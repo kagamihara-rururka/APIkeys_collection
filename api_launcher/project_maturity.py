@@ -17,6 +17,7 @@ from api_launcher.importers.compatibility_shims import importer_compatibility_sh
 from api_launcher.mvp_readiness import build_mvp_readiness_payload
 from api_launcher.repository import ApiCatalogRepository
 from api_launcher.simulation_bridge import DEFAULT_SIMULATION_BACKENDS
+from api_launcher.visual_asset_event_logging import log_visual_asset_ready_event
 from api_launcher.visual_asset_contracts import (
     SKIN_ASSET_LIFECYCLE_STATUSES,
     visual_asset_ready_event_log_context,
@@ -294,6 +295,7 @@ def _renderer_bridge_metrics() -> dict[str, Any]:
         "visual_skin_asset_manifest_projection_contract": "renderer_skin_asset_manifest_projection",
         "visual_asset_ready_event_factory_contract": "visual_asset_ready_event_from_registry_entry",
         "visual_asset_ready_event_log_context_contract": visual_asset_ready_event_log_context.__name__,
+        "visual_asset_ready_event_log_writer_contract": log_visual_asset_ready_event.__name__,
         "skin_asset_lifecycle_statuses": sorted(SKIN_ASSET_LIFECYCLE_STATUSES),
         "skin_asset_lifecycle_status_count": len(SKIN_ASSET_LIFECYCLE_STATUSES),
         "empty_visual_asset_registry_summary": visual_asset_registry_summary(()),
