@@ -3,6 +3,7 @@
 Last updated: 2026-06-02
 
 ## 目前工作焦點 / Active Focus
+- [x] 2026-06-02 Visual/Skin ready-event writer 已補顯式 event log adapter：新增 `api_launcher.visual_asset_event_logging.log_visual_asset_ready_event()`，可把 `VisualAssetReadyEvent` 寫成 `visual_asset_ready` JSONL event，並支援 injected logger 測試；它只使用 bounded context，不在 import 時寫 log，也尚未接 registry persistence 或自動 lifecycle emission。
 - [x] 2026-06-02 Visual/Skin ready-event log context 已補 bounded projection：新增 `visual_asset_ready_event_log_context()`，把 `VisualAssetReadyEvent` 投影成可寫入 event log 的安全摘要；它只白名單輸出 manifest reference、lineage、status、renderer targets、safety flags 與 registry projection metadata，不輸出任意 metadata、secret、payload bytes 或 renderer internals，也尚未實際呼叫 `log_event()`。
 - [x] 2026-06-02 Visual/Skin ready-event factory 已補 contract guard：新增 `visual_asset_ready_event_from_registry_entry()`，只允許 `ready` registry entry 產生 `VisualAssetReadyEvent`，並自動帶入 source request lineage 與 registry metadata；目前尚未接 runtime event log。
 - [x] 2026-06-02 Visual/Skin Asset contract 已補 compact manifest projection：新增 `renderer_skin_asset_manifest_projection()`，讓 RRKAL Core 可把 registry entry 投影成下游可讀的 manifest reference envelope；projection 只包含 reference、lineage、status、renderer targets 與 safety flags，不輸出完整 source request internals，也不讀 renderer payload。
