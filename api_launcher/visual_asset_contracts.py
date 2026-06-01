@@ -118,6 +118,7 @@ class RendererSkinAssetReference:
             "dataset_uid": self.dataset_uid,
             "manifest_path": self.manifest_path,
             "lifecycle_status": self.status,
+            "lifecycle_status_display_profile": skin_asset_status_display_profile(self.status),
             "renderer_targets": list(self.renderer_targets),
             "asset_format": self.asset_format,
             "checksum": self.checksum,
@@ -213,6 +214,7 @@ class RendererSkinAssetRegistryEntry:
             "registry_entry_id": self.registry_entry_id,
             "lifecycle_status": self.status,
             "lifecycle_status_label": skin_asset_status_label(self.status),
+            "lifecycle_status_display_profile": skin_asset_status_display_profile(self.status),
             "manifest_path": self.skin_asset.manifest_path,
             "source_curated_asset_id": self.skin_asset.source_curated_asset_id,
             "dataset_uid": self.skin_asset.dataset_uid,
@@ -274,6 +276,7 @@ def renderer_skin_asset_manifest_projection(entry: RendererSkinAssetRegistryEntr
         "manifest_path": skin_asset.manifest_path,
         "lifecycle_status": skin_asset.status,
         "lifecycle_status_label": skin_asset_status_label(skin_asset.status),
+        "lifecycle_status_display_profile": skin_asset_status_display_profile(skin_asset.status),
         "renderer_targets": list(skin_asset.renderer_targets),
         "asset_format": skin_asset.asset_format,
         "checksum": skin_asset.checksum,
@@ -343,6 +346,7 @@ def visual_asset_ready_event_log_context(event: VisualAssetReadyEvent) -> dict[s
         "manifest_path": skin_asset.manifest_path,
         "lifecycle_status": skin_asset.status,
         "lifecycle_status_label": skin_asset_status_label(skin_asset.status),
+        "lifecycle_status_display_profile": skin_asset_status_display_profile(skin_asset.status),
         "renderer_targets": list(skin_asset.renderer_targets),
         "asset_format": skin_asset.asset_format,
         "checksum": skin_asset.checksum,
@@ -366,6 +370,16 @@ def visual_asset_ready_event_log_context(event: VisualAssetReadyEvent) -> dict[s
 
 def skin_asset_status_label(status: SkinAssetLifecycleStatus | str) -> str:
     return _SKIN_ASSET_STATUS_LABELS.get(_status_value(status), "皮層資產狀態待確認")
+
+
+def skin_asset_status_display_profile(status: SkinAssetLifecycleStatus | str) -> dict[str, Any]:
+    """Return UI-neutral display metadata for a visual/skin lifecycle status."""
+
+    value = _status_value(status)
+    profile = dict(_SKIN_ASSET_STATUS_DISPLAY_PROFILES.get(value, _UNKNOWN_SKIN_ASSET_STATUS_DISPLAY_PROFILE))
+    profile["status"] = value
+    profile["display_label"] = skin_asset_status_label(value)
+    return profile
 
 
 def _validate_lifecycle_status(status: SkinAssetLifecycleStatus | str) -> None:
@@ -415,6 +429,84 @@ _SKIN_ASSET_STATUS_LABELS = {
 }
 
 
+_SKIN_ASSET_STATUS_DISPLAY_PROFILES: dict[str, dict[str, Any]] = {
+    SkinAssetLifecycleStatus.PLANNED.value: {
+        "status_icon": "🚧",
+        "display_tone": "neutral",
+        "next_action": "等待建立皮層資產",
+        "is_ready": False,
+        "is_terminal": False,
+        "review_required": False,
+        "construction": True,
+    },
+    SkinAssetLifecycleStatus.BUILDING.value: {
+        "status_icon": "◐",
+        "display_tone": "warning",
+        "next_action": "等待外部 builder 完成",
+        "is_ready": False,
+        "is_terminal": False,
+        "review_required": False,
+        "construction": True,
+    },
+    SkinAssetLifecycleStatus.READY.value: {
+        "status_icon": "✓",
+        "display_tone": "success",
+        "next_action": "可交給 renderer 消費",
+        "is_ready": True,
+        "is_terminal": False,
+        "review_required": False,
+        "construction": False,
+    },
+    SkinAssetLifecycleStatus.FAILED.value: {
+        "status_icon": "!",
+        "display_tone": "danger",
+        "next_action": "檢查 build error 並重新排程",
+        "is_ready": False,
+        "is_terminal": True,
+        "review_required": True,
+        "construction": False,
+    },
+    SkinAssetLifecycleStatus.REVIEW_REQUIRED.value: {
+        "status_icon": "🚧",
+        "display_tone": "review",
+        "next_action": "進入人工審核",
+        "is_ready": False,
+        "is_terminal": False,
+        "review_required": True,
+        "construction": True,
+    },
+    SkinAssetLifecycleStatus.REJECTED.value: {
+        "status_icon": "!",
+        "display_tone": "danger",
+        "next_action": "保留紀錄並停止交付",
+        "is_ready": False,
+        "is_terminal": True,
+        "review_required": False,
+        "construction": False,
+    },
+    SkinAssetLifecycleStatus.CONSUMED_BY_RENDERER.value: {
+        "status_icon": "✓",
+        "display_tone": "success",
+        "next_action": "記錄 renderer 消費狀態",
+        "is_ready": True,
+        "is_terminal": False,
+        "review_required": False,
+        "construction": False,
+    },
+}
+
+
+_UNKNOWN_SKIN_ASSET_STATUS_DISPLAY_PROFILE: dict[str, Any] = {
+    "status_icon": "?",
+    "display_tone": "neutral",
+    "next_action": "確認皮層資產狀態",
+    "is_ready": False,
+    "is_terminal": False,
+    "review_required": True,
+    "construction": True,
+}
+
+
 __all__ = [
     "CuratedDataAssetReference",
     "RendererSkinAssetReference",
@@ -426,6 +518,7 @@ __all__ = [
     "VISUAL_ASSET_CONTRACT_SCHEMA_VERSION",
     "VisualAssetReadyEvent",
     "renderer_skin_asset_manifest_projection",
+    "skin_asset_status_display_profile",
     "skin_asset_status_label",
     "visual_asset_ready_event_from_registry_entry",
     "visual_asset_ready_event_log_context",

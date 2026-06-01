@@ -13,6 +13,7 @@ from api_launcher.visual_asset_contracts import (
     SkinBuildResult,
     VisualAssetReadyEvent,
     renderer_skin_asset_manifest_projection,
+    skin_asset_status_display_profile,
     skin_asset_status_label,
     visual_asset_ready_event_from_registry_entry,
     visual_asset_ready_event_log_context,
@@ -125,6 +126,27 @@ class VisualAssetContractTest(unittest.TestCase):
         self.assertEqual("可供 renderer 使用", skin_asset_status_label("ready"))
         self.assertEqual("皮層資產狀態待確認", skin_asset_status_label("future_status"))
 
+    def test_status_display_profile_marks_ready_review_and_unknown_states(self) -> None:
+        ready = skin_asset_status_display_profile(SkinAssetLifecycleStatus.READY)
+        self.assertEqual("ready", ready["status"])
+        self.assertEqual("✓", ready["status_icon"])
+        self.assertEqual("success", ready["display_tone"])
+        self.assertEqual("可供 renderer 使用", ready["display_label"])
+        self.assertTrue(ready["is_ready"])
+        self.assertFalse(ready["construction"])
+
+        review = skin_asset_status_display_profile("review_required")
+        self.assertEqual("🚧", review["status_icon"])
+        self.assertEqual("review", review["display_tone"])
+        self.assertTrue(review["review_required"])
+        self.assertTrue(review["construction"])
+
+        unknown = skin_asset_status_display_profile("future_status")
+        self.assertEqual("?", unknown["status_icon"])
+        self.assertEqual("neutral", unknown["display_tone"])
+        self.assertEqual("皮層資產狀態待確認", unknown["display_label"])
+        self.assertTrue(unknown["review_required"])
+
     def test_registry_entry_serializes_manifest_reference_without_payload_loading(self) -> None:
         source = CuratedDataAssetReference(
             curated_asset_id="curated-gebco-2025",
@@ -170,6 +192,8 @@ class VisualAssetContractTest(unittest.TestCase):
         self.assertEqual("registry-skin-gebco-2025", payload["registry_entry_id"])
         self.assertEqual("ready", payload["lifecycle_status"])
         self.assertEqual("可供 renderer 使用", payload["lifecycle_status_label"])
+        self.assertEqual("success", payload["lifecycle_status_display_profile"]["display_tone"])
+        self.assertTrue(payload["lifecycle_status_display_profile"]["is_ready"])
         self.assertEqual("state/visual_assets/skin-gebco-2025.manifest.json", payload["manifest_path"])
         self.assertEqual(["displaytools"], payload["renderer_targets"])
         self.assertTrue(payload["control_plane_only"])
@@ -244,6 +268,8 @@ class VisualAssetContractTest(unittest.TestCase):
         self.assertEqual("state/visual_assets/ready.manifest.json", projection["manifest_path"])
         self.assertEqual("ready", projection["lifecycle_status"])
         self.assertEqual("可供 renderer 使用", projection["lifecycle_status_label"])
+        self.assertEqual("success", projection["lifecycle_status_display_profile"]["display_tone"])
+        self.assertTrue(projection["lifecycle_status_display_profile"]["is_ready"])
         self.assertEqual(["displaytools"], projection["renderer_targets"])
         self.assertEqual("request-ready", projection["lineage"]["source_request_id"])
         self.assertTrue(projection["safety"]["control_plane_only"])
