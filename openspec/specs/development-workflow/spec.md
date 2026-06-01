@@ -166,28 +166,30 @@ OpenSpec, Spectra, Qt Creator, and Qt Designer setup SHALL respect the project e
 
 ### Requirement: Canonical Cloud Workspace And Local Test Clone / 雲端正本與本地測試分流
 
-The project SHALL treat `K:\APIkeys_collection` as the canonical cloud workspace for IDE inspection, source edits, commits, and pushes, while using local-disk clones only as proof environments for GUI, showcase, and heavy smoke tests.
+The project SHALL treat `L:\RRKAL_project` as the canonical cloud workspace for IDE inspection, source edits, commits, and pushes, while using local-disk clones only as proof environments for GUI, showcase, and heavy smoke tests.
+
+Old `K:\APIkeys_collection` is historical/read-only reference for this project unless the user explicitly reassigns it.
 
 #### Scenario: Daily source edit and commit
 
 - GIVEN an agent changes production source, docs, specs, or tests
 - WHEN the change is ready to commit
-- THEN the change SHALL be present in `K:\APIkeys_collection` before commit
-- AND the commit/push SHALL originate from `K:\APIkeys_collection` unless the user explicitly transfers ownership to another workspace.
+- THEN the change SHALL be present in `L:\RRKAL_project` before commit
+- AND the commit/push SHALL originate from `L:\RRKAL_project` unless the user explicitly transfers ownership to another workspace.
 
 #### Scenario: Local clone finds a fix
 
 - GIVEN a local clone under `C:\Users\lyn59\Documents\Codex\RRKAL_local_test\...` is used for GUI, showcase, or smoke testing
 - WHEN a bug is fixed or a useful change is discovered in that clone
-- THEN the agent SHALL port the change back to `K:\APIkeys_collection`
-- AND SHALL verify the K workspace before pushing to GitHub.
+- THEN the agent SHALL port the change back to `L:\RRKAL_project`
+- AND SHALL verify the L workspace before pushing to GitHub.
 
 #### Scenario: GitHub synchronization
 
-- GIVEN K workspace and GitHub differ
+- GIVEN L workspace and GitHub differ
 - WHEN syncing project state
-- THEN the agent SHOULD first make the K workspace the reviewed source of truth, then push from K to GitHub and verify GitHub Actions.
-- AND the agent SHALL NOT treat a passing local clone as proof that the K workspace or GitHub has the same change.
+- THEN the agent SHOULD first make the L workspace the reviewed source of truth, then push from L to GitHub and verify GitHub Actions.
+- AND the agent SHALL NOT treat a passing local clone as proof that the L workspace or GitHub has the same change.
 
 ### Requirement: Beginner-Friendly Progress Reporting
 
