@@ -200,6 +200,9 @@ class RendererSkinAssetRegistryEntry:
     updated_at: str = field(default_factory=utc_now_iso)
     metadata: dict[str, Any] = field(default_factory=dict)
 
+    def __post_init__(self) -> None:
+        _validate_registry_entry_lineage(self)
+
     @property
     def status(self) -> str:
         return self.skin_asset.status
@@ -261,6 +264,30 @@ def _validate_lifecycle_status(status: SkinAssetLifecycleStatus | str) -> None:
     value = _status_value(status)
     if value not in SKIN_ASSET_LIFECYCLE_STATUSES:
         raise ValueError(f"Unsupported skin asset lifecycle status: {value}")
+
+
+def _validate_registry_entry_lineage(entry: RendererSkinAssetRegistryEntry) -> None:
+    skin_asset = entry.skin_asset
+    if entry.source_request:
+        if entry.source_request.request_id != skin_asset.source_request_id:
+            raise ValueError(
+                "Renderer skin registry entry source_request.request_id must match skin_asset.source_request_id"
+            )
+        source_curated_id = entry.source_request.source_asset.curated_asset_id
+        if source_curated_id and source_curated_id != skin_asset.source_curated_asset_id:
+            raise ValueError(
+                "Renderer skin registry entry source_request source asset must match skin_asset.source_curated_asset_id"
+            )
+    if entry.latest_build_result:
+        if entry.latest_build_result.request_id != skin_asset.source_request_id:
+            raise ValueError(
+                "Renderer skin registry entry latest_build_result.request_id must match skin_asset.source_request_id"
+            )
+        result_skin_asset = entry.latest_build_result.skin_asset
+        if result_skin_asset and result_skin_asset.skin_asset_id != skin_asset.skin_asset_id:
+            raise ValueError(
+                "Renderer skin registry entry latest_build_result.skin_asset must match skin_asset.skin_asset_id"
+            )
 
 
 def _status_value(status: SkinAssetLifecycleStatus | str) -> str:

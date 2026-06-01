@@ -211,6 +211,82 @@ class VisualAssetContractTest(unittest.TestCase):
         self.assertTrue(summary["control_plane_only"])
         self.assertFalse(summary["payload_loading"])
 
+    def test_registry_entry_rejects_mismatched_source_request(self) -> None:
+        source = CuratedDataAssetReference(
+            curated_asset_id="curated-other",
+            dataset_uid="dataset-ready",
+        )
+        request = SkinBuildRequest(
+            request_id="request-other",
+            source_asset=source,
+            requested_skin_type="terrain_skin",
+            renderer_targets=("displaytools",),
+        )
+        skin_asset = RendererSkinAssetReference(
+            skin_asset_id="skin-ready",
+            source_request_id="request-ready",
+            source_curated_asset_id="curated-ready",
+            dataset_uid="dataset-ready",
+            manifest_path="state/visual_assets/ready.manifest.json",
+            lifecycle_status=SkinAssetLifecycleStatus.READY,
+            renderer_targets=("displaytools",),
+        )
+
+        with self.assertRaisesRegex(ValueError, "source_request.request_id"):
+            RendererSkinAssetRegistryEntry("entry-ready", skin_asset, source_request=request)
+
+    def test_registry_entry_rejects_mismatched_source_curated_asset(self) -> None:
+        source = CuratedDataAssetReference(
+            curated_asset_id="curated-other",
+            dataset_uid="dataset-ready",
+        )
+        request = SkinBuildRequest(
+            request_id="request-ready",
+            source_asset=source,
+            requested_skin_type="terrain_skin",
+            renderer_targets=("displaytools",),
+        )
+        skin_asset = RendererSkinAssetReference(
+            skin_asset_id="skin-ready",
+            source_request_id="request-ready",
+            source_curated_asset_id="curated-ready",
+            dataset_uid="dataset-ready",
+            manifest_path="state/visual_assets/ready.manifest.json",
+            lifecycle_status=SkinAssetLifecycleStatus.READY,
+            renderer_targets=("displaytools",),
+        )
+
+        with self.assertRaisesRegex(ValueError, "source asset"):
+            RendererSkinAssetRegistryEntry("entry-ready", skin_asset, source_request=request)
+
+    def test_registry_entry_rejects_mismatched_build_result_skin_asset(self) -> None:
+        skin_asset = RendererSkinAssetReference(
+            skin_asset_id="skin-ready",
+            source_request_id="request-ready",
+            source_curated_asset_id="curated-ready",
+            dataset_uid="dataset-ready",
+            manifest_path="state/visual_assets/ready.manifest.json",
+            lifecycle_status=SkinAssetLifecycleStatus.READY,
+            renderer_targets=("displaytools",),
+        )
+        other_skin_asset = RendererSkinAssetReference(
+            skin_asset_id="skin-other",
+            source_request_id="request-ready",
+            source_curated_asset_id="curated-ready",
+            dataset_uid="dataset-ready",
+            manifest_path="state/visual_assets/other.manifest.json",
+            lifecycle_status=SkinAssetLifecycleStatus.READY,
+            renderer_targets=("displaytools",),
+        )
+        result = SkinBuildResult(
+            request_id="request-ready",
+            lifecycle_status="ready",
+            skin_asset=other_skin_asset,
+        )
+
+        with self.assertRaisesRegex(ValueError, "latest_build_result.skin_asset"):
+            RendererSkinAssetRegistryEntry("entry-ready", skin_asset, latest_build_result=result)
+
     def test_contract_module_does_not_import_renderer_projects(self) -> None:
         source = Path("api_launcher/visual_asset_contracts.py").read_text(encoding="utf-8")
         forbidden = ("RRKAL_displaytools", "rrkal_visual_compressor", "vis_2_dis", "taichi", "PyQt")
