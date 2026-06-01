@@ -3,6 +3,7 @@
 Last updated: 2026-06-02
 
 ## 目前工作焦點 / Active Focus
+- [x] 2026-06-02 Visual/Skin registry persistence dry-run DDL preview 已補：新增 `visual_asset_registry_sqlite_ddl_preview()`，會依 `visual_asset_registry_persistence_schema()` 產生可審閱 SQLite DDL，並在 maturity metrics 暴露；它不連 DB、不建表、不寫檔、不自動發 event，renderer row 仍是 `contract_only`。
 - [x] 2026-06-02 Visual/Skin registry persistence OpenSpec 已建立：`openspec/changes/visual-asset-registry-persistence/` 已定義未來 registry persistence 的 schema ownership、migration guard、control-plane-only row、ready-event boundary 與 UI-neutral read payload；這只是實作前契約，尚未建立資料表、尚未接 repository write/read，也不讀 renderer payload。
 - [x] 2026-06-02 OpenSpec workspace boundary drift 已修補：`openspec/specs/development-workflow/spec.md` 的 canonical workspace 從舊 `K:\APIkeys_collection` 更新為 `L:\RRKAL_project`，並明確標示 K 槽只作歷史 / 唯讀參考。
 - [x] 2026-06-02 Visual/Skin registry persistence row projection 已補：新增 `visual_asset_registry_entry_persistence_record()`，可把 registry entry 投影成符合 schema 的扁平 row，`renderer_targets` / bounded metadata 會序列化成 JSON，且會過濾明顯 payload / secret / token metadata；仍不寫 DB。

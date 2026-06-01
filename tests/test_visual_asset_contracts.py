@@ -20,6 +20,7 @@ from api_launcher.visual_asset_contracts import (
     visual_asset_ready_event_log_context,
     visual_asset_registry_entry_persistence_record,
     visual_asset_registry_persistence_schema,
+    visual_asset_registry_sqlite_ddl_preview,
     visual_asset_registry_summary,
 )
 
@@ -286,6 +287,42 @@ class VisualAssetContractTest(unittest.TestCase):
         index_names = {index["name"] for index in schema["indexes"]}
         self.assertIn("idx_visual_skin_asset_registry_status", index_names)
         self.assertIn("idx_visual_skin_asset_registry_dataset", index_names)
+
+    def test_registry_sqlite_ddl_preview_is_dry_run_and_schema_driven(self) -> None:
+        preview = visual_asset_registry_sqlite_ddl_preview()
+        schema = visual_asset_registry_persistence_schema()
+        statements_text = "\n".join(preview["statements"])
+
+        self.assertEqual("sqlite_ddl_dry_run", preview["preview_type"])
+        self.assertTrue(preview["dry_run"])
+        self.assertFalse(preview["creates_database_state"])
+        self.assertFalse(preview["connects_to_database"])
+        self.assertTrue(preview["requires_explicit_migration"])
+        self.assertFalse(preview["auto_event_emission"])
+        self.assertEqual("visual_skin_asset_registry", preview["table_name"])
+        self.assertEqual(len(schema["columns"]), preview["column_count"])
+        self.assertEqual(len(schema["indexes"]), preview["index_count"])
+        self.assertEqual(preview["index_count"] + 1, preview["statement_count"])
+
+        self.assertIn('CREATE TABLE IF NOT EXISTS "visual_skin_asset_registry"', preview["table_sql"])
+        self.assertIn('"registry_entry_id" TEXT PRIMARY KEY NOT NULL', preview["table_sql"])
+        self.assertIn('"manifest_path" TEXT NOT NULL', preview["table_sql"])
+        self.assertIn('"renderer_targets_json" TEXT NOT NULL', preview["table_sql"])
+        self.assertIn('"metadata_json" TEXT', preview["table_sql"])
+        self.assertIn(
+            'CREATE INDEX IF NOT EXISTS "idx_visual_skin_asset_registry_status"',
+            statements_text,
+        )
+        self.assertIn(
+            'ON "visual_skin_asset_registry" ("lifecycle_status");',
+            statements_text,
+        )
+        self.assertNotIn("payload_bytes", statements_text)
+        self.assertNotIn("npz_payload", statements_text)
+        self.assertFalse(preview["safety"]["payload_columns_allowed"])
+        self.assertFalse(preview["safety"]["auto_event_emission"])
+        self.assertTrue(preview["safety"]["control_plane_only"])
+        self.assertFalse(preview["safety"]["payload_loading"])
 
     def test_registry_entry_persistence_record_matches_schema_without_payload_metadata(self) -> None:
         skin_asset = RendererSkinAssetReference(

@@ -461,6 +461,61 @@ def visual_asset_registry_entry_persistence_record(entry: RendererSkinAssetRegis
     }
 
 
+def visual_asset_registry_sqlite_ddl_preview() -> dict[str, Any]:
+    """Render reviewable SQLite DDL for the registry table without running it.
+
+    This is the first migration boundary for Visual/Skin registry persistence:
+    it consumes the schema contract and returns dry-run SQL only. It must not
+    connect to SQLite, create files, create tables, or emit lifecycle events.
+    """
+
+    schema = visual_asset_registry_persistence_schema()
+    table_name = str(schema["table_name"])
+    primary_key = str(schema["primary_key"])
+    columns = tuple(schema["columns"])
+    column_lines: list[str] = []
+    for column in columns:
+        name = str(column["name"])
+        storage_type = _sqlite_storage_type(column["storage_type"])
+        required = bool(column["required"])
+        clauses = [_sqlite_identifier(name), storage_type]
+        if name == primary_key:
+            clauses.append("PRIMARY KEY")
+        if required:
+            clauses.append("NOT NULL")
+        column_lines.append(" ".join(clauses))
+
+    table_sql = (
+        f"CREATE TABLE IF NOT EXISTS {_sqlite_identifier(table_name)} (\n"
+        + ",\n".join(f"    {line}" for line in column_lines)
+        + "\n);"
+    )
+    index_sql = tuple(_sqlite_index_statement(table_name, index) for index in schema["indexes"])
+    statements = (table_sql, *index_sql)
+
+    return {
+        "schema_version": schema["schema_version"],
+        "preview_type": "sqlite_ddl_dry_run",
+        "table_name": table_name,
+        "dry_run": True,
+        "creates_database_state": False,
+        "connects_to_database": False,
+        "requires_explicit_migration": True,
+        "auto_event_emission": False,
+        "table_sql": table_sql,
+        "index_sql": list(index_sql),
+        "statements": list(statements),
+        "statement_count": len(statements),
+        "column_count": len(columns),
+        "index_count": len(index_sql),
+        "safety": {
+            **schema["safety"],
+            "payload_columns_allowed": schema["migration_guards"]["payload_columns_allowed"],
+            "auto_event_emission": schema["migration_guards"]["auto_event_emission"],
+        },
+    }
+
+
 def renderer_skin_asset_manifest_projection(entry: RendererSkinAssetRegistryEntry) -> dict[str, Any]:
     """Project a registry entry into a compact cross-project manifest reference.
 
@@ -625,6 +680,34 @@ def _json_dumps_control_plane(value: Any) -> str:
     return json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
 
 
+def _sqlite_identifier(value: str) -> str:
+    """Return a safely quoted internal SQLite identifier."""
+
+    if not value or not all(char.isalnum() or char == "_" for char in value):
+        raise ValueError(f"Unsafe SQLite identifier in visual asset registry schema: {value!r}")
+    return f'"{value}"'
+
+
+def _sqlite_storage_type(value: object) -> str:
+    storage_type = str(value or "").strip().upper()
+    if storage_type not in {"TEXT", "INTEGER", "REAL", "BLOB"}:
+        raise ValueError(f"Unsupported SQLite storage type in visual asset registry schema: {value!r}")
+    return storage_type
+
+
+def _sqlite_index_statement(table_name: str, index: dict[str, Any]) -> str:
+    index_name = str(index["name"])
+    columns = tuple(str(column) for column in index["columns"])
+    if not columns:
+        raise ValueError(f"Visual asset registry index has no columns: {index_name!r}")
+    unique = "UNIQUE " if index.get("unique") else ""
+    column_sql = ", ".join(_sqlite_identifier(column) for column in columns)
+    return (
+        f"CREATE {unique}INDEX IF NOT EXISTS {_sqlite_identifier(index_name)} "
+        f"ON {_sqlite_identifier(table_name)} ({column_sql});"
+    )
+
+
 def _bounded_registry_metadata(metadata: dict[str, Any]) -> dict[str, Any]:
     """Keep metadata persistence small and free of obvious payload/secret keys."""
 
@@ -758,5 +841,6 @@ __all__ = [
     "visual_asset_ready_event_log_context",
     "visual_asset_registry_entry_persistence_record",
     "visual_asset_registry_persistence_schema",
+    "visual_asset_registry_sqlite_ddl_preview",
     "visual_asset_registry_summary",
 ]

@@ -1,8 +1,8 @@
 ## 1. Contract And Dry-Run Foundation
 
-- [ ] 1.1 Add a dry-run SQLite DDL renderer that consumes `visual_asset_registry_persistence_schema()` and writes no database state.
-- [ ] 1.2 Add tests proving dry-run DDL includes required columns/indexes and excludes payload columns.
-- [ ] 1.3 Expose the dry-run contract in project maturity metrics without changing renderer maturity away from `contract_only`.
+- [x] 1.1 Add a dry-run SQLite DDL renderer that consumes `visual_asset_registry_persistence_schema()` and writes no database state.
+- [x] 1.2 Add tests proving dry-run DDL includes required columns/indexes and excludes payload columns.
+- [x] 1.3 Expose the dry-run contract in project maturity metrics without changing renderer maturity away from `contract_only`.
 
 ## 2. Owned Test Persistence
 
@@ -25,6 +25,6 @@
 
 ## 5. Documentation And Handoff
 
-- [ ] 5.1 Update `docs/VISUAL_SKIN_ASSET_CONTRACT.zh-TW.md` after each implemented slice.
-- [ ] 5.2 Update `docs/PROJECT_MATURITY_MATRIX.zh-TW.md`, `docs/PROJECT_GTD.md`, `docs/AGENT_HANDOFF.zh-TW.md`, and `docs/DEVELOPMENT_LOG.zh-TW.md`.
+- [x] 5.1 Update `docs/VISUAL_SKIN_ASSET_CONTRACT.zh-TW.md` after each implemented slice.
+- [x] 5.2 Update `docs/PROJECT_MATURITY_MATRIX.zh-TW.md`, `docs/PROJECT_GTD.md`, `docs/AGENT_HANDOFF.zh-TW.md`, and `docs/DEVELOPMENT_LOG.zh-TW.md`.
 - [ ] 5.3 Run docs/OpenSpec mojibake scan, `git diff --check`, focused tests, pre-push smoke, and GitHub Actions before marking the change ready to archive.

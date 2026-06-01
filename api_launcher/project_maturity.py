@@ -24,6 +24,7 @@ from api_launcher.visual_asset_contracts import (
     visual_asset_ready_event_log_context,
     visual_asset_registry_entry_persistence_record,
     visual_asset_registry_persistence_schema,
+    visual_asset_registry_sqlite_ddl_preview,
     visual_asset_registry_summary,
 )
 
@@ -303,9 +304,11 @@ def _renderer_bridge_metrics() -> dict[str, Any]:
         "skin_asset_lifecycle_display_profile_contract": skin_asset_status_display_profile.__name__,
         "visual_asset_registry_persistence_schema_contract": visual_asset_registry_persistence_schema.__name__,
         "visual_asset_registry_entry_persistence_record_contract": visual_asset_registry_entry_persistence_record.__name__,
+        "visual_asset_registry_sqlite_ddl_preview_contract": visual_asset_registry_sqlite_ddl_preview.__name__,
         "skin_asset_lifecycle_statuses": sorted(SKIN_ASSET_LIFECYCLE_STATUSES),
         "skin_asset_lifecycle_status_count": len(SKIN_ASSET_LIFECYCLE_STATUSES),
         "visual_asset_registry_persistence_schema": visual_asset_registry_persistence_schema(),
+        "visual_asset_registry_sqlite_ddl_preview": visual_asset_registry_sqlite_ddl_preview(),
         "empty_visual_asset_registry_summary": visual_asset_registry_summary(()),
         "control_plane_only": True,
         "imports_renderer_projects": False,

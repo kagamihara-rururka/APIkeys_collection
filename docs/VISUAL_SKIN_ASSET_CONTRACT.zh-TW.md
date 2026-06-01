@@ -73,6 +73,7 @@ flowchart TD
 | `skin_asset_status_display_profile()` | 把 lifecycle status 轉成 UI-neutral `status_icon`、`display_tone`、`display_label`、`next_action` 與 readiness flags。 | 前端不需要自己推論 planned/building/review_required 是否施工中，也不代表 renderer payload 已實作。 |
 | `visual_asset_registry_persistence_schema()` | 定義未來 `visual_skin_asset_registry` 的欄位、index、allowed status 與 migration guard。 | 不建立資料表、不連 DB、不自動發 event、不讀 renderer payload。 |
 | `visual_asset_registry_entry_persistence_record()` | 把 registry entry 投影成符合 persistence schema 的扁平 row，並序列化 renderer targets / bounded metadata。 | 不寫 DB、不執行 migration、不保存 payload / secret / token 類 metadata。 |
+| `visual_asset_registry_sqlite_ddl_preview()` | 依據 persistence schema 產生可審閱的 SQLite `CREATE TABLE` / `CREATE INDEX` dry-run SQL。 | 不連 SQLite、不建立資料表、不寫檔、不自動發 event；正式 migration 仍需 explicit guard。 |
 
 ## Lifecycle 狀態
 
@@ -119,6 +120,7 @@ flowchart TD
 - `SkinBuildResult` 即使沒有 `skin_asset`，也會輸出 lifecycle display profile，讓 failed / review-required build result 可被 UI 安全顯示。
 - Registry persistence schema contract 已輸出 `visual_skin_asset_registry` 欄位、index、lifecycle vocabulary 與 migration guard，並明確標示 `schema_contract_only`、不自動建表、不自動發 event。
 - Registry persistence row projection 可把 entry 轉成 schema-aligned flat row，且 bounded metadata 會過濾 payload / secret / token 類 key。
+- Registry persistence SQLite DDL preview 可由 schema contract 產生 dry-run `CREATE TABLE` / `CREATE INDEX` SQL，且不連 DB、不建表、不包含 payload 欄位；project maturity 仍標示 renderer row 為 `contract_only`。
 - Contract module 不 import `RRKAL_displaytools`、`rrkal-visual-compressor`、`vis_2_dis`、Taichi、PyQt。
 - Project maturity renderer row 保持 `contract_only` / `🚧`，並輸出 registry contract 與 empty summary。
 
@@ -126,13 +128,15 @@ flowchart TD
 
 - `py -3 -B -m unittest tests.test_visual_asset_contracts tests.test_project_maturity -v`
 - `.\scripts\pre_push_smoke_brief.cmd`
-- GitHub Actions manual run `26784919740`
+- Full smoke `state\logs\pre_push_smoke_20260602_064026.log`：1066 tests / 4 skipped，MVP demo `download_import_completed` / `row_count=3`
+- GitHub Actions manual run `26784919740`（schema contract checkpoint）；DDL preview checkpoint 的 GitHub Actions 需看本輪後續 run。
 
 ## 尚未實作
 
 這些不是目前已交付功能：
 
 - 真正 visual asset registry persistence。
+- 真正 visual asset registry migration / table creation / repository write-read。
 - skin builder。
 - `RendererSkinAsset` payload reader。
 - `.npz` / tile / GPU buffer inspection。
@@ -146,7 +150,7 @@ flowchart TD
 
 安全的後續切片：
 
-1. 若要真正落地 registry persistence，先開 OpenSpec / migration guard，消費 `visual_asset_registry_persistence_schema()` 與 `visual_asset_registry_entry_persistence_record()`，不得讓 repository layer 自行發明欄位或 row shape。
+1. 若要真正落地 registry persistence，先由 `visual_asset_registry_sqlite_ddl_preview()` 審閱 migration SQL，再消費 `visual_asset_registry_persistence_schema()` 與 `visual_asset_registry_entry_persistence_record()`，不得讓 repository layer 自行發明欄位或 row shape。
 2. 規格化何時由 registry persistence 或 explicit workflow 呼叫 `log_visual_asset_ready_registry_entry()`；不得在 import、普通 serialization、table write 或 lifecycle status set 時自動發 event。
 3. 與 displaytools / compressor 透過 `L:\AGENT_EXCHANGE` 或正式 OpenSpec 對齊欄位，不直接 import 對方 repo。
 4. 若下游需要更多欄位，先版本化 projection schema，不要讓 downstream 直接依賴 `entry.to_dict()` 的完整內部形狀。

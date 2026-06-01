@@ -95,6 +95,10 @@ class ProjectMaturityTests(unittest.TestCase):
             renderer_metrics["visual_asset_ready_registry_entry_log_writer_contract"],
         )
         self.assertEqual(
+            "visual_asset_registry_sqlite_ddl_preview",
+            renderer_metrics["visual_asset_registry_sqlite_ddl_preview_contract"],
+        )
+        self.assertEqual(
             "skin_asset_status_display_profile",
             renderer_metrics["skin_asset_lifecycle_display_profile_contract"],
         )
@@ -103,6 +107,12 @@ class ProjectMaturityTests(unittest.TestCase):
         empty_registry = renderer_metrics["empty_visual_asset_registry_summary"]
         self.assertEqual(0, empty_registry["registry_entry_count"])
         self.assertEqual(0, empty_registry["ready_count"])
+        ddl_preview = renderer_metrics["visual_asset_registry_sqlite_ddl_preview"]
+        self.assertEqual("sqlite_ddl_dry_run", ddl_preview["preview_type"])
+        self.assertTrue(ddl_preview["dry_run"])
+        self.assertFalse(ddl_preview["creates_database_state"])
+        self.assertFalse(ddl_preview["auto_event_emission"])
+        self.assertIn('CREATE TABLE IF NOT EXISTS "visual_skin_asset_registry"', ddl_preview["table_sql"])
         self.assertTrue(empty_registry["control_plane_only"])
         self.assertFalse(empty_registry["payload_loading"])
         self.assertTrue(renderer_metrics["control_plane_only"])
