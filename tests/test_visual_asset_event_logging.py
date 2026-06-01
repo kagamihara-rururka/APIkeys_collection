@@ -7,10 +7,11 @@ from pathlib import Path
 from api_launcher.event_log import latest_events
 from api_launcher.visual_asset_contracts import (
     RendererSkinAssetReference,
+    RendererSkinAssetRegistryEntry,
     SkinAssetLifecycleStatus,
     VisualAssetReadyEvent,
 )
-from api_launcher.visual_asset_event_logging import log_visual_asset_ready_event
+from api_launcher.visual_asset_event_logging import log_visual_asset_ready_event, log_visual_asset_ready_registry_entry
 
 
 class VisualAssetEventLoggingTests(unittest.TestCase):
@@ -99,6 +100,50 @@ class VisualAssetEventLoggingTests(unittest.TestCase):
         self.assertEqual("visual_asset", calls[0]["component"])
         self.assertNotIn("log_path", calls[0])
         self.assertEqual("skin-ready", calls[0]["context"]["skin_asset_id"])  # type: ignore[index]
+
+    def test_ready_registry_entry_log_writer_creates_event_and_context(self) -> None:
+        skin_asset = RendererSkinAssetReference(
+            skin_asset_id="skin-ready",
+            source_request_id="request-ready",
+            source_curated_asset_id="curated-ready",
+            dataset_uid="dataset-ready",
+            manifest_path="state/visual_assets/ready.manifest.json",
+            lifecycle_status=SkinAssetLifecycleStatus.READY,
+            renderer_targets=("displaytools",),
+        )
+        entry = RendererSkinAssetRegistryEntry("entry-ready", skin_asset)
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            log_path = Path(tmpdir) / "events.jsonl"
+            log_visual_asset_ready_registry_entry(
+                entry,
+                emitted_at="2026-06-02T00:05:00Z",
+                metadata={"note": "do-not-log"},
+                log_path=log_path,
+            )
+            events = latest_events(log_path=log_path)
+
+        self.assertEqual(1, len(events))
+        context = events[0]["context"]
+        self.assertEqual("visual-ready:skin-ready", context["event_id"])
+        self.assertEqual("entry-ready", context["metadata"]["registry_entry_id"])
+        self.assertEqual("renderer_skin_asset_manifest_reference", context["metadata"]["projection_type"])
+        self.assertNotIn("do-not-log", str(context))
+
+    def test_ready_registry_entry_log_writer_rejects_non_ready_entry(self) -> None:
+        skin_asset = RendererSkinAssetReference(
+            skin_asset_id="skin-review",
+            source_request_id="request-review",
+            source_curated_asset_id="curated-review",
+            dataset_uid="dataset-review",
+            manifest_path="state/visual_assets/review.manifest.json",
+            lifecycle_status=SkinAssetLifecycleStatus.REVIEW_REQUIRED,
+            renderer_targets=("displaytools",),
+        )
+        entry = RendererSkinAssetRegistryEntry("entry-review", skin_asset)
+
+        with self.assertRaisesRegex(ValueError, "ready skin assets"):
+            log_visual_asset_ready_registry_entry(entry)
 
 
 if __name__ == "__main__":
