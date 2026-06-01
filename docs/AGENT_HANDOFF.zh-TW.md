@@ -1,4 +1,9 @@
 # Agent 接力卡
+## 2026-06-02 06:31 +08:00 Visual/Skin registry persistence OpenSpec proposal
+- 本輪建立 `openspec/changes/visual-asset-registry-persistence/`，把下一步 registry persistence 的要求先收成正式 OpenSpec：repository / migration 層必須消費既有 `visual_asset_registry_persistence_schema()` 與 `visual_asset_registry_entry_persistence_record()`，不得自行拆欄位或把 payload 欄位塞進 DB。
+- 邊界：這只是 implementation-ready proposal，不是 persistence 實作。尚未建立 `visual_skin_asset_registry` table、尚未接 repository write/read/list、尚未接 UI，也不 import displaytools / visual-compressor / vis_2_dis，不讀 `.npz`、GPU buffer、renderer project 或 payload bytes。table write 未來也不得自動呼叫 ready-event writer。
+- 已驗證：`openspec status --change visual-asset-registry-persistence` 顯示 proposal / design / spec / tasks 完整；`openspec validate --all --no-interactive` 通過；OpenSpec mojibake scan 通過。下一步若要實作，先從 tasks 1.x 的 dry-run / repository boundary 測試切入，不要直接做 DB migration。
+
 ## 2026-06-02 06:24 +08:00 OpenSpec workspace boundary drift correction
 - 本輪讀 `openspec/specs/development-workflow/spec.md` 時發現 durable workflow contract 仍把 `K:\APIkeys_collection` 寫成 canonical workspace。已最小修補為 `L:\RRKAL_project`，並補上舊 K 槽只作 historical/read-only reference，避免下一位 agent 依 OpenSpec 回頭寫 K。
 - 邊界：這是 workflow/spec drift 修補，不改產品碼、crawler、download/import、Visual/Skin contract、UI 或 GitHub workflow。下一步仍以 `L:\RRKAL_project` 為提交來源。
