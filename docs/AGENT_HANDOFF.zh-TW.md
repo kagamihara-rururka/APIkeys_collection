@@ -1,4 +1,8 @@
 # Agent 接力卡
+## 2026-06-02 04:18 +08:00 Visual/Skin contract docs consolidation
+- 本輪新增 `docs/VISUAL_SKIN_ASSET_CONTRACT.zh-TW.md`，把 Visual/Skin Asset control-plane contract 從 handoff/GTD/architecture 的分散描述收成正式專題文件，明確列出 contract 類型、lifecycle status、lineage guard、已驗證能力、尚未實作項目與下一步。
+- 邊界不變：這是文件收斂，不改產品碼；RRKAL Core 仍只保存 manifest reference、lineage、lifecycle 與 job status，不 import displaytools / visual-compressor / vis_2_dis，不讀 `.npz`、GPU buffer、Qt/Taichi payload 或 renderer project file。
+- 下一步可繼續做小型 control-plane hardening，例如 versioned manifest projection 或 registry persistence OpenSpec；不要直接接 renderer preview、skin builder 或 payload reader。
 ## 2026-06-02 04:06 +08:00 Visual/Skin registry lineage guard
 - 本輪補強 `RendererSkinAssetRegistryEntry` 的 fail-fast lineage guard：若 `source_request.request_id`、`source_request.source_asset.curated_asset_id`、`latest_build_result.request_id` 或 `latest_build_result.skin_asset.skin_asset_id` 與 registry entry 的 `skin_asset` 對不上，會在建立 registry entry 時直接 `ValueError`。
 - 邊界不變：這仍是 RRKAL Core control-plane contract guard，不接資料庫 persistence、不 import displaytools / visual-compressor / vis_2_dis、不讀 renderer payload，也不改 project maturity row 的 contract-only 定位。

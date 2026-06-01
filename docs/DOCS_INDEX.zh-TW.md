@@ -1,6 +1,6 @@
 # 文件索引與整理規則
 
-最後更新：2026-06-01
+最後更新：2026-06-02
 
 這份文件是「文件地圖」。它不是要把其他文件降級，而是要讓下一位 Agent 或組員知道每份文件負責什麼、該先讀哪裡、改完功能後要回頭更新哪幾份文件。
 
@@ -92,6 +92,7 @@ RRKAL 本身是資料資產治理專案，專案文件也可以用資料治理�
 | `ARCHITECTURE.zh-TW.md` | 中文架構入口，說明本機 MVP、分散式閉環、模組層、資料夾目標結構與重要邊界。 | 模組責任、資料流、Hadoop/K8S/renderer/mobile/P2P 邊界改變時更新。 |
 | `ARCHITECTURE.md` | 英文架構原文與跨語系參考。 | 大幅更新時同步更新 `ARCHITECTURE.zh-TW.md` 或至少補中文摘要。 |
 | `TECHNICAL_OVERVIEW.zh-TW.md` | 中文技術總覽，白話說明資料、下載、SQL、AI、renderer 等主線。 | 新功能進入 MVP 或 skeleton 邊界改變時更新。 |
+| `VISUAL_SKIN_ASSET_CONTRACT.zh-TW.md` | RRKAL Core 對未來 RendererSkinAsset 的控制面契約，說明 build request、skin reference、registry entry、ready event、lifecycle status 與禁止碰 renderer payload 的邊界。 | 變更 `api_launcher/visual_asset_contracts.py`、project maturity renderer row、Visual/Skin registry lifecycle、跨 displaytools / compressor manifest reference 時更新。 |
 | `DATASET_TYPE_MAP.zh-TW.md` | 資料類型地圖，說明 table、GIS、time-series、array、media、RAG 等資料該怎麼想。 | 新增資料類型、storage hint、viewer hint 時更新。 |
 | `DATASET_DISCOVERY_NOTES.zh-TW.md` | dataset discovery 主入口，聚焦 crawler-first、爬蟲資產 / Crawler Asset 的落點、candidate review、adapter 邊界、bounded resolver、download/import plan 與版本計畫。 | 改 crawler、crawler asset 概念、candidate、adapter resolver、download plan 時更新。 |
 | `DATABASE_PORTAL_INTAKE.zh-TW.md` | 組員收集資料入口網站的表格與規則。 | intake 欄位、promotion 流程、Notion 同步規則改變時更新。 |
