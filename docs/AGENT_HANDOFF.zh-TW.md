@@ -1,4 +1,9 @@
 # Agent 接力卡
+## 2026-06-01 21:56 +08:00 Visual/Skin Asset control-plane contract
+- 新增 `api_launcher/visual_asset_contracts.py` 與 `tests/test_visual_asset_contracts.py`，讓 RRKAL Core 可先登記未來 RendererSkinAsset 的 build request、build result、manifest reference、ready event 與 lifecycle status。
+- 邊界：這只是一層 control-plane contract。它不得 import `RRKAL_displaytools`、`rrkal-visual-compressor`、`vis_2_dis`，不得讀 `.npz`、GPU buffer、Qt/Taichi payload 或 renderer 專案檔；RRKAL Core 管資產生命週期，不管資產怎麼畫。
+- Project maturity matrix 的 renderer row 已公開 `visual_skin_asset_contract_schema` 與 lifecycle status metrics，仍標為 `contract_only` / `🚧`，避免把 contract 草案誤報成已交付 renderer。
+- 已驗證：`py -3 -B -m py_compile api_launcher\visual_asset_contracts.py api_launcher\project_maturity.py tests\test_visual_asset_contracts.py tests\test_project_maturity.py` OK；`py -3 -B -m unittest tests.test_visual_asset_contracts tests.test_project_maturity -v` 通過 12 tests；`--project-maturity-json` 確認 renderer row 仍是 `contract_only` 且 `visual_skin_asset_contract_schema=api_launcher.visual_asset_contracts`；完整 smoke `state\logs\pre_push_smoke_20260601_215243.log` 通過，1048 tests / 4 skipped，MVP demo `download_import_completed` / `row_count=3`。
 ## 2026-06-01 21:43 +08:00 Workspace boundary correction
 - 使用者最新明確指令：`L:\RRKAL_project` 是 RRKAL active workspace 與提交來源；`K:` 只作歷史紀錄、舊狀態查詢與必要資料參考。
 - 後續 RRKAL 開發不要主動掃全 K 槽、不要治理 K 槽文件或資料、不要把 K 槽當 fallback 工作區；需要查舊狀態時才 read-only 查詢。

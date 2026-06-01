@@ -1,6 +1,6 @@
 # RuRuKa Asset Launcher 架構
 
-最後更新：2026-05-27
+最後更新：2026-06-01
 
 RuRuKa Asset Launcher 是一個類 Steam 的科學資料集、爬蟲資產與本機資料庫 launcher。它負責整理 provider/catalog、治理資料取得能力、產生下載計畫、下載與匯入資料、追蹤已安裝資產，並把整理後的資料交給 Taichi、Unreal 或其他下游 renderer / 分析工具。
 
@@ -13,7 +13,7 @@ RuRuKa Asset Launcher 是一個類 Steam 的科學資料集、爬蟲資產與本
 產品有兩個相連但責任不同的半部：
 
 - 資料 launcher：catalog、下載計畫、install/update/uninstall 安全規則、SQL/file/API 串接。
-- renderer data pipeline：curated dataset 轉成 tile/cache manifest 或其他 renderer bridge 資產，供 Taichi、Unreal、圖表或未來前端使用。
+- renderer data pipeline：curated dataset 轉成 tile/cache manifest 或其他 renderer bridge 資產，供 Taichi、Unreal、圖表或未來前端使用。RRKAL Core 只管理資料資產生命週期、manifest reference、lineage 與 job status，不實作皮層生成、壓縮或 renderer payload 讀取。
 
 討論架構時，請分清楚「今天本機 MVP 能跑的閉環」和「中期 Hadoop/K8S 分散式閉環」。
 
@@ -150,7 +150,7 @@ flowchart TD
 | Downloading | `api_launcher/downloads/*` | job queue、HTTP adapter、staging、manifest repair、transfer tools。 |
 | Import / curation | `api_launcher/importers/*` | CSV/JSON/archive raw -> curated SQLite。 |
 | Data store | `api_launcher/data_store_connections.py`, `database_self_check.py`, `database_repair.py` | SQLite/MySQL/PostgreSQL profile、self-check、repair guard。 |
-| Renderer bridge | `renderer_contracts.py`, `tile_manifests.py`, `rendering_profiles.py`, `render_effects.py`, `simulation_bridge.py`, `unreal_bridge.py` | dataset 到 renderer/cache/tile/simulation 的 contract。 |
+| Renderer bridge | `renderer_contracts.py`, `visual_asset_contracts.py`, `tile_manifests.py`, `rendering_profiles.py`, `render_effects.py`, `simulation_bridge.py`, `unreal_bridge.py` | dataset 到 renderer/cache/tile/simulation/skin asset reference 的 contract；不在 Core 讀 renderer payload。 |
 | Tests | `tests/` | 保護 catalog、crawler、download、import、registry、renderer、UI 行為。 |
 
 ## 重要邊界
@@ -162,6 +162,8 @@ Unreal 是 rendering/UI consumer，不是資料 owner。Raw data、version、che
 ### Renderer bridge
 
 Renderer bridge 資產是可管理資料資產，不是隱形 glue。Tile manifest、cache、mesh、texture atlas、chart index、material preset 都應逐步帶 source dataset version、checksum、compatibility target、rebuild recipe、health status。
+
+`api_launcher/visual_asset_contracts.py` 是 RRKAL Core 對未來 RendererSkinAsset 的控制面契約。它只記錄 `SkinBuildRequest`、`SkinBuildResult`、`RendererSkinAssetReference`、`VisualAssetReadyEvent` 與 lifecycle status；不得 import `RRKAL_displaytools`、`rrkal-visual-compressor`、`vis_2_dis`，也不得讀 `.npz`、GPU buffer、Qt/Taichi payload 或 renderer 專案檔。
 
 ### Mobile / remote control
 

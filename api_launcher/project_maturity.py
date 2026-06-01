@@ -17,9 +17,10 @@ from api_launcher.importers.compatibility_shims import importer_compatibility_sh
 from api_launcher.mvp_readiness import build_mvp_readiness_payload
 from api_launcher.repository import ApiCatalogRepository
 from api_launcher.simulation_bridge import DEFAULT_SIMULATION_BACKENDS
+from api_launcher.visual_asset_contracts import SKIN_ASSET_LIFECYCLE_STATUSES
 
 
-MATRIX_VERSION = "2026-05-28"
+MATRIX_VERSION = "2026-06-01"
 
 
 @dataclass(frozen=True)
@@ -279,6 +280,20 @@ def _content_parser_import_metrics() -> dict[str, Any]:
     }
 
 
+def _renderer_bridge_metrics() -> dict[str, Any]:
+    """Expose control-plane renderer/skin contract evidence without implying real renderer I/O."""
+
+    return {
+        "simulation_backend_contract_count": len(DEFAULT_SIMULATION_BACKENDS),
+        "visual_skin_asset_contract_schema": "api_launcher.visual_asset_contracts",
+        "skin_asset_lifecycle_statuses": sorted(SKIN_ASSET_LIFECYCLE_STATUSES),
+        "skin_asset_lifecycle_status_count": len(SKIN_ASSET_LIFECYCLE_STATUSES),
+        "control_plane_only": True,
+        "imports_renderer_projects": False,
+        "payload_loading": False,
+    }
+
+
 def _matrix_rows(mvp_readiness: dict[str, Any]) -> tuple[MaturityMatrixRow, ...]:
     return (
         MaturityMatrixRow(
@@ -358,11 +373,19 @@ def _matrix_rows(mvp_readiness: dict[str, Any]) -> tuple[MaturityMatrixRow, ...]
             area_label="Renderer, Unreal, and simulation bridge",
             maturity_level="contract_only",
             maturity_label_zh_TW="合約 / planned，不可當已交付執行功能",
-            deliverable_scope="Renderer/simulation contracts describe future asset roles, targets, and bridge destinations.",
-            verified_behavior_source=("api_launcher.unreal_bridge", "api_launcher.simulation_bridge", "tests.test_simulation_bridge"),
-            current_limitations=("Unreal bridge plans target paths but does not copy/import assets; simulation backends are contract_only.",),
-            next_actions=("Only present these as roadmap/contracts until real I/O or simulation execution is implemented and tested.",),
-            metrics={"simulation_backend_contract_count": len(DEFAULT_SIMULATION_BACKENDS)},
+            deliverable_scope="Renderer/simulation/skin contracts describe future asset roles, lifecycle references, targets, and bridge destinations.",
+            verified_behavior_source=(
+                "api_launcher.unreal_bridge",
+                "api_launcher.simulation_bridge",
+                "api_launcher.visual_asset_contracts",
+                "tests.test_simulation_bridge",
+                "tests.test_visual_asset_contracts",
+            ),
+            current_limitations=(
+                "Unreal bridge plans target paths but does not copy/import assets; simulation backends are contract_only; visual/skin contracts store manifest references only.",
+            ),
+            next_actions=("Only present these as roadmap/contracts until real I/O, skin build execution, or simulation execution is implemented and tested.",),
+            metrics=_renderer_bridge_metrics(),
         ),
         MaturityMatrixRow(
             area_id="qt_modern_ui",

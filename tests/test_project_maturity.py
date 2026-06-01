@@ -68,6 +68,13 @@ class ProjectMaturityTests(unittest.TestCase):
         self.assertEqual("contract_only", rows["renderer_unreal_simulation"]["maturity_level"])
         self.assertEqual("🚧", rows["renderer_unreal_simulation"]["status_icon"])
         self.assertEqual("review", rows["renderer_unreal_simulation"]["display_tone"])
+        renderer_metrics = rows["renderer_unreal_simulation"]["metrics"]
+        self.assertEqual("api_launcher.visual_asset_contracts", renderer_metrics["visual_skin_asset_contract_schema"])
+        self.assertIn("ready", renderer_metrics["skin_asset_lifecycle_statuses"])
+        self.assertEqual(7, renderer_metrics["skin_asset_lifecycle_status_count"])
+        self.assertTrue(renderer_metrics["control_plane_only"])
+        self.assertFalse(renderer_metrics["imports_renderer_projects"])
+        self.assertFalse(renderer_metrics["payload_loading"])
         scheduler_metrics = rows["background_jobs_and_scheduler"]["metrics"]
         self.assertTrue(scheduler_metrics["policy_registry_available"])
         self.assertGreaterEqual(scheduler_metrics["bounded_tk_policy_count"], 8)

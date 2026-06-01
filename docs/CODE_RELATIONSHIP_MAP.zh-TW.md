@@ -70,6 +70,7 @@ flowchart TD
 | download | `api_launcher/downloads/*` | queue、HTTP、staging、manifest、repair | `tests/test_http_downloader.py`, `tests/test_download_jobs.py`, `tests/test_repair.py` |
 | import | `api_launcher/importers/*` | CSV/JSON/archive raw -> curated SQLite | `tests/test_csv_importer.py`, `tests/test_json_importer.py`, `tests/test_download_plan_runner.py` |
 | data store | `data_store_connections.py`, `database_self_check.py`, `database_repair.py` | SQLite/MySQL/PostgreSQL profile、self-check、repair guard | `tests/test_data_store_connections.py`, `tests/test_database_self_check.py` |
+| visual / renderer control-plane contracts | `visual_asset_contracts.py`, `renderer_contracts.py`, `tile_manifests.py`, `simulation_bridge.py`, `unreal_bridge.py` | 只描述 renderer-ready / skin asset / tile / simulation / Unreal target 的 manifest reference、lineage、lifecycle status 與 planned target；不讀 payload、不 import 下游專案 | `tests/test_visual_asset_contracts.py`, `tests/test_simulation_bridge.py` |
 | UI | `frontends/tk/launcher_ui.py` | 顯示、選單、觸發 backend flow、狀態文字 | `tests/test_launcher_ui.py`, `tests/test_tk_ui_preferences.py` |
 | handoff / automation | `handoff.py`, `heartbeat.py`, `scripts/heartbeat_*` | 接力報告、自動化安全檢查、agent prompt | `tests/test_handoff.py`, `tests/test_heartbeat.py` |
 
