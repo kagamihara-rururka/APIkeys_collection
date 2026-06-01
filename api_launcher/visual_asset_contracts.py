@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, Iterable
@@ -434,6 +435,32 @@ def visual_asset_registry_persistence_schema() -> dict[str, Any]:
     }
 
 
+def visual_asset_registry_entry_persistence_record(entry: RendererSkinAssetRegistryEntry) -> dict[str, Any]:
+    """Project a registry entry into one flat persistence row without writing it.
+
+    The future repository layer can store this row after an explicit migration
+    exists. This helper keeps the flattening rules near the schema contract and
+    avoids each UI/CLI/repository path inventing its own row shape.
+    """
+
+    return {
+        "registry_entry_id": entry.registry_entry_id,
+        "skin_asset_id": entry.skin_asset.skin_asset_id,
+        "lifecycle_status": entry.status,
+        "manifest_path": entry.skin_asset.manifest_path,
+        "source_request_id": entry.skin_asset.source_request_id,
+        "source_curated_asset_id": entry.skin_asset.source_curated_asset_id,
+        "dataset_uid": entry.skin_asset.dataset_uid,
+        "renderer_targets_json": _json_dumps_control_plane(list(entry.skin_asset.renderer_targets)),
+        "review_required": 1 if entry.review_required else 0,
+        "checksum": entry.skin_asset.checksum,
+        "size_bytes": entry.skin_asset.size_bytes,
+        "registered_at": entry.registered_at,
+        "updated_at": entry.updated_at,
+        "metadata_json": _json_dumps_control_plane(_bounded_registry_metadata(entry.metadata)),
+    }
+
+
 def renderer_skin_asset_manifest_projection(entry: RendererSkinAssetRegistryEntry) -> dict[str, Any]:
     """Project a registry entry into a compact cross-project manifest reference.
 
@@ -594,6 +621,33 @@ def _status_value(status: SkinAssetLifecycleStatus | str) -> str:
     return str(status or "").strip()
 
 
+def _json_dumps_control_plane(value: Any) -> str:
+    return json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+
+
+def _bounded_registry_metadata(metadata: dict[str, Any]) -> dict[str, Any]:
+    """Keep metadata persistence small and free of obvious payload/secret keys."""
+
+    blocked_fragments = ("payload", "secret", "token", "api_key", "password", "npz", "gpu_buffer")
+    bounded: dict[str, Any] = {}
+    for key, value in metadata.items():
+        normalized_key = str(key)
+        lowered = normalized_key.lower()
+        if any(fragment in lowered for fragment in blocked_fragments):
+            continue
+        if isinstance(value, (str, int, float, bool)) or value is None:
+            bounded[normalized_key] = value
+        elif isinstance(value, (list, tuple)):
+            scalar_items = [
+                item
+                for item in value
+                if isinstance(item, (str, int, float, bool)) or item is None
+            ]
+            if len(scalar_items) == len(value):
+                bounded[normalized_key] = scalar_items
+    return bounded
+
+
 _SKIN_ASSET_STATUS_LABELS = {
     SkinAssetLifecycleStatus.PLANNED.value: "已規劃",
     SkinAssetLifecycleStatus.BUILDING.value: "建立中",
@@ -702,6 +756,7 @@ __all__ = [
     "skin_asset_status_label",
     "visual_asset_ready_event_from_registry_entry",
     "visual_asset_ready_event_log_context",
+    "visual_asset_registry_entry_persistence_record",
     "visual_asset_registry_persistence_schema",
     "visual_asset_registry_summary",
 ]

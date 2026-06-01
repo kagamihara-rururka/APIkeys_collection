@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import unittest
 from pathlib import Path
 
@@ -17,6 +18,7 @@ from api_launcher.visual_asset_contracts import (
     skin_asset_status_label,
     visual_asset_ready_event_from_registry_entry,
     visual_asset_ready_event_log_context,
+    visual_asset_registry_entry_persistence_record,
     visual_asset_registry_persistence_schema,
     visual_asset_registry_summary,
 )
@@ -284,6 +286,47 @@ class VisualAssetContractTest(unittest.TestCase):
         index_names = {index["name"] for index in schema["indexes"]}
         self.assertIn("idx_visual_skin_asset_registry_status", index_names)
         self.assertIn("idx_visual_skin_asset_registry_dataset", index_names)
+
+    def test_registry_entry_persistence_record_matches_schema_without_payload_metadata(self) -> None:
+        skin_asset = RendererSkinAssetReference(
+            skin_asset_id="skin-ready",
+            source_request_id="request-ready",
+            source_curated_asset_id="curated-ready",
+            dataset_uid="dataset-ready",
+            manifest_path="state/visual_assets/ready.manifest.json",
+            lifecycle_status=SkinAssetLifecycleStatus.READY,
+            renderer_targets=("displaytools", "qt_preview"),
+            checksum="abc123",
+            size_bytes=4096,
+        )
+        entry = RendererSkinAssetRegistryEntry(
+            "entry-ready",
+            skin_asset,
+            review_required=True,
+            registered_at="2026-06-02T00:00:00Z",
+            updated_at="2026-06-02T00:01:00Z",
+            metadata={
+                "note": "safe",
+                "tags": ("terrain", "preview"),
+                "payload_bytes": "do-not-store",
+                "api_key": "do-not-store",
+                "nested": {"not": "flat"},
+            },
+        )
+
+        record = visual_asset_registry_entry_persistence_record(entry)
+        schema = visual_asset_registry_persistence_schema()
+        schema_columns = {column["name"] for column in schema["columns"]}
+
+        self.assertEqual(schema_columns, set(record))
+        self.assertEqual("entry-ready", record["registry_entry_id"])
+        self.assertEqual("ready", record["lifecycle_status"])
+        self.assertEqual(1, record["review_required"])
+        self.assertEqual(["displaytools", "qt_preview"], json.loads(record["renderer_targets_json"]))
+        self.assertEqual({"note": "safe", "tags": ["terrain", "preview"]}, json.loads(record["metadata_json"]))
+        self.assertNotIn("payload_bytes", record["metadata_json"])
+        self.assertNotIn("api_key", record["metadata_json"])
+        self.assertNotIn("nested", record["metadata_json"])
 
     def test_manifest_projection_is_compact_renderer_safe_reference(self) -> None:
         skin_asset = RendererSkinAssetReference(
