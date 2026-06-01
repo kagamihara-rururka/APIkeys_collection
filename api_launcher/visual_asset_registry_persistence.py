@@ -177,6 +177,38 @@ def list_visual_asset_registry_entry_payloads_for_owned_test_database(
     return [_entry_payload_from_persistence_record(record) for record in records]
 
 
+def visual_asset_registry_owned_test_drop_preview(
+    sqlite_path: str | Path,
+    *,
+    allow_owned_test_database: bool = False,
+) -> dict[str, Any]:
+    """Render reviewable rollback SQL for an owned test DB without executing it."""
+
+    if not allow_owned_test_database:
+        raise ValueError(
+            "Refusing to preview visual asset registry rollback without allow_owned_test_database=True"
+        )
+
+    path = Path(sqlite_path).expanduser().resolve(strict=False)
+    if not path.exists():
+        return _drop_preview_payload(path, database_exists=False, owned_test_database=False)
+
+    with sqlite_write_gate(path):
+        with closing(sqlite3.connect(path, timeout=30)) as conn:
+            conn.row_factory = sqlite3.Row
+            _require_owned_test_database(conn)
+            table_names = _sqlite_table_names(conn)
+            index_names = _sqlite_index_names(conn)
+
+    return _drop_preview_payload(
+        path,
+        database_exists=True,
+        owned_test_database=True,
+        table_names=table_names,
+        index_names=index_names,
+    )
+
+
 def _ensure_owned_test_database(conn: sqlite3.Connection) -> None:
     table_names = _sqlite_table_names(conn)
     if table_names and OWNED_TEST_DATABASE_MARKER_TABLE not in table_names:
@@ -328,6 +360,53 @@ def _sqlite_identifier(value: str) -> str:
     return f'"{value}"'
 
 
+def _drop_preview_payload(
+    path: Path,
+    *,
+    database_exists: bool,
+    owned_test_database: bool,
+    table_names: set[str] | None = None,
+    index_names: set[str] | None = None,
+) -> dict[str, Any]:
+    preview = visual_asset_registry_sqlite_ddl_preview()
+    index_drop_statements = [
+        f"DROP INDEX IF EXISTS {_sqlite_identifier(index_name)};"
+        for index_name in reversed([_index_name(statement) for statement in preview["index_sql"]])
+        if index_name
+    ]
+    statements = [
+        *index_drop_statements,
+        f"DROP TABLE IF EXISTS {_sqlite_identifier(VISUAL_ASSET_REGISTRY_TABLE_NAME)};",
+        f"DROP TABLE IF EXISTS {_sqlite_identifier(OWNED_TEST_DATABASE_MARKER_TABLE)};",
+    ]
+    return {
+        "operation": "visual_asset_registry_owned_test_drop_preview",
+        "database_path": str(path),
+        "database_exists": database_exists,
+        "owned_test_database": owned_test_database,
+        "scope": "owned_test_database_only",
+        "dry_run": True,
+        "destructive_execution_enabled": False,
+        "creates_database_state": False,
+        "mutates_database_state": False,
+        "statements": statements,
+        "statement_count": len(statements),
+        "table_exists": VISUAL_ASSET_REGISTRY_TABLE_NAME in (table_names or set()),
+        "marker_table_exists": OWNED_TEST_DATABASE_MARKER_TABLE in (table_names or set()),
+        "index_names": sorted(index_names or ()),
+        "auto_event_emission": False,
+        "control_plane_only": True,
+        "payload_loading": False,
+    }
+
+
+def _index_name(index_statement: str) -> str:
+    parts = index_statement.split('"')
+    if len(parts) < 2:
+        return ""
+    return parts[1]
+
+
 def _sqlite_table_names(conn: sqlite3.Connection) -> set[str]:
     return {
         str(row["name"])
@@ -352,5 +431,6 @@ __all__ = [
     "create_visual_asset_registry_table_for_owned_test_database",
     "list_visual_asset_registry_entry_payloads_for_owned_test_database",
     "read_visual_asset_registry_entry_payload_for_owned_test_database",
+    "visual_asset_registry_owned_test_drop_preview",
     "write_visual_asset_registry_entry_for_owned_test_database",
 ]

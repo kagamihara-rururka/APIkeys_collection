@@ -78,6 +78,7 @@ flowchart TD
 | `write_visual_asset_registry_entry_for_owned_test_database()` | 只在明確 `allow_owned_test_database=True` 的 RRKAL owned test SQLite DB 中 upsert 一筆 registry row，且 row shape 來自 `visual_asset_registry_entry_persistence_record()`。 | 不可作產品 repository write；拒絕未 opt-in / 非 owned DB，不自動發 ready event，不讀 renderer payload。 |
 | `read_visual_asset_registry_entry_payload_for_owned_test_database()` | 只從 RRKAL owned test SQLite DB 讀回一筆 `RendererSkinAssetRegistryEntry` 相容 control-plane payload。 | 不可掃使用者 DB；沒有 owned marker 時拒絕，不讀 manifest / `.npz` / renderer payload。 |
 | `list_visual_asset_registry_entry_payloads_for_owned_test_database()` | 只從 RRKAL owned test SQLite DB 列出 registry control-plane payloads。 | 不可作正式 UI repository list；沒有 owned marker 時拒絕，不觸發 lifecycle event。 |
+| `visual_asset_registry_owned_test_drop_preview()` | 只針對 RRKAL owned test SQLite DB 產生 rollback/drop SQL preview。 | 只 dry-run，不執行 DROP；沒有 owned marker 時拒絕，不提供使用者 DB destructive path。 |
 
 ## Lifecycle 狀態
 
@@ -127,6 +128,7 @@ flowchart TD
 - Registry persistence SQLite DDL preview 可由 schema contract 產生 dry-run `CREATE TABLE` / `CREATE INDEX` SQL，且不連 DB、不建表、不包含 payload 欄位；project maturity 仍標示 renderer row 為 `contract_only`。
 - Owned test-only table creation helper 需要明確 `allow_owned_test_database=True`；它會建立 RRKAL marker table、materialize registry table/index，並拒絕已有非 owned marker 的 SQLite DB。
 - Owned test-only write/read/list helpers 需要明確 `allow_owned_test_database=True`；write 會消費 schema-aligned persistence record，read/list 會回傳 registry-entry 相容 control-plane payload，並保持 `auto_event_emission=false` / `payload_loading=false`。
+- Owned test-only rollback/drop preview 需要明確 `allow_owned_test_database=True` 與 owned marker；它只回傳 DROP preview statements，並保持 `destructive_execution_enabled=false` / `mutates_database_state=false`。
 - Contract module 不 import `RRKAL_displaytools`、`rrkal-visual-compressor`、`vis_2_dis`、Taichi、PyQt。
 - Project maturity renderer row 保持 `contract_only` / `🚧`，並輸出 registry contract 與 empty summary。
 

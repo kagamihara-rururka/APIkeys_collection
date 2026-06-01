@@ -18,6 +18,7 @@ from api_launcher.visual_asset_registry_persistence import (
     create_visual_asset_registry_table_for_owned_test_database,
     list_visual_asset_registry_entry_payloads_for_owned_test_database,
     read_visual_asset_registry_entry_payload_for_owned_test_database,
+    visual_asset_registry_owned_test_drop_preview,
     write_visual_asset_registry_entry_for_owned_test_database,
 )
 
@@ -210,6 +211,72 @@ class VisualAssetRegistryPersistenceTests(unittest.TestCase):
                 read_visual_asset_registry_entry_payload_for_owned_test_database(
                     db_path,
                     "entry-ready",
+                    allow_owned_test_database=True,
+                )
+
+    def test_owned_test_drop_preview_requires_explicit_gate(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            db_path = Path(tmpdir) / "visual-registry.sqlite"
+
+            with self.assertRaisesRegex(ValueError, "allow_owned_test_database=True"):
+                visual_asset_registry_owned_test_drop_preview(db_path)
+
+            self.assertFalse(db_path.exists())
+
+    def test_owned_test_drop_preview_is_dry_run_and_keeps_database_state(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            db_path = Path(tmpdir) / "visual-registry.sqlite"
+            write_visual_asset_registry_entry_for_owned_test_database(
+                db_path,
+                _registry_entry("entry-ready", "skin-ready"),
+                allow_owned_test_database=True,
+            )
+
+            preview = visual_asset_registry_owned_test_drop_preview(
+                db_path,
+                allow_owned_test_database=True,
+            )
+
+            self.assertTrue(preview["dry_run"])
+            self.assertFalse(preview["destructive_execution_enabled"])
+            self.assertFalse(preview["mutates_database_state"])
+            self.assertTrue(preview["owned_test_database"])
+            self.assertTrue(preview["table_exists"])
+            self.assertTrue(preview["marker_table_exists"])
+            self.assertIn('DROP TABLE IF EXISTS "visual_skin_asset_registry";', preview["statements"])
+            self.assertIn(
+                f'DROP TABLE IF EXISTS "{OWNED_TEST_DATABASE_MARKER_TABLE}";',
+                preview["statements"],
+            )
+            self.assertIn(
+                'DROP INDEX IF EXISTS "idx_visual_skin_asset_registry_status";',
+                preview["statements"],
+            )
+            self.assertFalse(preview["auto_event_emission"])
+            self.assertTrue(preview["control_plane_only"])
+            self.assertFalse(preview["payload_loading"])
+
+            with closing(sqlite3.connect(db_path)) as conn:
+                table_names = {
+                    row[0]
+                    for row in conn.execute(
+                        "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'"
+                    ).fetchall()
+                }
+
+            self.assertIn(VISUAL_ASSET_REGISTRY_TABLE_NAME, table_names)
+            self.assertIn(OWNED_TEST_DATABASE_MARKER_TABLE, table_names)
+
+    def test_owned_test_drop_preview_rejects_existing_unowned_database(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            db_path = Path(tmpdir) / "user.sqlite"
+            with closing(sqlite3.connect(db_path)) as conn:
+                conn.execute("CREATE TABLE user_data (id INTEGER PRIMARY KEY)")
+                conn.commit()
+
+            with self.assertRaisesRegex(ValueError, "unowned SQLite database"):
+                visual_asset_registry_owned_test_drop_preview(
+                    db_path,
                     allow_owned_test_database=True,
                 )
 

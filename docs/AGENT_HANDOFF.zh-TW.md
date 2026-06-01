@@ -1,4 +1,9 @@
 # Agent 接力卡
+## 2026-06-02 07:35 +08:00 Visual/Skin registry owned test rollback/drop preview
+- 本輪完成 OpenSpec task 2.4：新增 `api_launcher.visual_asset_registry_persistence.visual_asset_registry_owned_test_drop_preview()`。helper 必須傳入 `allow_owned_test_database=True`，且既有 SQLite DB 必須有 RRKAL owned marker；通過後只回傳可審閱的 DROP INDEX / DROP TABLE SQL preview。
+- 邊界：這是 dry-run rollback preview，不執行 DROP、不刪 DB、不改 registry row、不發 `visual_asset_ready` event、不讀 renderer payload、不 import displaytools / visual-compressor / vis_2_dis。若 DB 已存在但不是 owned test DB，會拒絕。
+- 已驗證：`py -3 -B -m unittest tests.test_visual_asset_registry_persistence tests.test_visual_asset_contracts tests.test_project_maturity -v` 通過 36 tests；完整 smoke `state\logs\pre_push_smoke_20260602_072740.log` 通過 1076 tests / 4 skipped，MVP demo `download_import_completed` / `row_count=3`；maturity payload 可見 `visual_asset_registry_owned_test_drop_preview_contract=visual_asset_registry_owned_test_drop_preview`。下一步若繼續此 OpenSpec，進入 3.x read-side summary helper；仍不可把 preview 擴成 destructive command。
+
 ## 2026-06-02 07:20 +08:00 Visual/Skin registry owned test write/read/list helpers
 - 本輪完成 OpenSpec task 2.2-2.3：新增 `api_launcher.visual_asset_registry_persistence.write_visual_asset_registry_entry_for_owned_test_database()`、`read_visual_asset_registry_entry_payload_for_owned_test_database()`、`list_visual_asset_registry_entry_payloads_for_owned_test_database()`。write helper 消費 `visual_asset_registry_entry_persistence_record()`，會在明確 `allow_owned_test_database=True` 的 RRKAL owned test SQLite DB 中 upsert registry row；read/list 會回傳 `RendererSkinAssetRegistryEntry` 相容的 control-plane payload。
 - 邊界：這仍不是正式 migration，也不是 user DB persistence。所有 write/read/list 都要求 explicit owned-test opt-in；既有非 owned SQLite DB 會被拒絕。普通 table write/upsert 不會發 `visual_asset_ready` event，不讀 renderer payload，不 import displaytools / visual-compressor / vis_2_dis，不保存 payload / secret / token 類 metadata。
