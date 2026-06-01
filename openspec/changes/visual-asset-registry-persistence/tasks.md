@@ -7,8 +7,8 @@
 ## 2. Owned Test Persistence
 
 - [x] 2.1 Add an owned test-only table creation helper gated behind explicit test/runtime options.
-- [ ] 2.2 Add write/read helpers that consume `visual_asset_registry_entry_persistence_record()` and return `RendererSkinAssetRegistryEntry`-compatible control-plane payloads.
-- [ ] 2.3 Add tests for write/read/list using a temporary SQLite database and existing SQLite write gate or equivalent per-path guard.
+- [x] 2.2 Add write/read helpers that consume `visual_asset_registry_entry_persistence_record()` and return `RendererSkinAssetRegistryEntry`-compatible control-plane payloads.
+- [x] 2.3 Add tests for write/read/list using a temporary SQLite database and existing SQLite write gate or equivalent per-path guard.
 - [ ] 2.4 Add rollback/drop preview for owned test databases only; do not enable destructive actions for user DBs.
 
 ## 3. Summary And UI-Neutral Read Payload

@@ -1,13 +1,18 @@
 from __future__ import annotations
 
 import sqlite3
+import json
 from contextlib import closing
 from pathlib import Path
 from typing import Any
 
 from api_launcher.sqlite_write_gate import sqlite_write_gate
 from api_launcher.visual_asset_contracts import (
+    RendererSkinAssetReference,
+    RendererSkinAssetRegistryEntry,
     VISUAL_ASSET_REGISTRY_TABLE_NAME,
+    visual_asset_registry_entry_persistence_record,
+    visual_asset_registry_persistence_schema,
     visual_asset_registry_sqlite_ddl_preview,
 )
 
@@ -41,8 +46,7 @@ def create_visual_asset_registry_table_for_owned_test_database(
         with closing(sqlite3.connect(path, timeout=30)) as conn:
             conn.row_factory = sqlite3.Row
             _ensure_owned_test_database(conn)
-            for statement in preview["statements"]:
-                conn.execute(statement)
+            _create_registry_table_in_owned_connection(conn, preview)
             conn.commit()
             table_names = _sqlite_table_names(conn)
             index_names = _sqlite_index_names(conn)
@@ -64,6 +68,113 @@ def create_visual_asset_registry_table_for_owned_test_database(
         "control_plane_only": True,
         "payload_loading": False,
     }
+
+
+def write_visual_asset_registry_entry_for_owned_test_database(
+    sqlite_path: str | Path,
+    entry: RendererSkinAssetRegistryEntry,
+    *,
+    allow_owned_test_database: bool = False,
+) -> dict[str, Any]:
+    """Upsert one registry entry only inside an explicitly owned test DB.
+
+    This is not the product repository path. The helper exists to prove that
+    the schema and row projection can round-trip through SQLite while keeping
+    event emission and renderer payload loading outside the persistence write.
+    """
+
+    if not allow_owned_test_database:
+        raise ValueError(
+            "Refusing to write visual asset registry entry without allow_owned_test_database=True"
+        )
+
+    path = Path(sqlite_path).expanduser().resolve(strict=False)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    record = visual_asset_registry_entry_persistence_record(entry)
+    _validate_record_matches_schema(record)
+
+    with sqlite_write_gate(path):
+        with closing(sqlite3.connect(path, timeout=30)) as conn:
+            conn.row_factory = sqlite3.Row
+            _ensure_owned_test_database(conn)
+            _create_registry_table_in_owned_connection(conn)
+            cursor = conn.execute(_upsert_registry_record_sql(), _record_values(record))
+            conn.commit()
+            persisted = _fetch_registry_record(conn, entry.registry_entry_id)
+
+    return {
+        "operation": "write_visual_asset_registry_entry_for_owned_test_database",
+        "database_path": str(path),
+        "table_name": VISUAL_ASSET_REGISTRY_TABLE_NAME,
+        "registry_entry_id": entry.registry_entry_id,
+        "owned_test_database": True,
+        "scope": "owned_test_database_only",
+        "rows_written": cursor.rowcount,
+        "persistence_record": persisted,
+        "entry_payload": _entry_payload_from_persistence_record(persisted) if persisted else None,
+        "auto_event_emission": False,
+        "control_plane_only": True,
+        "payload_loading": False,
+    }
+
+
+def read_visual_asset_registry_entry_payload_for_owned_test_database(
+    sqlite_path: str | Path,
+    registry_entry_id: str,
+    *,
+    allow_owned_test_database: bool = False,
+) -> dict[str, Any] | None:
+    """Read one persisted visual registry entry from an owned test DB only."""
+
+    if not allow_owned_test_database:
+        raise ValueError(
+            "Refusing to read visual asset registry entry without allow_owned_test_database=True"
+        )
+
+    path = Path(sqlite_path).expanduser().resolve(strict=False)
+    if not path.exists():
+        return None
+
+    with sqlite_write_gate(path):
+        with closing(sqlite3.connect(path, timeout=30)) as conn:
+            conn.row_factory = sqlite3.Row
+            _require_owned_test_database(conn)
+            record = _fetch_registry_record(conn, registry_entry_id)
+
+    return _entry_payload_from_persistence_record(record) if record else None
+
+
+def list_visual_asset_registry_entry_payloads_for_owned_test_database(
+    sqlite_path: str | Path,
+    *,
+    allow_owned_test_database: bool = False,
+) -> list[dict[str, Any]]:
+    """List persisted visual registry entries from an owned test DB only."""
+
+    if not allow_owned_test_database:
+        raise ValueError(
+            "Refusing to list visual asset registry entries without allow_owned_test_database=True"
+        )
+
+    path = Path(sqlite_path).expanduser().resolve(strict=False)
+    if not path.exists():
+        return []
+
+    with sqlite_write_gate(path):
+        with closing(sqlite3.connect(path, timeout=30)) as conn:
+            conn.row_factory = sqlite3.Row
+            _require_owned_test_database(conn)
+            if VISUAL_ASSET_REGISTRY_TABLE_NAME not in _sqlite_table_names(conn):
+                return []
+            records = [
+                _record_from_row(row)
+                for row in conn.execute(
+                    f"SELECT * FROM {_sqlite_identifier(VISUAL_ASSET_REGISTRY_TABLE_NAME)} "
+                    "ORDER BY registry_entry_id"
+                ).fetchall()
+            ]
+
+    return [_entry_payload_from_persistence_record(record) for record in records]
 
 
 def _ensure_owned_test_database(conn: sqlite3.Connection) -> None:
@@ -90,6 +201,133 @@ def _ensure_owned_test_database(conn: sqlite3.Connection) -> None:
     )
 
 
+def _require_owned_test_database(conn: sqlite3.Connection) -> None:
+    if OWNED_TEST_DATABASE_MARKER_TABLE not in _sqlite_table_names(conn):
+        raise ValueError(
+            "Refusing to read visual asset registry entries from an unowned SQLite database"
+        )
+
+
+def _create_registry_table_in_owned_connection(
+    conn: sqlite3.Connection,
+    preview: dict[str, Any] | None = None,
+) -> None:
+    ddl_preview = preview or visual_asset_registry_sqlite_ddl_preview()
+    for statement in ddl_preview["statements"]:
+        conn.execute(statement)
+
+
+def _validate_record_matches_schema(record: dict[str, Any]) -> None:
+    expected = set(_registry_column_names())
+    if set(record) != expected:
+        missing = sorted(expected - set(record))
+        unexpected = sorted(set(record) - expected)
+        raise ValueError(
+            "Visual asset registry persistence record does not match schema "
+            f"(missing={missing}, unexpected={unexpected})"
+        )
+
+
+def _registry_column_names() -> tuple[str, ...]:
+    schema = visual_asset_registry_persistence_schema()
+    return tuple(str(column["name"]) for column in schema["columns"])
+
+
+def _record_values(record: dict[str, Any]) -> tuple[Any, ...]:
+    return tuple(record[column] for column in _registry_column_names())
+
+
+def _upsert_registry_record_sql() -> str:
+    columns = _registry_column_names()
+    primary_key = "registry_entry_id"
+    column_sql = ", ".join(_sqlite_identifier(column) for column in columns)
+    placeholders = ", ".join("?" for _ in columns)
+    update_columns = tuple(column for column in columns if column != primary_key)
+    update_sql = ", ".join(
+        f"{_sqlite_identifier(column)} = excluded.{_sqlite_identifier(column)}"
+        for column in update_columns
+    )
+    return (
+        f"INSERT INTO {_sqlite_identifier(VISUAL_ASSET_REGISTRY_TABLE_NAME)} ({column_sql}) "
+        f"VALUES ({placeholders}) "
+        f"ON CONFLICT({_sqlite_identifier(primary_key)}) DO UPDATE SET {update_sql}"
+    )
+
+
+def _fetch_registry_record(conn: sqlite3.Connection, registry_entry_id: str) -> dict[str, Any] | None:
+    if VISUAL_ASSET_REGISTRY_TABLE_NAME not in _sqlite_table_names(conn):
+        return None
+    row = conn.execute(
+        f"SELECT * FROM {_sqlite_identifier(VISUAL_ASSET_REGISTRY_TABLE_NAME)} "
+        f"WHERE {_sqlite_identifier('registry_entry_id')} = ?",
+        (registry_entry_id,),
+    ).fetchone()
+    if row is None:
+        return None
+    return _record_from_row(row)
+
+
+def _record_from_row(row: sqlite3.Row) -> dict[str, Any]:
+    return {column: row[column] for column in _registry_column_names()}
+
+
+def _entry_payload_from_persistence_record(record: dict[str, Any]) -> dict[str, Any]:
+    entry = _entry_from_persistence_record(record)
+    payload = entry.to_dict()
+    payload["persistence_record"] = dict(record)
+    payload["owned_test_database"] = True
+    payload["auto_event_emission"] = False
+    payload["control_plane_only"] = True
+    payload["payload_loading"] = False
+    return payload
+
+
+def _entry_from_persistence_record(record: dict[str, Any]) -> RendererSkinAssetRegistryEntry:
+    renderer_targets = _json_load_tuple(record.get("renderer_targets_json"))
+    metadata = _json_load_dict(record.get("metadata_json"))
+    registered_at = str(record.get("registered_at") or "")
+    skin_asset = RendererSkinAssetReference(
+        skin_asset_id=str(record.get("skin_asset_id") or ""),
+        source_request_id=str(record.get("source_request_id") or ""),
+        source_curated_asset_id=str(record.get("source_curated_asset_id") or ""),
+        dataset_uid=str(record.get("dataset_uid") or ""),
+        manifest_path=str(record.get("manifest_path") or ""),
+        lifecycle_status=str(record.get("lifecycle_status") or ""),
+        renderer_targets=renderer_targets,
+        checksum=str(record.get("checksum") or ""),
+        size_bytes=int(record.get("size_bytes") or 0),
+        created_at=registered_at,
+    )
+    return RendererSkinAssetRegistryEntry(
+        registry_entry_id=str(record.get("registry_entry_id") or ""),
+        skin_asset=skin_asset,
+        review_required=bool(record.get("review_required")),
+        registered_at=registered_at,
+        updated_at=str(record.get("updated_at") or ""),
+        metadata=metadata,
+    )
+
+
+def _json_load_tuple(value: object) -> tuple[str, ...]:
+    decoded = json.loads(str(value or "[]"))
+    if not isinstance(decoded, list):
+        raise ValueError("Visual asset registry renderer_targets_json must decode to a list")
+    return tuple(str(item) for item in decoded)
+
+
+def _json_load_dict(value: object) -> dict[str, Any]:
+    decoded = json.loads(str(value or "{}"))
+    if not isinstance(decoded, dict):
+        raise ValueError("Visual asset registry metadata_json must decode to an object")
+    return dict(decoded)
+
+
+def _sqlite_identifier(value: str) -> str:
+    if not value or not all(char.isalnum() or char == "_" for char in value):
+        raise ValueError(f"Unsafe SQLite identifier in visual asset registry persistence: {value!r}")
+    return f'"{value}"'
+
+
 def _sqlite_table_names(conn: sqlite3.Connection) -> set[str]:
     return {
         str(row["name"])
@@ -112,4 +350,7 @@ __all__ = [
     "OWNED_TEST_DATABASE_MARKER_TABLE",
     "VISUAL_ASSET_REGISTRY_OWNED_TEST_MARKER",
     "create_visual_asset_registry_table_for_owned_test_database",
+    "list_visual_asset_registry_entry_payloads_for_owned_test_database",
+    "read_visual_asset_registry_entry_payload_for_owned_test_database",
+    "write_visual_asset_registry_entry_for_owned_test_database",
 ]

@@ -103,6 +103,18 @@ class ProjectMaturityTests(unittest.TestCase):
             renderer_metrics["visual_asset_registry_owned_test_table_helper_contract"],
         )
         self.assertEqual(
+            "write_visual_asset_registry_entry_for_owned_test_database",
+            renderer_metrics["visual_asset_registry_owned_test_write_helper_contract"],
+        )
+        self.assertEqual(
+            "read_visual_asset_registry_entry_payload_for_owned_test_database",
+            renderer_metrics["visual_asset_registry_owned_test_read_helper_contract"],
+        )
+        self.assertEqual(
+            "list_visual_asset_registry_entry_payloads_for_owned_test_database",
+            renderer_metrics["visual_asset_registry_owned_test_list_helper_contract"],
+        )
+        self.assertEqual(
             "skin_asset_status_display_profile",
             renderer_metrics["skin_asset_lifecycle_display_profile_contract"],
         )
