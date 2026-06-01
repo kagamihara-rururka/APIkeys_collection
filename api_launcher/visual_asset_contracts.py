@@ -153,6 +153,7 @@ class SkinBuildResult:
             "schema_version": VISUAL_ASSET_CONTRACT_SCHEMA_VERSION,
             "request_id": self.request_id,
             "lifecycle_status": self.status,
+            "lifecycle_status_display_profile": skin_asset_status_display_profile(self.status),
             "skin_asset": self.skin_asset.to_dict() if self.skin_asset else None,
             "error_message": self.error_message,
             "warning_codes": list(self.warning_codes),

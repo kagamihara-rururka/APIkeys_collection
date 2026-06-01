@@ -102,6 +102,7 @@ class VisualAssetContractTest(unittest.TestCase):
         event_payload = event.to_dict()
 
         self.assertEqual("ready", result_payload["lifecycle_status"])
+        self.assertEqual("success", result_payload["lifecycle_status_display_profile"]["display_tone"])
         self.assertEqual("skin-gebco-2025", result_payload["skin_asset"]["skin_asset_id"])
         self.assertEqual("state/visual_assets/skin-gebco-2025.manifest.json", result_payload["skin_asset"]["manifest_path"])
         self.assertEqual(["external_builder_output"], result_payload["warning_codes"])
@@ -109,6 +110,22 @@ class VisualAssetContractTest(unittest.TestCase):
         self.assertEqual("ready", event_payload["skin_asset"]["lifecycle_status"])
         self.assertNotIn("payload_bytes", str(event_payload))
         self.assertNotIn("renderer_import", str(event_payload))
+
+    def test_build_result_display_profile_works_without_skin_asset(self) -> None:
+        result = SkinBuildResult(
+            request_id="skin-build-failed",
+            lifecycle_status=SkinAssetLifecycleStatus.FAILED,
+            error_message="builder failed",
+            completed_at="2026-06-01T00:11:00Z",
+        )
+
+        payload = result.to_dict()
+
+        self.assertEqual("failed", payload["lifecycle_status"])
+        self.assertIsNone(payload["skin_asset"])
+        self.assertEqual("danger", payload["lifecycle_status_display_profile"]["display_tone"])
+        self.assertTrue(payload["lifecycle_status_display_profile"]["is_terminal"])
+        self.assertFalse(payload["lifecycle_status_display_profile"]["is_ready"])
 
     def test_invalid_lifecycle_status_fails_fast(self) -> None:
         with self.assertRaises(ValueError):
