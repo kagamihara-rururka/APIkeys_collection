@@ -15,6 +15,7 @@ from api_launcher.visual_asset_contracts import (
     renderer_skin_asset_manifest_projection,
     skin_asset_status_label,
     visual_asset_ready_event_from_registry_entry,
+    visual_asset_ready_event_log_context,
     visual_asset_registry_summary,
 )
 
@@ -294,6 +295,62 @@ class VisualAssetContractTest(unittest.TestCase):
 
         with self.assertRaisesRegex(ValueError, "ready skin assets"):
             visual_asset_ready_event_from_registry_entry(entry)
+
+    def test_ready_event_log_context_is_bounded_manifest_reference(self) -> None:
+        skin_asset = RendererSkinAssetReference(
+            skin_asset_id="skin-ready",
+            source_request_id="request-ready",
+            source_curated_asset_id="curated-ready",
+            dataset_uid="dataset-ready",
+            manifest_path="state/visual_assets/ready.manifest.json",
+            lifecycle_status=SkinAssetLifecycleStatus.READY,
+            renderer_targets=("displaytools",),
+            asset_format="renderer_skin_asset_manifest",
+            checksum="abc123",
+            size_bytes=4096,
+            generated_by="external_builder",
+            metadata={"payload_bytes": "do-not-log"},
+        )
+        event = VisualAssetReadyEvent(
+            event_id="visual-ready-1",
+            skin_asset=skin_asset,
+            source_request_id="request-ready",
+            emitted_at="2026-06-02T00:03:00Z",
+            metadata={
+                "registry_entry_id": "entry-ready",
+                "projection_type": "renderer_skin_asset_manifest_reference",
+                "note": "do-not-log",
+                "token": "secret",
+                "payload_bytes": "bad",
+            },
+        )
+
+        context = visual_asset_ready_event_log_context(event)
+
+        self.assertEqual("visual_asset_ready", context["event_type"])
+        self.assertEqual("visual-ready-1", context["event_id"])
+        self.assertEqual("skin-ready", context["skin_asset_id"])
+        self.assertEqual("state/visual_assets/ready.manifest.json", context["manifest_path"])
+        self.assertEqual("ready", context["lifecycle_status"])
+        self.assertEqual(["displaytools"], context["renderer_targets"])
+        self.assertEqual("request-ready", context["lineage"]["source_request_id"])
+        self.assertEqual("curated-ready", context["lineage"]["source_curated_asset_id"])
+        self.assertEqual("dataset-ready", context["lineage"]["dataset_uid"])
+        self.assertEqual(
+            {
+                "registry_entry_id": "entry-ready",
+                "projection_type": "renderer_skin_asset_manifest_reference",
+            },
+            context["metadata"],
+        )
+        self.assertTrue(context["safety"]["control_plane_only"])
+        self.assertFalse(context["safety"]["payload_loading"])
+        self.assertFalse(context["safety"]["imports_renderer_projects"])
+        self.assertFalse(context["safety"]["arbitrary_metadata_logged"])
+        self.assertNotIn("token", str(context))
+        self.assertNotIn("payload_bytes", str(context))
+        self.assertNotIn("do-not-log", str(context))
+        self.assertNotIn("skin_asset", context)
 
     def test_registry_entry_rejects_mismatched_source_request(self) -> None:
         source = CuratedDataAssetReference(
