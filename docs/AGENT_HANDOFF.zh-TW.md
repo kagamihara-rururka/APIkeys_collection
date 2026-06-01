@@ -1,4 +1,9 @@
 # Agent 接力卡
+## 2026-06-02 07:50 +08:00 Visual/Skin registry owned test read-side summary
+- 本輪完成 OpenSpec task 3.1-3.2：新增 `api_launcher.visual_asset_registry_persistence.visual_asset_registry_summary_for_owned_test_database()`。helper 必須傳入 `allow_owned_test_database=True`；若 DB 不存在，回傳空 summary 且不建檔；若 DB 存在，必須有 RRKAL owned marker，否則拒絕。
+- 回傳 payload 只含 control-plane summary：lifecycle counts、`status_display_profiles`、`review_required_count`、`renderer_target_counts`、DB ownership/table flags 與 safety flags。它不讀 manifest / `.npz` / renderer payload、不 import displaytools / visual-compressor / vis_2_dis、不發 `visual_asset_ready` event。
+- 已驗證：`py -3 -B -m unittest tests.test_visual_asset_registry_persistence tests.test_visual_asset_contracts tests.test_project_maturity -v` 通過 40 tests；完整 smoke `state\logs\pre_push_smoke_20260602_074220.log` 通過 1080 tests / 4 skipped，MVP demo `download_import_completed` / `row_count=3`；`py -3 -B APIkeys_collection.py --project-maturity-json` 可見 `visual_asset_registry_owned_test_summary_contract=visual_asset_registry_summary_for_owned_test_database`，renderer row 仍是 `contract_only`。下一步若繼續此 OpenSpec，可做 3.3 CLI JSON/debug endpoint；仍不可接 UI 或正式 user DB repository。
+
 ## 2026-06-02 07:35 +08:00 Visual/Skin registry owned test rollback/drop preview
 - 本輪完成 OpenSpec task 2.4：新增 `api_launcher.visual_asset_registry_persistence.visual_asset_registry_owned_test_drop_preview()`。helper 必須傳入 `allow_owned_test_database=True`，且既有 SQLite DB 必須有 RRKAL owned marker；通過後只回傳可審閱的 DROP INDEX / DROP TABLE SQL preview。
 - 邊界：這是 dry-run rollback preview，不執行 DROP、不刪 DB、不改 registry row、不發 `visual_asset_ready` event、不讀 renderer payload、不 import displaytools / visual-compressor / vis_2_dis。若 DB 已存在但不是 owned test DB，會拒絕。

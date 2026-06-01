@@ -19,6 +19,7 @@ from api_launcher.visual_asset_registry_persistence import (
     list_visual_asset_registry_entry_payloads_for_owned_test_database,
     read_visual_asset_registry_entry_payload_for_owned_test_database,
     visual_asset_registry_owned_test_drop_preview,
+    visual_asset_registry_summary_for_owned_test_database,
     write_visual_asset_registry_entry_for_owned_test_database,
 )
 
@@ -280,12 +281,105 @@ class VisualAssetRegistryPersistenceTests(unittest.TestCase):
                     allow_owned_test_database=True,
                 )
 
+    def test_owned_test_summary_requires_explicit_gate_without_creating_database(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            db_path = Path(tmpdir) / "visual-registry.sqlite"
+
+            with self.assertRaisesRegex(ValueError, "allow_owned_test_database=True"):
+                visual_asset_registry_summary_for_owned_test_database(db_path)
+
+            summary = visual_asset_registry_summary_for_owned_test_database(
+                db_path,
+                allow_owned_test_database=True,
+            )
+
+            self.assertFalse(db_path.exists())
+            self.assertFalse(summary["database_exists"])
+            self.assertFalse(summary["owned_test_database"])
+            self.assertFalse(summary["table_exists"])
+            self.assertEqual(0, summary["registry_entry_count"])
+            self.assertTrue(summary["control_plane_only"])
+            self.assertFalse(summary["payload_loading"])
+
+    def test_owned_test_summary_counts_statuses_targets_and_safety_flags(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            db_path = Path(tmpdir) / "visual-registry.sqlite"
+            missing_payload_path = Path(tmpdir) / "missing-renderer-payload.npz"
+            write_visual_asset_registry_entry_for_owned_test_database(
+                db_path,
+                _registry_entry(
+                    "entry-ready",
+                    "skin-ready",
+                    renderer_targets=("displaytools", "qt_preview"),
+                    review_required=False,
+                    manifest_path=str(missing_payload_path),
+                ),
+                allow_owned_test_database=True,
+            )
+            write_visual_asset_registry_entry_for_owned_test_database(
+                db_path,
+                _registry_entry(
+                    "entry-review",
+                    "skin-review",
+                    lifecycle_status=SkinAssetLifecycleStatus.REVIEW_REQUIRED,
+                    renderer_targets=("displaytools",),
+                    review_required=True,
+                ),
+                allow_owned_test_database=True,
+            )
+
+            summary = visual_asset_registry_summary_for_owned_test_database(
+                db_path,
+                allow_owned_test_database=True,
+            )
+
+            self.assertTrue(summary["database_exists"])
+            self.assertTrue(summary["owned_test_database"])
+            self.assertTrue(summary["table_exists"])
+            self.assertEqual(2, summary["registry_entry_count"])
+            self.assertEqual(1, summary["ready_count"])
+            self.assertEqual(1, summary["review_required_count"])
+            self.assertEqual(1, summary["status_counts"]["ready"])
+            self.assertEqual(1, summary["status_counts"]["review_required"])
+            self.assertEqual("success", summary["status_display_profiles"]["ready"]["display_tone"])
+            self.assertEqual("review", summary["status_display_profiles"]["review_required"]["display_tone"])
+            self.assertEqual(2, summary["renderer_target_counts"]["displaytools"])
+            self.assertEqual(1, summary["renderer_target_counts"]["qt_preview"])
+            self.assertFalse(summary["auto_event_emission"])
+            self.assertTrue(summary["safety"]["control_plane_only"])
+            self.assertFalse(summary["safety"]["payload_loading"])
+            self.assertFalse(summary["safety"]["imports_renderer_projects"])
+            self.assertFalse(summary["safety"]["reads_renderer_payloads"])
+
+    def test_owned_test_summary_rejects_existing_unowned_database(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            db_path = Path(tmpdir) / "user.sqlite"
+            with closing(sqlite3.connect(db_path)) as conn:
+                conn.execute("CREATE TABLE user_data (id INTEGER PRIMARY KEY)")
+                conn.commit()
+
+            with self.assertRaisesRegex(ValueError, "unowned SQLite database"):
+                visual_asset_registry_summary_for_owned_test_database(
+                    db_path,
+                    allow_owned_test_database=True,
+                )
+
+    def test_persistence_module_does_not_import_downstream_renderer_projects(self) -> None:
+        source = Path("api_launcher/visual_asset_registry_persistence.py").read_text(encoding="utf-8")
+        forbidden = ("RRKAL_displaytools", "rrkal_visual_compressor", "vis_2_dis", "taichi", "PyQt")
+        for token in forbidden:
+            self.assertNotIn(token, source)
+
 
 def _registry_entry(
     registry_entry_id: str,
     skin_asset_id: str,
     *,
     checksum: str = "abc123",
+    lifecycle_status: SkinAssetLifecycleStatus | str = SkinAssetLifecycleStatus.READY,
+    renderer_targets: tuple[str, ...] = ("displaytools", "qt_preview"),
+    review_required: bool = True,
+    manifest_path: str = "state/visual_assets/ready.manifest.json",
     metadata: dict[str, object] | None = None,
 ) -> RendererSkinAssetRegistryEntry:
     skin_asset = RendererSkinAssetReference(
@@ -293,9 +387,9 @@ def _registry_entry(
         source_request_id="request-ready",
         source_curated_asset_id="curated-ready",
         dataset_uid="dataset-ready",
-        manifest_path="state/visual_assets/ready.manifest.json",
-        lifecycle_status=SkinAssetLifecycleStatus.READY,
-        renderer_targets=("displaytools", "qt_preview"),
+        manifest_path=manifest_path,
+        lifecycle_status=lifecycle_status,
+        renderer_targets=renderer_targets,
         checksum=checksum,
         size_bytes=4096,
         created_at="2026-06-02T00:00:00Z",
@@ -303,7 +397,7 @@ def _registry_entry(
     return RendererSkinAssetRegistryEntry(
         registry_entry_id=registry_entry_id,
         skin_asset=skin_asset,
-        review_required=True,
+        review_required=review_required,
         registered_at="2026-06-02T00:01:00Z",
         updated_at="2026-06-02T00:02:00Z",
         metadata=dict(metadata or {}),

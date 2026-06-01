@@ -32,6 +32,7 @@ from api_launcher.visual_asset_registry_persistence import (
     list_visual_asset_registry_entry_payloads_for_owned_test_database,
     read_visual_asset_registry_entry_payload_for_owned_test_database,
     visual_asset_registry_owned_test_drop_preview,
+    visual_asset_registry_summary_for_owned_test_database,
     write_visual_asset_registry_entry_for_owned_test_database,
 )
 
@@ -326,6 +327,9 @@ def _renderer_bridge_metrics() -> dict[str, Any]:
         ),
         "visual_asset_registry_owned_test_drop_preview_contract": (
             visual_asset_registry_owned_test_drop_preview.__name__
+        ),
+        "visual_asset_registry_owned_test_summary_contract": (
+            visual_asset_registry_summary_for_owned_test_database.__name__
         ),
         "skin_asset_lifecycle_statuses": sorted(SKIN_ASSET_LIFECYCLE_STATUSES),
         "skin_asset_lifecycle_status_count": len(SKIN_ASSET_LIFECYCLE_STATUSES),

@@ -14,6 +14,7 @@ from api_launcher.visual_asset_contracts import (
     visual_asset_registry_entry_persistence_record,
     visual_asset_registry_persistence_schema,
     visual_asset_registry_sqlite_ddl_preview,
+    visual_asset_registry_summary,
 )
 
 
@@ -175,6 +176,54 @@ def list_visual_asset_registry_entry_payloads_for_owned_test_database(
             ]
 
     return [_entry_payload_from_persistence_record(record) for record in records]
+
+
+def visual_asset_registry_summary_for_owned_test_database(
+    sqlite_path: str | Path,
+    *,
+    allow_owned_test_database: bool = False,
+) -> dict[str, Any]:
+    """Summarize persisted visual registry rows from an owned test DB only."""
+
+    if not allow_owned_test_database:
+        raise ValueError(
+            "Refusing to summarize visual asset registry entries without allow_owned_test_database=True"
+        )
+
+    path = Path(sqlite_path).expanduser().resolve(strict=False)
+    if not path.exists():
+        return _summary_payload(
+            path,
+            database_exists=False,
+            owned_test_database=False,
+            table_exists=False,
+            entries=(),
+        )
+
+    with sqlite_write_gate(path):
+        with closing(sqlite3.connect(path, timeout=30)) as conn:
+            conn.row_factory = sqlite3.Row
+            _require_owned_test_database(conn)
+            table_names = _sqlite_table_names(conn)
+            if VISUAL_ASSET_REGISTRY_TABLE_NAME in table_names:
+                records = [
+                    _record_from_row(row)
+                    for row in conn.execute(
+                        f"SELECT * FROM {_sqlite_identifier(VISUAL_ASSET_REGISTRY_TABLE_NAME)} "
+                        "ORDER BY registry_entry_id"
+                    ).fetchall()
+                ]
+            else:
+                records = []
+
+    entries = tuple(_entry_from_persistence_record(record) for record in records)
+    return _summary_payload(
+        path,
+        database_exists=True,
+        owned_test_database=True,
+        table_exists=VISUAL_ASSET_REGISTRY_TABLE_NAME in table_names,
+        entries=entries,
+    )
 
 
 def visual_asset_registry_owned_test_drop_preview(
@@ -400,6 +449,38 @@ def _drop_preview_payload(
     }
 
 
+def _summary_payload(
+    path: Path,
+    *,
+    database_exists: bool,
+    owned_test_database: bool,
+    table_exists: bool,
+    entries: tuple[RendererSkinAssetRegistryEntry, ...],
+) -> dict[str, Any]:
+    summary = visual_asset_registry_summary(entries)
+    summary.update(
+        {
+            "operation": "visual_asset_registry_summary_for_owned_test_database",
+            "database_path": str(path),
+            "database_exists": database_exists,
+            "owned_test_database": owned_test_database,
+            "table_exists": table_exists,
+            "scope": "owned_test_database_only",
+            "auto_event_emission": False,
+            "control_plane_only": True,
+            "payload_loading": False,
+            "safety": {
+                "control_plane_only": True,
+                "payload_loading": False,
+                "imports_renderer_projects": False,
+                "reads_renderer_payloads": False,
+                "auto_event_emission": False,
+            },
+        }
+    )
+    return summary
+
+
 def _index_name(index_statement: str) -> str:
     parts = index_statement.split('"')
     if len(parts) < 2:
@@ -432,5 +513,6 @@ __all__ = [
     "list_visual_asset_registry_entry_payloads_for_owned_test_database",
     "read_visual_asset_registry_entry_payload_for_owned_test_database",
     "visual_asset_registry_owned_test_drop_preview",
+    "visual_asset_registry_summary_for_owned_test_database",
     "write_visual_asset_registry_entry_for_owned_test_database",
 ]
