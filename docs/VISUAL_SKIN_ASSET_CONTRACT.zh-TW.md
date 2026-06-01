@@ -66,6 +66,7 @@ flowchart TD
 | `RendererSkinAssetRegistryEntry` | 登錄一筆 renderer-ready manifest reference，串接 skin asset、source request、latest build result、review flag、metadata。 | 不做 database persistence，不讀 renderer payload。 |
 | `visual_asset_registry_summary()` | 彙總 registry entries 的 status count、ready count、review count、renderer target count。 | 不掃 manifest 內容，不做 payload health check。 |
 | `renderer_skin_asset_manifest_projection()` | 把 registry entry 投影成 compact cross-project manifest reference，給 event log、displaytools 或 future builder 讀取。 | 不輸出完整 source request internals，不讀或嵌入 renderer payload。 |
+| `visual_asset_ready_event_from_registry_entry()` | 從 `ready` registry entry 產生 `VisualAssetReadyEvent`，自動帶入 source request lineage 與 registry metadata。 | 不對非 `ready` asset 發 ready event，不寫入 runtime event log。 |
 
 ## Lifecycle 狀態
 
@@ -103,6 +104,7 @@ flowchart TD
 - Registry summary 的 lifecycle / renderer target / review count。
 - Registry entry lineage mismatch fail-fast。
 - Compact manifest projection 只輸出 manifest reference、lineage、renderer target、status 與 safety flags。
+- Ready-event factory 只接受 `ready` registry entry，避免對 review / failed asset 發出可消費事件。
 - Contract module 不 import `RRKAL_displaytools`、`rrkal-visual-compressor`、`vis_2_dis`、Taichi、PyQt。
 - Project maturity renderer row 保持 `contract_only` / `🚧`，並輸出 registry contract 與 empty summary。
 
@@ -131,7 +133,7 @@ flowchart TD
 安全的後續切片：
 
 1. 定義 registry persistence OpenSpec，先規格化資料庫欄位與 migration guard。
-2. 把 `VisualAssetReadyEvent` 接到 event log，但仍只寫 manifest reference。
+2. 把 `visual_asset_ready_event_from_registry_entry()` 的 output 接到 event log，但仍只寫 manifest reference。
 3. 與 displaytools / compressor 透過 `L:\AGENT_EXCHANGE` 或正式 OpenSpec 對齊欄位，不直接 import 對方 repo。
 4. 若下游需要更多欄位，先版本化 projection schema，不要讓 downstream 直接依賴 `entry.to_dict()` 的完整內部形狀。
 

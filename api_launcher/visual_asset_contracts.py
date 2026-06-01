@@ -295,6 +295,29 @@ def renderer_skin_asset_manifest_projection(entry: RendererSkinAssetRegistryEntr
     }
 
 
+def visual_asset_ready_event_from_registry_entry(
+    entry: RendererSkinAssetRegistryEntry,
+    *,
+    event_id: str = "",
+    emitted_at: str = "",
+    metadata: dict[str, Any] | None = None,
+) -> VisualAssetReadyEvent:
+    """Create a ready event from a registry entry without hand-written lineage ids."""
+
+    if entry.status != SkinAssetLifecycleStatus.READY.value:
+        raise ValueError("VisualAssetReadyEvent can only be emitted for ready skin assets")
+    event_metadata = dict(metadata or {})
+    event_metadata.setdefault("registry_entry_id", entry.registry_entry_id)
+    event_metadata.setdefault("projection_type", "renderer_skin_asset_manifest_reference")
+    return VisualAssetReadyEvent(
+        event_id=event_id or f"visual-ready:{entry.skin_asset.skin_asset_id}",
+        skin_asset=entry.skin_asset,
+        source_request_id=entry.skin_asset.source_request_id,
+        emitted_at=emitted_at or utc_now_iso(),
+        metadata=event_metadata,
+    )
+
+
 def skin_asset_status_label(status: SkinAssetLifecycleStatus | str) -> str:
     return _SKIN_ASSET_STATUS_LABELS.get(_status_value(status), "皮層資產狀態待確認")
 
@@ -358,5 +381,6 @@ __all__ = [
     "VisualAssetReadyEvent",
     "renderer_skin_asset_manifest_projection",
     "skin_asset_status_label",
+    "visual_asset_ready_event_from_registry_entry",
     "visual_asset_registry_summary",
 ]

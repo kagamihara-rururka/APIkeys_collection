@@ -1,4 +1,8 @@
 # Agent 接力卡
+## 2026-06-02 04:35 +08:00 Visual/Skin ready-event factory guard
+- 本輪新增 `visual_asset_ready_event_from_registry_entry()`，從 `RendererSkinAssetRegistryEntry` 安全產生 `VisualAssetReadyEvent`。factory 只接受 `ready` registry entry，會自動使用 `skin_asset.source_request_id`，並把 `registry_entry_id` 與 projection type 放進 metadata。
+- 邊界不變：這只是 event object factory，不寫 runtime event log、不呼叫 renderer、不 import displaytools / visual-compressor / vis_2_dis、不讀 renderer payload。下一步若接 event log，仍只能寫 manifest reference。
+- 已驗證：source compile check OK；`py -3 -B -m unittest tests.test_visual_asset_contracts tests.test_project_maturity -v` 通過 20 tests；`--project-maturity-json` 抽查 `visual_asset_ready_event_factory_contract=visual_asset_ready_event_from_registry_entry`、`control_plane_only=true`、`payload_loading=false`；完整 smoke `state\logs\pre_push_smoke_20260602_043651.log` 通過，1056 tests / 4 skipped，MVP demo `download_import_completed` / `row_count=3`。
 ## 2026-06-02 04:24 +08:00 Visual/Skin manifest projection contract
 - 本輪新增 `renderer_skin_asset_manifest_projection()`，把 `RendererSkinAssetRegistryEntry` 投影成 compact cross-project manifest reference。projection 只包含 registry entry id、skin asset id、manifest path、lifecycle status/label、renderer targets、asset format、checksum、lineage 與 safety flags。
 - 這個 projection 是給 event log / displaytools / future builder 的 reference envelope，不是 payload reader；它不輸出完整 source request internals、不 import displaytools / visual-compressor / vis_2_dis、不讀 `.npz` 或 renderer project file。

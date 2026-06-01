@@ -288,6 +288,7 @@ def _renderer_bridge_metrics() -> dict[str, Any]:
         "visual_skin_asset_contract_schema": "api_launcher.visual_asset_contracts",
         "visual_skin_asset_registry_entry_contract": "RendererSkinAssetRegistryEntry",
         "visual_skin_asset_manifest_projection_contract": "renderer_skin_asset_manifest_projection",
+        "visual_asset_ready_event_factory_contract": "visual_asset_ready_event_from_registry_entry",
         "skin_asset_lifecycle_statuses": sorted(SKIN_ASSET_LIFECYCLE_STATUSES),
         "skin_asset_lifecycle_status_count": len(SKIN_ASSET_LIFECYCLE_STATUSES),
         "empty_visual_asset_registry_summary": visual_asset_registry_summary(()),

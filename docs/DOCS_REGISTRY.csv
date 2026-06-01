@@ -17,7 +17,7 @@ docs/USER_GUIDE.zh-TW.md,user,user_guide,4,2026-05-29,"not updated in helper-onl
 docs/USER_MANUAL.zh-TW.md,user,user_manual,4,2026-05-29,"not updated in helper-only consolidation slices","Demo/manual flow, not every backend helper move."
 docs/TECHNICAL_OVERVIEW.zh-TW.md,architecture,technical_overview,4,2026-05-29,"MVP loop and service boundaries still apply","Update when backend flow changes."
 docs/ARCHITECTURE.zh-TW.md,architecture,architecture_entry,4,2026-05-29,"no folder-level move in recovery lane","Update for module/data-flow boundary changes."
-docs/VISUAL_SKIN_ASSET_CONTRACT.zh-TW.md,feature,visual_skin_asset_contract,4,2026-06-02,"RendererSkinAssetRegistryEntry lineage guard and manifest projection contract verified","RRKAL Core control-plane contract only; does not imply renderer payload integration."
+docs/VISUAL_SKIN_ASSET_CONTRACT.zh-TW.md,feature,visual_skin_asset_contract,4,2026-06-02,"RendererSkinAssetRegistryEntry lineage guard, manifest projection, and ready-event factory verified","RRKAL Core control-plane contract only; does not imply renderer payload integration."
 docs/DEVELOPMENT_WORKFLOW_OPEN_SPEC.zh-TW.md,workflow,openspec_workflow,4,2026-05-29,"GitHub owner/workspace URLs aligned","Use before medium/large cross-module changes."
 docs/CODEX_CLOUD_HANDOFF.zh-TW.md,workflow,codex_cloud_handoff,3,2026-05-30,"initialized public handoff/private transcript boundary","Use when moving RRKAL work to Codex Cloud or a new local thread."
 docs/WORKFLOW.zh-TW.md,workflow,standard_development_workflow,3,2026-05-31,"agent exchange inbox and response rule added","Use for start/end checklists, workspace rules, docs drift, agent exchange, and raw transcript policy."

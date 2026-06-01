@@ -78,6 +78,10 @@ class ProjectMaturityTests(unittest.TestCase):
             "renderer_skin_asset_manifest_projection",
             renderer_metrics["visual_skin_asset_manifest_projection_contract"],
         )
+        self.assertEqual(
+            "visual_asset_ready_event_from_registry_entry",
+            renderer_metrics["visual_asset_ready_event_factory_contract"],
+        )
         self.assertIn("ready", renderer_metrics["skin_asset_lifecycle_statuses"])
         self.assertEqual(7, renderer_metrics["skin_asset_lifecycle_status_count"])
         empty_registry = renderer_metrics["empty_visual_asset_registry_summary"]

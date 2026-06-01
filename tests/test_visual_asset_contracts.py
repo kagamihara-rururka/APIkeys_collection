@@ -14,6 +14,7 @@ from api_launcher.visual_asset_contracts import (
     VisualAssetReadyEvent,
     renderer_skin_asset_manifest_projection,
     skin_asset_status_label,
+    visual_asset_ready_event_from_registry_entry,
     visual_asset_registry_summary,
 )
 
@@ -250,6 +251,49 @@ class VisualAssetContractTest(unittest.TestCase):
         self.assertNotIn("source_request", projection)
         self.assertNotIn("latest_build_result", projection)
         self.assertNotIn("payload_bytes", str(projection))
+
+    def test_ready_event_factory_uses_registry_entry_lineage(self) -> None:
+        skin_asset = RendererSkinAssetReference(
+            skin_asset_id="skin-ready",
+            source_request_id="request-ready",
+            source_curated_asset_id="curated-ready",
+            dataset_uid="dataset-ready",
+            manifest_path="state/visual_assets/ready.manifest.json",
+            lifecycle_status=SkinAssetLifecycleStatus.READY,
+            renderer_targets=("displaytools",),
+        )
+        entry = RendererSkinAssetRegistryEntry("entry-ready", skin_asset)
+
+        event = visual_asset_ready_event_from_registry_entry(
+            entry,
+            emitted_at="2026-06-02T00:02:00Z",
+            metadata={"note": "checked"},
+        )
+        payload = event.to_dict()
+
+        self.assertEqual("visual-ready:skin-ready", payload["event_id"])
+        self.assertEqual("visual_asset_ready", payload["event_type"])
+        self.assertEqual("request-ready", payload["source_request_id"])
+        self.assertEqual("entry-ready", payload["metadata"]["registry_entry_id"])
+        self.assertEqual("renderer_skin_asset_manifest_reference", payload["metadata"]["projection_type"])
+        self.assertEqual("checked", payload["metadata"]["note"])
+        self.assertEqual("ready", payload["skin_asset"]["lifecycle_status"])
+        self.assertNotIn("payload_bytes", str(payload))
+
+    def test_ready_event_factory_rejects_non_ready_registry_entry(self) -> None:
+        skin_asset = RendererSkinAssetReference(
+            skin_asset_id="skin-review",
+            source_request_id="request-review",
+            source_curated_asset_id="curated-review",
+            dataset_uid="dataset-review",
+            manifest_path="state/visual_assets/review.manifest.json",
+            lifecycle_status=SkinAssetLifecycleStatus.REVIEW_REQUIRED,
+            renderer_targets=("displaytools",),
+        )
+        entry = RendererSkinAssetRegistryEntry("entry-review", skin_asset)
+
+        with self.assertRaisesRegex(ValueError, "ready skin assets"):
+            visual_asset_ready_event_from_registry_entry(entry)
 
     def test_registry_entry_rejects_mismatched_source_request(self) -> None:
         source = CuratedDataAssetReference(
