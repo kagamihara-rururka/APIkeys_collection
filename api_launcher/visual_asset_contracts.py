@@ -251,6 +251,10 @@ def visual_asset_registry_summary(entries: Iterable[RendererSkinAssetRegistryEnt
         "schema_version": VISUAL_ASSET_CONTRACT_SCHEMA_VERSION,
         "registry_entry_count": len(registry_entries),
         "status_counts": status_counts,
+        "status_display_profiles": {
+            status: skin_asset_status_display_profile(status)
+            for status in sorted(SKIN_ASSET_LIFECYCLE_STATUSES)
+        },
         "ready_count": status_counts.get(SkinAssetLifecycleStatus.READY.value, 0),
         "review_required_count": review_required_count,
         "renderer_target_counts": renderer_target_counts,

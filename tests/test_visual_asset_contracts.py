@@ -250,6 +250,8 @@ class VisualAssetContractTest(unittest.TestCase):
         self.assertEqual(1, summary["review_required_count"])
         self.assertEqual(1, summary["status_counts"]["ready"])
         self.assertEqual(1, summary["status_counts"]["review_required"])
+        self.assertEqual("success", summary["status_display_profiles"]["ready"]["display_tone"])
+        self.assertEqual("🚧", summary["status_display_profiles"]["review_required"]["status_icon"])
         self.assertEqual(2, summary["renderer_target_counts"]["displaytools"])
         self.assertEqual(1, summary["renderer_target_counts"]["qt_preview"])
         self.assertTrue(summary["control_plane_only"])
