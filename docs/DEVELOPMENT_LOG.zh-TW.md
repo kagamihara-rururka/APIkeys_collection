@@ -15,6 +15,12 @@
 - `開發階段` 是粗粒度階段標籤，用來讓人一眼分辨當前工作屬於 `MVP Demo Closure`、`MVP Hardening`、`Database / Repair`、`Discovery / Crawler`、`Docs / Workflow` 等哪一段；新 checkpoint 必須填寫，不要只藏在中文說明裡。
 - 日期區塊與同日內時間都倒序，讓最近期 checkpoint 一打開就能看到。
 
+### 2026-06-02
+
+| 時間 | 階段 | 狀態 | SHA | Run | Commit | 變更與驗證 |
+| --- | --- | --- | --- | --- | --- | --- |
+| 03:51 | Control Plane / Visual Asset Contract | **SMOKE PASS** | `pending` | `local smoke` | pending | 延續 Visual/Skin Asset control-plane contract，新增 `RendererSkinAssetRegistryEntry` 與 `visual_asset_registry_summary()`，讓 RRKAL Core 可登錄 renderer-ready manifest reference 與 lifecycle summary，但仍不讀 `.npz`、GPU buffer、renderer project file 或 payload bytes，也不 import displaytools、visual-compressor、vis_2_dis、Taichi/PyQt。Project maturity renderer row 新增 `visual_skin_asset_registry_entry_contract=RendererSkinAssetRegistryEntry` 與 `empty_visual_asset_registry_summary`，明確標示目前只是 registry contract surface、沒有假裝已有 renderer asset records。已驗證：`py -3 -B -m py_compile api_launcher\visual_asset_contracts.py api_launcher\project_maturity.py tests\test_visual_asset_contracts.py tests\test_project_maturity.py` OK；`py -3 -B -m unittest tests.test_visual_asset_contracts tests.test_project_maturity -v` 通過 14 tests；`--project-maturity-json` 抽查 registry contract 與 empty summary OK；`git diff --check` OK；完整 smoke `state\logs\pre_push_smoke_20260602_035442.log` 通過，1050 tests / 4 skipped，MVP demo `download_import_completed` / `row_count=3`。Docs drift check：已同步 GTD / handoff / development log；本輪不改 UI、crawler、download/import、credential、renderer I/O 或 user guide。 |
+
 ### 2026-06-01
 
 | 時間 | 階段 | 狀態 | SHA | Run | Commit | 變更與驗證 |

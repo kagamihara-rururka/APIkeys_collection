@@ -1,4 +1,9 @@
 # Agent 接力卡
+## 2026-06-02 03:51 +08:00 Visual/Skin Asset registry entry contract
+- 延續 2026-06-01 的 Visual/Skin Asset control-plane contract，本輪新增 `RendererSkinAssetRegistryEntry` 與 `visual_asset_registry_summary()`，讓 RRKAL Core 可描述「已登錄的 renderer-ready manifest reference」與 lifecycle summary，而不需要讀取 renderer payload。
+- 邊界不變：`api_launcher.visual_asset_contracts` 仍不得 import `RRKAL_displaytools`、`rrkal-visual-compressor`、`vis_2_dis`、Taichi/PyQt，也不得讀 `.npz`、GPU buffer、renderer project file 或 payload bytes。新 registry entry 只輸出 manifest path、source curated asset id、dataset uid、renderer target、status label、review flag 與 control-plane metadata。
+- Project maturity renderer row 已新增 `visual_skin_asset_registry_entry_contract=RendererSkinAssetRegistryEntry` 與 `empty_visual_asset_registry_summary`，明確表示目前只是 registry contract surface，尚無實際 visual asset registry records；`control_plane_only=true`、`payload_loading=false`。
+- 已驗證：`py -3 -B -m py_compile api_launcher\visual_asset_contracts.py api_launcher\project_maturity.py tests\test_visual_asset_contracts.py tests\test_project_maturity.py` OK；`py -3 -B -m unittest tests.test_visual_asset_contracts tests.test_project_maturity -v` 通過 14 tests；`--project-maturity-json` 抽查 registry entry contract 與 empty registry summary OK；`git diff --check` OK；完整 smoke `state\logs\pre_push_smoke_20260602_035442.log` 通過，1050 tests / 4 skipped，MVP demo `download_import_completed` / `row_count=3`。
 ## 2026-06-01 21:56 +08:00 Visual/Skin Asset control-plane contract
 - 新增 `api_launcher/visual_asset_contracts.py` 與 `tests/test_visual_asset_contracts.py`，讓 RRKAL Core 可先登記未來 RendererSkinAsset 的 build request、build result、manifest reference、ready event 與 lifecycle status。
 - 邊界：這只是一層 control-plane contract。它不得 import `RRKAL_displaytools`、`rrkal-visual-compressor`、`vis_2_dis`，不得讀 `.npz`、GPU buffer、Qt/Taichi payload 或 renderer 專案檔；RRKAL Core 管資產生命週期，不管資產怎麼畫。

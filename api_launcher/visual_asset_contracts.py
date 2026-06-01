@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any
+from typing import Any, Iterable
 
 from api_launcher.db import utc_now_iso
 
@@ -182,6 +182,77 @@ class VisualAssetReadyEvent:
         }
 
 
+@dataclass(frozen=True)
+class RendererSkinAssetRegistryEntry:
+    """RRKAL Core registry row for a renderer-ready manifest reference.
+
+    The registry entry deliberately stores only control-plane metadata. It may
+    point at a skin manifest, but it must not open renderer payloads, GPU
+    buffers, or project files.
+    """
+
+    registry_entry_id: str
+    skin_asset: RendererSkinAssetReference
+    source_request: SkinBuildRequest | None = None
+    latest_build_result: SkinBuildResult | None = None
+    review_required: bool = False
+    registered_at: str = field(default_factory=utc_now_iso)
+    updated_at: str = field(default_factory=utc_now_iso)
+    metadata: dict[str, Any] = field(default_factory=dict)
+
+    @property
+    def status(self) -> str:
+        return self.skin_asset.status
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "schema_version": VISUAL_ASSET_CONTRACT_SCHEMA_VERSION,
+            "registry_entry_id": self.registry_entry_id,
+            "lifecycle_status": self.status,
+            "lifecycle_status_label": skin_asset_status_label(self.status),
+            "manifest_path": self.skin_asset.manifest_path,
+            "source_curated_asset_id": self.skin_asset.source_curated_asset_id,
+            "dataset_uid": self.skin_asset.dataset_uid,
+            "renderer_targets": list(self.skin_asset.renderer_targets),
+            "review_required": self.review_required,
+            "skin_asset": self.skin_asset.to_dict(),
+            "source_request": self.source_request.to_dict() if self.source_request else None,
+            "latest_build_result": self.latest_build_result.to_dict() if self.latest_build_result else None,
+            "registered_at": self.registered_at,
+            "updated_at": self.updated_at,
+            "metadata": dict(self.metadata),
+            "control_plane_only": True,
+            "payload_loading": False,
+        }
+
+
+def visual_asset_registry_summary(entries: Iterable[RendererSkinAssetRegistryEntry]) -> dict[str, Any]:
+    """Summarize registry entries without inspecting renderer payloads."""
+
+    registry_entries = tuple(entries)
+    status_counts = {status: 0 for status in sorted(SKIN_ASSET_LIFECYCLE_STATUSES)}
+    renderer_target_counts: dict[str, int] = {}
+    review_required_count = 0
+
+    for entry in registry_entries:
+        status_counts[entry.status] = status_counts.get(entry.status, 0) + 1
+        if entry.review_required or entry.status == SkinAssetLifecycleStatus.REVIEW_REQUIRED.value:
+            review_required_count += 1
+        for target in entry.skin_asset.renderer_targets:
+            renderer_target_counts[target] = renderer_target_counts.get(target, 0) + 1
+
+    return {
+        "schema_version": VISUAL_ASSET_CONTRACT_SCHEMA_VERSION,
+        "registry_entry_count": len(registry_entries),
+        "status_counts": status_counts,
+        "ready_count": status_counts.get(SkinAssetLifecycleStatus.READY.value, 0),
+        "review_required_count": review_required_count,
+        "renderer_target_counts": renderer_target_counts,
+        "control_plane_only": True,
+        "payload_loading": False,
+    }
+
+
 def skin_asset_status_label(status: SkinAssetLifecycleStatus | str) -> str:
     return _SKIN_ASSET_STATUS_LABELS.get(_status_value(status), "皮層資產狀態待確認")
 
@@ -212,6 +283,7 @@ _SKIN_ASSET_STATUS_LABELS = {
 __all__ = [
     "CuratedDataAssetReference",
     "RendererSkinAssetReference",
+    "RendererSkinAssetRegistryEntry",
     "SKIN_ASSET_LIFECYCLE_STATUSES",
     "SkinAssetLifecycleStatus",
     "SkinBuildRequest",
@@ -219,4 +291,5 @@ __all__ = [
     "VISUAL_ASSET_CONTRACT_SCHEMA_VERSION",
     "VisualAssetReadyEvent",
     "skin_asset_status_label",
+    "visual_asset_registry_summary",
 ]

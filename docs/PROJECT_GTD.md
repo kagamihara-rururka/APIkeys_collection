@@ -3,6 +3,7 @@
 Last updated: 2026-06-01
 
 ## 目前工作焦點 / Active Focus
+- [x] 2026-06-02 RRKAL Core Visual/Skin Asset Registry contract 已補 registry entry 與 summary：新增 `RendererSkinAssetRegistryEntry` / `visual_asset_registry_summary()`，只登錄 manifest reference、lifecycle、renderer target、review flag 與 control-plane metadata；project maturity renderer row 會輸出空 registry summary，明確表示尚未有實際 renderer asset records，也不讀 renderer payload。
 - [x] 2026-06-01 workspace boundary 已再次收緊：`L:\RRKAL_project` 是唯一 RRKAL active workspace / commit source；`K:` 只作歷史紀錄、舊狀態查詢與必要資料參考，不再主動掃描、治理或寫入。
 - [x] 2026-06-01 RRKAL Core Visual/Skin Asset Registry contract 草案已落地：新增 `api_launcher/visual_asset_contracts.py`，只定義 `SkinBuildRequest`、`SkinBuildResult`、`RendererSkinAssetReference`、`VisualAssetReadyEvent` 與 `SkinAssetLifecycleStatus`；這是 control-plane manifest reference / lifecycle contract，不 import displaytools、visual-compressor、vis_2_dis，不讀 renderer payload。
 - [x] 2026-05-29 recovery lane 已切到 `L:\RRKAL_project`：以 `32e215c` 作乾淨基底，完整 smoke 通過（912 tests / 4 skipped，MVP `download_import_completed` / `row_count=3`），Git metadata 已留在 `L:\RRKAL_project\.git`，舊 `K:\APIkeys_collection` 在本 session 只作唯讀參考。

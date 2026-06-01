@@ -70,8 +70,17 @@ class ProjectMaturityTests(unittest.TestCase):
         self.assertEqual("review", rows["renderer_unreal_simulation"]["display_tone"])
         renderer_metrics = rows["renderer_unreal_simulation"]["metrics"]
         self.assertEqual("api_launcher.visual_asset_contracts", renderer_metrics["visual_skin_asset_contract_schema"])
+        self.assertEqual(
+            "RendererSkinAssetRegistryEntry",
+            renderer_metrics["visual_skin_asset_registry_entry_contract"],
+        )
         self.assertIn("ready", renderer_metrics["skin_asset_lifecycle_statuses"])
         self.assertEqual(7, renderer_metrics["skin_asset_lifecycle_status_count"])
+        empty_registry = renderer_metrics["empty_visual_asset_registry_summary"]
+        self.assertEqual(0, empty_registry["registry_entry_count"])
+        self.assertEqual(0, empty_registry["ready_count"])
+        self.assertTrue(empty_registry["control_plane_only"])
+        self.assertFalse(empty_registry["payload_loading"])
         self.assertTrue(renderer_metrics["control_plane_only"])
         self.assertFalse(renderer_metrics["imports_renderer_projects"])
         self.assertFalse(renderer_metrics["payload_loading"])
