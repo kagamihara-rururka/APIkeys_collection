@@ -1,4 +1,9 @@
 # Agent 接力卡
+## 2026-06-02 06:17 +08:00 Visual/Skin registry persistence row projection
+- 本輪新增 `visual_asset_registry_entry_persistence_record()`，把 `RendererSkinAssetRegistryEntry` 投影成一筆符合 `visual_asset_registry_persistence_schema()` 的扁平 row。`renderer_targets` 與 bounded metadata 會以 JSON 字串保存，metadata 會過濾明顯 `payload` / `secret` / `token` / `api_key` / `.npz` / GPU buffer 類 key。
+- 邊界不變：這仍不寫資料庫、不建表、不做 migration、不發 lifecycle event、不讀 renderer payload，也不 import displaytools / visual-compressor / vis_2_dis。未來 repository layer 若要落地 persistence，應消費此 projection，而不是重新拆欄位。
+- 已驗證：source compile check OK；`py -3 -B -m unittest tests.test_visual_asset_contracts tests.test_project_maturity -v` 通過 25 tests；`--project-maturity-json` 抽查 `visual_asset_registry_entry_persistence_record_contract=visual_asset_registry_entry_persistence_record`；完整 smoke `state\logs\pre_push_smoke_20260602_061359.log` 通過，1065 tests / 4 skipped，MVP demo `download_import_completed` / `row_count=3`；GitHub Actions manual run `26785426976` 通過 Ubuntu、Windows 與 real DB smoke。Code commit：`d59b32f Add visual registry persistence row projection`。
+
 ## 2026-06-02 06:05 +08:00 Visual/Skin registry persistence schema contract
 - 本輪新增 `visual_asset_registry_persistence_schema()` 與 `VisualAssetRegistryColumn`，先把未來 `visual_skin_asset_registry` 的欄位、index、allowed lifecycle status 與 migration guard 做成 machine-readable contract。Project maturity renderer row 也會輸出這份 schema contract。
 - 邊界不變：這是 `schema_contract_only`，不自動建表、不連 SQLite / MySQL、不寫 registry persistence、不自動 lifecycle emission，也不讀 `.npz`、GPU buffer 或 renderer payload。若未來要落地 DB persistence，仍需 OpenSpec / migration guard。

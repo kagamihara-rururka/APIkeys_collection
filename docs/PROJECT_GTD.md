@@ -3,6 +3,7 @@
 Last updated: 2026-06-02
 
 ## 目前工作焦點 / Active Focus
+- [x] 2026-06-02 Visual/Skin registry persistence row projection 已補：新增 `visual_asset_registry_entry_persistence_record()`，可把 registry entry 投影成符合 schema 的扁平 row，`renderer_targets` / bounded metadata 會序列化成 JSON，且會過濾明顯 payload / secret / token metadata；仍不寫 DB。
 - [x] 2026-06-02 Visual/Skin registry persistence schema contract 已補：新增 `visual_asset_registry_persistence_schema()`，定義未來 `visual_skin_asset_registry` 的欄位、index、lifecycle vocabulary 與 migration guard；它明確標示 `schema_contract_only`，不自動建表、不讀 payload、不自動發 event。
 - [x] 2026-06-02 Visual/Skin registry summary display profile 已補：`visual_asset_registry_summary()` 現在會輸出每個 lifecycle status 的 display profile，讓 dashboard / future UI 顯示 status counts 時不用自行維護 status -> icon / tone / label 對照。
 - [x] 2026-06-02 Visual/Skin build result display profile 已補：`SkinBuildResult.to_dict()` 即使沒有 `skin_asset` 也會輸出 lifecycle display profile，讓 failed / review-required build result 可由 UI 顯示後端定義的 tone / label / next_action，而不是前端自行猜測。
