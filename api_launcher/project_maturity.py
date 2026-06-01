@@ -27,6 +27,9 @@ from api_launcher.visual_asset_contracts import (
     visual_asset_registry_sqlite_ddl_preview,
     visual_asset_registry_summary,
 )
+from api_launcher.visual_asset_registry_persistence import (
+    create_visual_asset_registry_table_for_owned_test_database,
+)
 
 
 MATRIX_VERSION = "2026-06-02"
@@ -305,6 +308,9 @@ def _renderer_bridge_metrics() -> dict[str, Any]:
         "visual_asset_registry_persistence_schema_contract": visual_asset_registry_persistence_schema.__name__,
         "visual_asset_registry_entry_persistence_record_contract": visual_asset_registry_entry_persistence_record.__name__,
         "visual_asset_registry_sqlite_ddl_preview_contract": visual_asset_registry_sqlite_ddl_preview.__name__,
+        "visual_asset_registry_owned_test_table_helper_contract": (
+            create_visual_asset_registry_table_for_owned_test_database.__name__
+        ),
         "skin_asset_lifecycle_statuses": sorted(SKIN_ASSET_LIFECYCLE_STATUSES),
         "skin_asset_lifecycle_status_count": len(SKIN_ASSET_LIFECYCLE_STATUSES),
         "visual_asset_registry_persistence_schema": visual_asset_registry_persistence_schema(),

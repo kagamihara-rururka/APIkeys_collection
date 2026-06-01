@@ -1,4 +1,9 @@
 # Agent 接力卡
+## 2026-06-02 06:52 +08:00 Visual/Skin registry owned test table helper
+- 本輪完成 OpenSpec task 2.1：新增 `api_launcher.visual_asset_registry_persistence.create_visual_asset_registry_table_for_owned_test_database()`。helper 必須傳入 `allow_owned_test_database=True`，會先建立 RRKAL owned marker table，再執行 DDL preview statements materialize `visual_skin_asset_registry` table / indexes。
+- 邊界：這不是正式 migration，也不是 user DB persistence。未帶 opt-in 時直接拒絕且不建檔；若 SQLite DB 已有表但沒有 owned marker，也會拒絕，避免誤寫使用者資料庫。helper 不寫 registry row、不讀 renderer payload、不發 ready event、不 import displaytools / visual-compressor / vis_2_dis。
+- 已驗證：focused compile OK；`py -3 -B -m unittest tests.test_visual_asset_registry_persistence tests.test_visual_asset_contracts tests.test_project_maturity -v` 通過 29 tests；`--project-maturity-json` 可見 `visual_asset_registry_owned_test_table_helper_contract=create_visual_asset_registry_table_for_owned_test_database`；完整 smoke `state\logs\pre_push_smoke_20260602_065359.log` 通過，1069 tests / 4 skipped，MVP demo `download_import_completed` / `row_count=3`。下一步若繼續此 OpenSpec，進入 2.2 write/read helper，但仍只能先做 owned temp DB tests。
+
 ## 2026-06-02 06:38 +08:00 Visual/Skin registry persistence dry-run DDL preview
 - 本輪完成 OpenSpec task 1.1-1.3：新增 `visual_asset_registry_sqlite_ddl_preview()`，由 `visual_asset_registry_persistence_schema()` 產生 reviewable SQLite `CREATE TABLE` / `CREATE INDEX` dry-run SQL；project maturity renderer row 會輸出這份 preview contract。
 - 邊界：這不是 DB persistence。helper 不連 SQLite、不建表、不寫檔、不發 ready event、不讀 `.npz` / GPU buffer / renderer payload，也不 import displaytools / visual-compressor / vis_2_dis。renderer maturity 仍維持 `contract_only`。

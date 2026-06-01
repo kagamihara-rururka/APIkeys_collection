@@ -3,6 +3,7 @@
 Last updated: 2026-06-02
 
 ## 目前工作焦點 / Active Focus
+- [x] 2026-06-02 Visual/Skin registry persistence owned test DB 建表 helper 已補：新增 `create_visual_asset_registry_table_for_owned_test_database()`，必須明確傳入 `allow_owned_test_database=True`，會建立 marker table 並拒絕既有非 owned SQLite DB；它只服務 test / migration review，不是正式使用者 DB persistence。
 - [x] 2026-06-02 Visual/Skin registry persistence dry-run DDL preview 已補：新增 `visual_asset_registry_sqlite_ddl_preview()`，會依 `visual_asset_registry_persistence_schema()` 產生可審閱 SQLite DDL，並在 maturity metrics 暴露；它不連 DB、不建表、不寫檔、不自動發 event，renderer row 仍是 `contract_only`。
 - [x] 2026-06-02 Visual/Skin registry persistence OpenSpec 已建立：`openspec/changes/visual-asset-registry-persistence/` 已定義未來 registry persistence 的 schema ownership、migration guard、control-plane-only row、ready-event boundary 與 UI-neutral read payload；這只是實作前契約，尚未建立資料表、尚未接 repository write/read，也不讀 renderer payload。
 - [x] 2026-06-02 OpenSpec workspace boundary drift 已修補：`openspec/specs/development-workflow/spec.md` 的 canonical workspace 從舊 `K:\APIkeys_collection` 更新為 `L:\RRKAL_project`，並明確標示 K 槽只作歷史 / 唯讀參考。

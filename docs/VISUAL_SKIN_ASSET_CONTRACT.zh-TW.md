@@ -74,6 +74,7 @@ flowchart TD
 | `visual_asset_registry_persistence_schema()` | 定義未來 `visual_skin_asset_registry` 的欄位、index、allowed status 與 migration guard。 | 不建立資料表、不連 DB、不自動發 event、不讀 renderer payload。 |
 | `visual_asset_registry_entry_persistence_record()` | 把 registry entry 投影成符合 persistence schema 的扁平 row，並序列化 renderer targets / bounded metadata。 | 不寫 DB、不執行 migration、不保存 payload / secret / token 類 metadata。 |
 | `visual_asset_registry_sqlite_ddl_preview()` | 依據 persistence schema 產生可審閱的 SQLite `CREATE TABLE` / `CREATE INDEX` dry-run SQL。 | 不連 SQLite、不建立資料表、不寫檔、不自動發 event；正式 migration 仍需 explicit guard。 |
+| `create_visual_asset_registry_table_for_owned_test_database()` | 只在明確 `allow_owned_test_database=True` 的 RRKAL owned test SQLite DB 中 materialize registry table 與 marker table。 | 不可作產品 migration；拒絕已有非 owned marker 的 SQLite DB，不寫使用者資料庫、不發 event、不讀 renderer payload。 |
 
 ## Lifecycle 狀態
 
@@ -121,6 +122,7 @@ flowchart TD
 - Registry persistence schema contract 已輸出 `visual_skin_asset_registry` 欄位、index、lifecycle vocabulary 與 migration guard，並明確標示 `schema_contract_only`、不自動建表、不自動發 event。
 - Registry persistence row projection 可把 entry 轉成 schema-aligned flat row，且 bounded metadata 會過濾 payload / secret / token 類 key。
 - Registry persistence SQLite DDL preview 可由 schema contract 產生 dry-run `CREATE TABLE` / `CREATE INDEX` SQL，且不連 DB、不建表、不包含 payload 欄位；project maturity 仍標示 renderer row 為 `contract_only`。
+- Owned test-only table creation helper 需要明確 `allow_owned_test_database=True`；它會建立 RRKAL marker table、materialize registry table/index，並拒絕已有非 owned marker 的 SQLite DB。
 - Contract module 不 import `RRKAL_displaytools`、`rrkal-visual-compressor`、`vis_2_dis`、Taichi、PyQt。
 - Project maturity renderer row 保持 `contract_only` / `🚧`，並輸出 registry contract 與 empty summary。
 
@@ -128,15 +130,15 @@ flowchart TD
 
 - `py -3 -B -m unittest tests.test_visual_asset_contracts tests.test_project_maturity -v`
 - `.\scripts\pre_push_smoke_brief.cmd`
-- Full smoke `state\logs\pre_push_smoke_20260602_064026.log`：1066 tests / 4 skipped，MVP demo `download_import_completed` / `row_count=3`
-- GitHub Actions manual run `26786612078`（DDL preview checkpoint，Ubuntu / Windows / real DB smoke 通過）。
+- Full smoke `state\logs\pre_push_smoke_20260602_065359.log`：1069 tests / 4 skipped，MVP demo `download_import_completed` / `row_count=3`
+- GitHub Actions manual run `26786612078`（DDL preview checkpoint，Ubuntu / Windows / real DB smoke 通過）；owned test table helper checkpoint 的 GitHub Actions 需看本輪後續 run。
 
 ## 尚未實作
 
 這些不是目前已交付功能：
 
 - 真正 visual asset registry persistence。
-- 真正 visual asset registry migration / table creation / repository write-read。
+- 真正 visual asset registry migration / 使用者 DB table creation / repository write-read。
 - skin builder。
 - `RendererSkinAsset` payload reader。
 - `.npz` / tile / GPU buffer inspection。
@@ -150,7 +152,7 @@ flowchart TD
 
 安全的後續切片：
 
-1. 若要真正落地 registry persistence，先由 `visual_asset_registry_sqlite_ddl_preview()` 審閱 migration SQL，再消費 `visual_asset_registry_persistence_schema()` 與 `visual_asset_registry_entry_persistence_record()`，不得讓 repository layer 自行發明欄位或 row shape。
+1. 若要真正落地 registry persistence，先由 `visual_asset_registry_sqlite_ddl_preview()` 審閱 migration SQL，再消費 `visual_asset_registry_persistence_schema()` 與 `visual_asset_registry_entry_persistence_record()`，不得讓 repository layer 自行發明欄位或 row shape；正式 DB 路徑不能直接沿用 owned test helper 的 opt-in。
 2. 規格化何時由 registry persistence 或 explicit workflow 呼叫 `log_visual_asset_ready_registry_entry()`；不得在 import、普通 serialization、table write 或 lifecycle status set 時自動發 event。
 3. 與 displaytools / compressor 透過 `L:\AGENT_EXCHANGE` 或正式 OpenSpec 對齊欄位，不直接 import 對方 repo。
 4. 若下游需要更多欄位，先版本化 projection schema，不要讓 downstream 直接依賴 `entry.to_dict()` 的完整內部形狀。
