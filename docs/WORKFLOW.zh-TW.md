@@ -1,6 +1,6 @@
 # RRKAL Workflow
 
-最後更新：2026-05-31
+最後更新：2026-06-01
 
 這份文件定義 RRKAL / `APIkeys_collection` 的日常開發、Codex Cloud 接手、對話備份與 checkpoint 規則。它是工作流契約，不取代 `AGENT_HANDOFF.zh-TW.md`、`PROJECT_GTD.md` 或各專題文件。
 
@@ -54,13 +54,13 @@ Get-ChildItem -LiteralPath L:\AGENT_EXCHANGE\inbox -Filter '*_RRKAL_project.md'
 | 位置 | 權限 |
 | --- | --- |
 | `L:\RRKAL_project` | RRKAL 目前主工作區，可讀寫、commit、push。 |
-| `K:\APIkeys_collection` | 舊工作區，本 session 唯讀參考。 |
+| `K:\APIkeys_collection` | 舊工作區；只作歷史紀錄、舊狀態查詢與必要資料參考，不再作 active workspace，也不主動掃描或治理。 |
 | `L:` 其他資料夾 | 其他專案或共享資料，除非使用者明確授權，否則唯讀。 |
-| `K:\CODE_KM` | 其他專案，RRKAL 工作中唯讀。 |
+| `K:\CODE_KM` | 其他專案與歷史參考，RRKAL 工作中唯讀；不要為 RRKAL checkpoint 寫入或治理。 |
 | `L:\AGENT_EXCHANGE` | 跨 agent 意見交換區，不上 GitHub；RRKAL 主寫可讀收信檔並在相關 entry 的 `Responses` 區塊回覆，不可把原始信件複製進公開 repo。 |
 | `C:\Users\lyn59\Documents\Codex\RRKAL_local_test\...` | 可作 GUI / smoke / showcase 本地 clone 測試；修補要回補 L 槽。 |
 
-若 L 槽遇到 git metadata、pycache、SQLite lock、WinError 5 或雲端同步延遲，先重試或改用本地 clone 驗證；不要直接破壞 `.git` 或覆蓋工作區。
+若 L 槽遇到 git metadata、pycache、SQLite lock、WinError 5 或雲端同步延遲，先重試或改用本地 clone 驗證；不要直接破壞 `.git`、覆蓋工作區，或退回 K 槽當新主工作區。
 
 ## 開發節奏
 

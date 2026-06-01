@@ -1,8 +1,9 @@
 ﻿# RuRuKa Asset Launcher GTD
 
-Last updated: 2026-05-31
+Last updated: 2026-06-01
 
 ## 目前工作焦點 / Active Focus
+- [x] 2026-06-01 workspace boundary 已再次收緊：`L:\RRKAL_project` 是唯一 RRKAL active workspace / commit source；`K:` 只作歷史紀錄、舊狀態查詢與必要資料參考，不再主動掃描、治理或寫入。
 - [x] 2026-05-29 recovery lane 已切到 `L:\RRKAL_project`：以 `32e215c` 作乾淨基底，完整 smoke 通過（912 tests / 4 skipped，MVP `download_import_completed` / `row_count=3`），Git metadata 已留在 `L:\RRKAL_project\.git`，舊 `K:\APIkeys_collection` 在本 session 只作唯讀參考。
 - [x] GitHub owner 已更新為 `Kagamihara-Ruruka`：`origin`、heartbeat repo slug、manual import docs URL、repo skill 與 active GitHub Actions / workflow 指令已改用 `Kagamihara-Ruruka/APIkeys_collection`；歷史 development log 保留舊 owner 作脈絡。
 - [x] Codex Cloud / 新 thread 接手工作流已初始化：新增 `docs/CODEX_CLOUD_HANDOFF.zh-TW.md` 與 `docs/WORKFLOW.zh-TW.md`，明確區分公開 handoff/workflow/decision/log 與 private `dialogue-save` raw transcript 備份；本公開 repo 不保存 raw transcript。

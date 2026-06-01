@@ -1,6 +1,6 @@
 # 文件索引與整理規則
 
-最後更新：2026-05-31
+最後更新：2026-06-01
 
 這份文件是「文件地圖」。它不是要把其他文件降級，而是要讓下一位 Agent 或組員知道每份文件負責什麼、該先讀哪裡、改完功能後要回頭更新哪幾份文件。
 
@@ -74,7 +74,7 @@ RRKAL 本身是資料資產治理專案，專案文件也可以用資料治理�
 | 文件 | 角色 | 何時更新 |
 | --- | --- | --- |
 | `AGENT_HANDOFF.zh-TW.md` | 跨機器/跨 Agent 接力卡，記錄最新狀態、雷點與下一步。 | 每次穩定節點、commit/push 前後、跨 Agent 前更新。 |
-| `AGENT_START_HERE.zh-TW.md` | Agent 最短入口地圖，定義權威順序、目前主線、不要做什麼、K 槽參考邊界。 | 文檔分層、工作流或主線方向改變時更新；平常保持短。 |
+| `AGENT_START_HERE.zh-TW.md` | Agent 最短入口地圖，定義權威順序、目前主線、不要做什麼、L/K 工作區邊界。 | 文檔分層、工作流或主線方向改變時更新；平常保持短。 |
 | `PROJECT_GTD.md` | 進度主索引，列出每個產品區塊目前狀態與下一步。 | 每完成或改變一個功能閉環後更新。 |
 | `PROJECT_MATURITY_MATRIX.zh-TW.md` | 整體進度與成熟度口徑，定義 `deliverable_100`、`implemented_bounded`、`partial_bounded`、`contract_only`、`planned_not_started`、`hardening_needed`。 | 問「整體進度多少」、新增可交付 closure、或 source/adapter/renderer/UI 成熟度改變時更新。 |
 | `DEVELOPMENT_LOG.zh-TW.md` | 開發日誌，從 2026-05-21 起用流水帳記錄 push / CI run；最近日期與同日內最新時間放最上方，成功 run 用 `**CHECKPOINT**` 標醒目，失敗 run 保留為 `**CI 失敗**`，每筆都要有 `開發階段` 與中文說明。 | 每次完成並推送一個版本 checkpoint 後追加，不重寫舊紀錄；需要回補時可用 GitHub Actions run list 反推。 |
@@ -97,7 +97,7 @@ RRKAL 本身是資料資產治理專案，專案文件也可以用資料治理�
 | `DATABASE_PORTAL_INTAKE.zh-TW.md` | 組員收集資料入口網站的表格與規則。 | intake 欄位、promotion 流程、Notion 同步規則改變時更新。 |
 | `DEVELOPMENT_WORKFLOW_OPEN_SPEC.zh-TW.md` | OpenSpec / Spectra / Qt Designer 開發流程，定義中大型改動的規格化習慣。 | 開發流程、OpenSpec 工具、Spectra GUI、Qt/PySide6 工具位置或規格門檻改變時更新。 |
 | `CODEX_CLOUD_HANDOFF.zh-TW.md` | Codex Cloud / 新 thread 接手規則，定義公開 handoff 與 private raw transcript 備份邊界。 | 本地 Codex 不穩、Cloud 接手、private `dialogue-save` 路徑或跨專案交接規則改變時更新。 |
-| `WORKFLOW.zh-TW.md` | RRKAL 日常開發 workflow，整合開工、checkpoint、docs drift、對話備份、L/K 槽邊界與 final report checklist。 | 開發節奏、checkpoint 規則、workspace 權限、對話備份或 CI/smoke 流程改變時更新。 |
+| `WORKFLOW.zh-TW.md` | RRKAL 日常開發 workflow，整合開工、checkpoint、docs drift、對話備份、L/K 槽邊界與 final report checklist；K 槽只作歷史/查詢參考。 | 開發節奏、checkpoint 規則、workspace 權限、對話備份或 CI/smoke 流程改變時更新。 |
 | `WORKSPACE_LAYOUT.zh-TW.md` | 工作區分類、檔案責任、`.py` 拆分優先順序、路徑規則，以及 `tem/` 本機暫存區的使用規則。 | 新增資料夾、搬檔、拆大型模組、改 runtime/暫存目錄時更新。 |
 | `USER_GUIDE.zh-TW.md` | 使用者操作指南，保留較完整背景、操作說明與開發者 CLI 指令索引。 | UI/CLI 操作、選單名稱、使用流程改變時更新；Demo 快速手冊同步看 `USER_MANUAL.zh-TW.md`。 |
 | `WEB_PREVIEW_UIUX.zh-TW.md` | HTML/CSS Web Preview 的定位、啟動方式與 Tk/Qt/QSS 對照規則。 | Web Preview endpoint、UIUX 對照流程、CSS/QSS token 或瀏覽器驗證方式改變時更新。 |

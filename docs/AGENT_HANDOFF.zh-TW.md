@@ -1,4 +1,9 @@
 # Agent 接力卡
+## 2026-06-01 21:43 +08:00 Workspace boundary correction
+- 使用者最新明確指令：`L:\RRKAL_project` 是 RRKAL active workspace 與提交來源；`K:` 只作歷史紀錄、舊狀態查詢與必要資料參考。
+- 後續 RRKAL 開發不要主動掃全 K 槽、不要治理 K 槽文件或資料、不要把 K 槽當 fallback 工作區；需要查舊狀態時才 read-only 查詢。
+- 交換區檢查：`L:\AGENT_EXCHANGE\inbox\*_RRKAL_project.md` 目前沒有新的相關 `Status: new` entry 需要回覆。
+- 本輪是 docs drift 修補，不改產品碼；下一個安全行動是回到 RRKAL Core control-plane 主線，優先考慮 Visual/Skin Asset Registry contract 草案，且不得 import displaytools / visual-compressor / vis_2_dis 或讀 renderer payload。
 ## 2026-05-31 15:44 Web asset initials raw-id fallback guard
 - 本輪把 Web Preview 的 `assetInitials()` 收斂為只使用 `asset.display_name`；缺顯示名稱時使用中性 `RR`，不再從 `provider_id` / `asset_id` 取可見 initials。
 - 保持邊界：不改 asset card route key、button action、search/debug/provenance、provider display fallback 或 crawler/download/import 行為；這只是 Web avatar/initials 的 visible fallback hygiene。

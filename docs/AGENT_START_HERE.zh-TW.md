@@ -1,6 +1,6 @@
 # Agent Start Here
 
-最後更新：2026-05-31
+最後更新：2026-06-01
 
 這份文件是給接手 RRKAL / `APIkeys_collection` 的 agent 的最短入口地圖。它不取代詳細規格，只負責降低啟動時的判斷成本。
 
@@ -16,13 +16,13 @@
 2. Crawler 主線優先處理來源介面類型：STAC、CKAN、Socrata、OGC、CMR、ERDDAP、HTML file index、unknown fallback。
 3. 來源介面類型只回答「資料在哪裡、怎麼列資源」；CSV、JSON、NetCDF、GeoTIFF、ZIP 等內容格式要由 content detector / parser registry 另行處理。
 4. Tk 仍是目前可用 UI；未來 Qt 只是換皮，後端服務、crawler asset、bounds schema、capability contract 必須保持可重用。
-5. 本 session 的主工作區是 `L:\RRKAL_project`，也是提交來源；舊 `K:\APIkeys_collection` 只作唯讀參考。`L:` 是多專案共用雲端碟，除 `L:\RRKAL_project` 外其他資料夾都視為唯讀。GUI/showcase/full smoke 可 clone 到本地磁碟測試，通過後回補 `L:\RRKAL_project` 再 commit/push。
+5. 本 session 的主工作區是 `L:\RRKAL_project`，也是提交來源；`K:` 不再是 RRKAL active workspace，只作歷史紀錄、舊狀態查詢與必要資料參考。不要在日常 RRKAL 工作中主動治理、掃描或寫入 K 槽。`L:` 是多專案共用雲端碟，除 `L:\RRKAL_project` 外其他資料夾都視為唯讀。GUI/showcase/full smoke 可 clone 到本地磁碟測試，通過後回補 `L:\RRKAL_project` 再 commit/push。
 6. 若使用者問「整體進度多少」，不要回單一百分比；先讀 `docs/PROJECT_MATURITY_MATRIX.zh-TW.md` 或跑 `--project-maturity-json`，用成熟度矩陣回答。
 
 ## 不要做什麼
 
 - 不要把 NASA、NOAA、World Bank 這種機構名稱寫成 crawler 類別；先判斷來源介面類型。
-- 不要把 K 槽教材、CODE_KM、Sciverse 或其他參考範例直接搬成產品碼；先抽概念，做成小型、可測、可審核的 RRKAL module。
+- 不要把 K 槽歷史紀錄、教材、CODE_KM、Sciverse 或其他參考範例直接搬成產品碼；需要時只做 read-only 查證，再抽概念成小型、可測、可審核的 RRKAL module。
 - 不要把 source detector 判斷成功當成可直接下載或可正式 promotion；必須先產生 local source draft，再跑 crawler audit。
 - 不要讓 crawler 直接寫資料庫；維持 `download -> manifest -> import` 邊界。
 - 不要新增巨型 UI 檔案或把後端邏輯塞回 Tk；UI 應消費 service / form spec / capability contract。
@@ -63,9 +63,9 @@
 - push 後必須看 GitHub Actions：`gh run list --repo Kagamihara-Ruruka/APIkeys_collection --limit 5`，再用 `gh run watch RUN_ID --repo Kagamihara-Ruruka/APIkeys_collection --exit-status` 等遠端 checkpoint 確認。
 - 每個 checkpoint 結束前做 docs drift check：本輪是否改了 UI/Web/Tk/CLI、crawler/source pattern/download/import/adapter review、功能定位、展示/experimental surface、K 槽/本地 clone/GitHub/CI 工作流，或讓 handoff/GTD/log/index/user docs 任一敘述變成錯誤。
 
-## K 槽參考邊界
+## K 槽歷史 / 查詢邊界
 
-K 槽教材與 CODE_KM 是概念樣本庫，不是產品碼來源。
+K 槽現在是歷史紀錄與資料查詢區，不是 RRKAL active workspace，也不是本輪主動治理範圍。只有在需要查舊狀態、舊教材、舊資料樣本或 CODE_KM 參考時才讀；不要掃全 K 槽找任務，也不要寫入 K 槽。
 
 - 爬蟲教材：抽 HTTP 探測、HTML 連結解析、Scrapy 分層、rate limit、錯誤分類、fixture 測試。
 - CODE_KM：抽 provenance、checksum、pipeline run state、rights/review gate、local metadata index。

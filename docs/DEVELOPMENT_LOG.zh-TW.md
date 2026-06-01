@@ -1,6 +1,6 @@
 # 開發日誌
 
-最後更新：2026-05-31
+最後更新：2026-06-01
 
 這份文件從 2026-05-21 起持續記錄開發歷史，並已依 GitHub Actions push run 反推回補 2026-05-17 以後的流水帳。它不是取代 `PROJECT_GTD.md` 或 `AGENT_HANDOFF.zh-TW.md`：GTD 管目前進度與下一步，handoff 管接力狀態，開發日誌管「每個版本怎麼走到現在、哪個點可當 checkpoint、還有什麼風險」。
 
@@ -14,6 +14,12 @@
 - 每筆使用表格欄位：`時間`、`開發階段`、`標記`、`SHA`、`Run`、`原始標題`、`中文說明`。
 - `開發階段` 是粗粒度階段標籤，用來讓人一眼分辨當前工作屬於 `MVP Demo Closure`、`MVP Hardening`、`Database / Repair`、`Discovery / Crawler`、`Docs / Workflow` 等哪一段；新 checkpoint 必須填寫，不要只藏在中文說明裡。
 - 日期區塊與同日內時間都倒序，讓最近期 checkpoint 一打開就能看到。
+
+### 2026-06-01
+
+| 時間 | 階段 | 狀態 | SHA | Run | Commit | 變更與驗證 |
+| --- | --- | --- | --- | --- | --- | --- |
+| 21:43 | Docs / Workflow | **LOCAL DOCS** | `pending` | `not needed` | pending | 使用者明確收緊工作區邊界：`L:\RRKAL_project` 是 RRKAL active workspace / commit source；`K:` 只作歷史紀錄、舊狀態查詢與必要資料參考，不再主動掃描、治理或寫入。本輪同步 `AGENT_START_HERE`、`WORKFLOW`、`DOCS_INDEX`、`PROJECT_GTD` 與 `AGENT_HANDOFF`；交換區檢查無新的 RRKAL `Status: new` entry。這是 docs drift 修補，不改產品碼、Web/Tk、crawler、download/import 或 credential flow。 |
 
 ### 2026-05-31
 
