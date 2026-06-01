@@ -1,4 +1,9 @@
 # Agent 接力卡
+## 2026-06-02 05:42 +08:00 Visual/Skin build result display profile
+- 本輪讓 `SkinBuildResult.to_dict()` 在沒有 `skin_asset` 時也輸出 `lifecycle_status_display_profile`。這讓 failed / review-required build result 可以直接交給 UI 呈現 tone / label / next_action，不需要 Tk/Web/Qt 自己依狀態分支判斷。
+- 邊界不變：這不是 builder 執行、不是 renderer integration、不是 payload reader；它只是 control-plane result payload 的顯示契約。
+- 已驗證：source compile check OK；`py -3 -B -m unittest tests.test_visual_asset_contracts tests.test_project_maturity -v` 通過 23 tests；完整 smoke `state\logs\pre_push_smoke_20260602_053645.log` 通過，1063 tests / 4 skipped，MVP demo `download_import_completed` / `row_count=3`；GitHub Actions manual run `26783664461` 通過 Ubuntu、Windows 與 real DB smoke。Code commit：`b996203 Include display profile in skin build results`。
+
 ## 2026-06-02 05:34 +08:00 Visual/Skin lifecycle display profile
 - 本輪新增 `skin_asset_status_display_profile()`，把 Visual/Skin lifecycle status 轉成 UI-neutral payload：`status_icon`、`display_tone`、`display_label`、`next_action`、`is_ready`、`is_terminal`、`review_required`、`construction`。`planned` / `building` / `review_required` 會明確給施工中或 review 類顯示狀態。
 - 邊界不變：這只是 control-plane display contract，讓 Tk/Web/未來 Qt 不需要自己推論狀態；它不讀 renderer payload、不 import displaytools / visual-compressor / vis_2_dis，也不代表 renderer/skin builder 已落地。

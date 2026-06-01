@@ -61,7 +61,7 @@ flowchart TD
 | `CuratedDataAssetReference` | 指向 RRKAL 已整理資料資產，保存 curated id、dataset uid、provider、manifest path、checksum。 | 不打開 raw payload，不重新匯入資料。 |
 | `SkinBuildRequest` | 描述外部 builder 應建立什麼 skin asset、目標 renderer、profile、bounds signature、review flag。 | 不排程真正 builder，不做壓縮或 renderer 操作。 |
 | `RendererSkinAssetReference` | 指向 renderer-ready skin manifest，保存 skin id、source request id、source curated asset id、manifest path、status、targets、checksum。 | 不讀 `.npz`、tile、GPU buffer 或 renderer project。 |
-| `SkinBuildResult` | 記錄一次 build request 的結果、warning、review_required、可選 skin reference。 | 不代表 RRKAL Core 已經建出 payload。 |
+| `SkinBuildResult` | 記錄一次 build request 的結果、warning、review_required、可選 skin reference，並在沒有 skin asset 時仍輸出 lifecycle display profile。 | 不代表 RRKAL Core 已經建出 payload。 |
 | `VisualAssetReadyEvent` | 當某個 skin reference 可供下游消費時，輸出 structured event。 | 不呼叫 renderer，不直接載入 renderer。 |
 | `RendererSkinAssetRegistryEntry` | 登錄一筆 renderer-ready manifest reference，串接 skin asset、source request、latest build result、review flag、metadata。 | 不做 database persistence，不讀 renderer payload。 |
 | `visual_asset_registry_summary()` | 彙總 registry entries 的 status count、ready count、review count、renderer target count。 | 不掃 manifest 內容，不做 payload health check。 |
@@ -113,6 +113,7 @@ flowchart TD
 - Ready-event log writer 只在顯式呼叫時寫入 `visual_asset_ready` event，並使用同一份 bounded context。
 - Registry-entry ready-event writer 只接受 `ready` entry，會先經過 ready-event factory，再寫入 bounded event log。
 - Lifecycle display profile 會把 `planned`、`building`、`review_required` 標成施工中 / review 類 tone，讓 Tk / Web / 未來 Qt 直接消費後端顯示契約。
+- `SkinBuildResult` 即使沒有 `skin_asset`，也會輸出 lifecycle display profile，讓 failed / review-required build result 可被 UI 安全顯示。
 - Contract module 不 import `RRKAL_displaytools`、`rrkal-visual-compressor`、`vis_2_dis`、Taichi、PyQt。
 - Project maturity renderer row 保持 `contract_only` / `🚧`，並輸出 registry contract 與 empty summary。
 
