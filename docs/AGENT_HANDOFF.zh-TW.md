@@ -1,4 +1,9 @@
 # Agent 接力卡
+## 2026-06-02 05:15 +08:00 Visual/Skin registry-entry ready-event writer
+- 本輪新增 `api_launcher.visual_asset_event_logging.log_visual_asset_ready_registry_entry()`，讓未來 registry persistence 或 explicit workflow 可用一個 helper 將 `ready` `RendererSkinAssetRegistryEntry` 轉成 `VisualAssetReadyEvent`，再透過同一份 bounded writer 寫入 `visual_asset_ready` event。
+- 邊界不變：helper 只接受 `ready` entry，非 `ready` / review / failed entry 會被 ready-event factory 拒絕；它不接 registry persistence、不訂閱 lifecycle、不在 import 時寫 log、不 import displaytools / visual-compressor / vis_2_dis，也不讀 `.npz` 或 renderer payload。
+- 已驗證：source compile check OK；`py -3 -B -m unittest tests.test_visual_asset_event_logging tests.test_project_maturity -v` 通過 10 tests；`--project-maturity-json` 抽查 `visual_asset_ready_registry_entry_log_writer_contract=log_visual_asset_ready_registry_entry`；完整 smoke `state\logs\pre_push_smoke_20260602_051514.log` 通過，1061 tests / 4 skipped，MVP demo `download_import_completed` / `row_count=3`；GitHub Actions manual run `26782746568` 通過 Ubuntu、Windows 與 real DB smoke。Code commit：`5fb7a9e Add registry entry visual asset event logger`。
+
 ## 2026-06-02 05:06 +08:00 Visual/Skin ready-event explicit writer
 - 本輪新增 `api_launcher.visual_asset_event_logging.log_visual_asset_ready_event()`，用上一輪的 `visual_asset_ready_event_log_context()` 顯式寫入 `visual_asset_ready` event。helper 支援 `log_event_func` 注入與 `log_path`，所以測試與未來 workflow 可以控制寫入位置。
 - 邊界：這不是自動 lifecycle emission，不在 import 時寫 log，不接 registry persistence，不 import displaytools / visual-compressor / vis_2_dis，不讀 renderer payload；event context 仍只含 bounded manifest reference 與白名單 metadata。

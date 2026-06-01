@@ -150,7 +150,7 @@ flowchart TD
 | Downloading | `api_launcher/downloads/*` | job queue、HTTP adapter、staging、manifest repair、transfer tools。 |
 | Import / curation | `api_launcher/importers/*` | CSV/JSON/archive raw -> curated SQLite。 |
 | Data store | `api_launcher/data_store_connections.py`, `database_self_check.py`, `database_repair.py` | SQLite/MySQL/PostgreSQL profile、self-check、repair guard。 |
-| Renderer bridge | `renderer_contracts.py`, `visual_asset_contracts.py`, `visual_asset_event_logging.py`, `tile_manifests.py`, `rendering_profiles.py`, `render_effects.py`, `simulation_bridge.py`, `unreal_bridge.py` | dataset 到 renderer/cache/tile/simulation/skin asset reference、manifest projection、ready event、bounded event-log context 與顯式 event writer 的 contract；不在 Core 讀 renderer payload，也不直接呼叫下游 renderer。 |
+| Renderer bridge | `renderer_contracts.py`, `visual_asset_contracts.py`, `visual_asset_event_logging.py`, `tile_manifests.py`, `rendering_profiles.py`, `render_effects.py`, `simulation_bridge.py`, `unreal_bridge.py` | dataset 到 renderer/cache/tile/simulation/skin asset reference、manifest projection、ready event、bounded event-log context、顯式 event writer 與 registry-entry writer 的 contract；不在 Core 讀 renderer payload，也不直接呼叫下游 renderer。 |
 | Tests | `tests/` | 保護 catalog、crawler、download、import、registry、renderer、UI 行為。 |
 
 ## 重要邊界
