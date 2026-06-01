@@ -3,6 +3,7 @@
 Last updated: 2026-06-02
 
 ## 目前工作焦點 / Active Focus
+- [x] 2026-06-02 Visual/Skin registry summary display profile 已補：`visual_asset_registry_summary()` 現在會輸出每個 lifecycle status 的 display profile，讓 dashboard / future UI 顯示 status counts 時不用自行維護 status -> icon / tone / label 對照。
 - [x] 2026-06-02 Visual/Skin build result display profile 已補：`SkinBuildResult.to_dict()` 即使沒有 `skin_asset` 也會輸出 lifecycle display profile，讓 failed / review-required build result 可由 UI 顯示後端定義的 tone / label / next_action，而不是前端自行猜測。
 - [x] 2026-06-02 Visual/Skin lifecycle display profile 已補 UI-neutral 顯示契約：新增 `skin_asset_status_display_profile()`，讓 `planned` / `building` / `review_required` 等狀態可輸出 `🚧`、tone、label、next_action 與 readiness flags；Tk/Web/未來 Qt 不需要自行推論施工中狀態，也不能把 contract-only renderer 能力顯示成已交付。
 - [x] 2026-06-02 Visual/Skin registry-entry ready-event writer 已補顯式一鍵路徑：新增 `api_launcher.visual_asset_event_logging.log_visual_asset_ready_registry_entry()`，會把 `ready` `RendererSkinAssetRegistryEntry` 轉成 `VisualAssetReadyEvent` 後寫入 bounded `visual_asset_ready` event；它拒絕非 `ready` entry，不接 registry persistence，不自動 lifecycle emission，也不讀 renderer payload。

@@ -1,4 +1,9 @@
 # Agent 接力卡
+## 2026-06-02 05:50 +08:00 Visual/Skin registry summary display profile
+- 本輪讓 `visual_asset_registry_summary()` 在 `status_counts` 旁輸出 `status_display_profiles`。Dashboard / future UI 可以直接用後端提供的 status icon / tone / label / next_action 呈現 lifecycle count，不需要自己維護 status 對照表。
+- 邊界不變：summary 仍只彙總 registry control-plane rows，不掃 manifest、不讀 `.npz`、不做 payload health check，也不 import displaytools / visual-compressor / vis_2_dis。
+- 已驗證：source compile check OK；`py -3 -B -m unittest tests.test_visual_asset_contracts tests.test_project_maturity -v` 通過 23 tests；`--project-maturity-json` 抽查 empty registry summary 會輸出 `status_display_profiles`；完整 smoke `state\logs\pre_push_smoke_20260602_054647.log` 通過，1063 tests / 4 skipped，MVP demo `download_import_completed` / `row_count=3`；GitHub Actions manual run `26784156831` 通過 Ubuntu、Windows 與 real DB smoke。Code commit：`8f5276f Include display profiles in visual registry summary`。
+
 ## 2026-06-02 05:42 +08:00 Visual/Skin build result display profile
 - 本輪讓 `SkinBuildResult.to_dict()` 在沒有 `skin_asset` 時也輸出 `lifecycle_status_display_profile`。這讓 failed / review-required build result 可以直接交給 UI 呈現 tone / label / next_action，不需要 Tk/Web/Qt 自己依狀態分支判斷。
 - 邊界不變：這不是 builder 執行、不是 renderer integration、不是 payload reader；它只是 control-plane result payload 的顯示契約。

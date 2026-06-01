@@ -64,7 +64,7 @@ flowchart TD
 | `SkinBuildResult` | 記錄一次 build request 的結果、warning、review_required、可選 skin reference，並在沒有 skin asset 時仍輸出 lifecycle display profile。 | 不代表 RRKAL Core 已經建出 payload。 |
 | `VisualAssetReadyEvent` | 當某個 skin reference 可供下游消費時，輸出 structured event。 | 不呼叫 renderer，不直接載入 renderer。 |
 | `RendererSkinAssetRegistryEntry` | 登錄一筆 renderer-ready manifest reference，串接 skin asset、source request、latest build result、review flag、metadata。 | 不做 database persistence，不讀 renderer payload。 |
-| `visual_asset_registry_summary()` | 彙總 registry entries 的 status count、ready count、review count、renderer target count。 | 不掃 manifest 內容，不做 payload health check。 |
+| `visual_asset_registry_summary()` | 彙總 registry entries 的 status count、ready count、review count、renderer target count，並輸出每個 lifecycle status 的 display profile。 | 不掃 manifest 內容，不做 payload health check。 |
 | `renderer_skin_asset_manifest_projection()` | 把 registry entry 投影成 compact cross-project manifest reference，給 event log、displaytools 或 future builder 讀取。 | 不輸出完整 source request internals，不讀或嵌入 renderer payload。 |
 | `visual_asset_ready_event_from_registry_entry()` | 從 `ready` registry entry 產生 `VisualAssetReadyEvent`，自動帶入 source request lineage 與 registry metadata。 | 不對非 `ready` asset 發 ready event，不寫入 runtime event log。 |
 | `visual_asset_ready_event_log_context()` | 把 `VisualAssetReadyEvent` 投影成 bounded event-log context，白名單輸出 manifest reference、lineage、status、renderer targets 與 safety flags。 | 不直接呼叫 `log_event()`，不輸出任意 metadata、secret、payload bytes 或 renderer internals。 |
@@ -106,6 +106,7 @@ flowchart TD
 - `skin_asset_status_label()` 的 UI-neutral display label。
 - Registry entry 不輸出 payload bytes、不讀 `.npz`。
 - Registry summary 的 lifecycle / renderer target / review count。
+- Registry summary 會輸出 status display profiles，讓 dashboard 不必自行把 status count 轉成 UI 文案。
 - Registry entry lineage mismatch fail-fast。
 - Compact manifest projection 只輸出 manifest reference、lineage、renderer target、status 與 safety flags。
 - Ready-event factory 只接受 `ready` registry entry，避免對 review / failed asset 發出可消費事件。
