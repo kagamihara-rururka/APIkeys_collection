@@ -1,4 +1,9 @@
 # Agent 接力卡
+## 2026-06-02 05:34 +08:00 Visual/Skin lifecycle display profile
+- 本輪新增 `skin_asset_status_display_profile()`，把 Visual/Skin lifecycle status 轉成 UI-neutral payload：`status_icon`、`display_tone`、`display_label`、`next_action`、`is_ready`、`is_terminal`、`review_required`、`construction`。`planned` / `building` / `review_required` 會明確給施工中或 review 類顯示狀態。
+- 邊界不變：這只是 control-plane display contract，讓 Tk/Web/未來 Qt 不需要自己推論狀態；它不讀 renderer payload、不 import displaytools / visual-compressor / vis_2_dis，也不代表 renderer/skin builder 已落地。
+- 已驗證：source compile check OK；`py -3 -B -m unittest tests.test_visual_asset_contracts tests.test_project_maturity -v` 通過 22 tests；`--project-maturity-json` 抽查 `skin_asset_lifecycle_display_profile_contract=skin_asset_status_display_profile`；完整 smoke `state\logs\pre_push_smoke_20260602_052828.log` 通過，1062 tests / 4 skipped，MVP demo `download_import_completed` / `row_count=3`；GitHub Actions manual run `26783277810` 通過 Ubuntu、Windows 與 real DB smoke。Code commit：`3f00721 Add visual asset lifecycle display profile`。
+
 ## 2026-06-02 05:15 +08:00 Visual/Skin registry-entry ready-event writer
 - 本輪新增 `api_launcher.visual_asset_event_logging.log_visual_asset_ready_registry_entry()`，讓未來 registry persistence 或 explicit workflow 可用一個 helper 將 `ready` `RendererSkinAssetRegistryEntry` 轉成 `VisualAssetReadyEvent`，再透過同一份 bounded writer 寫入 `visual_asset_ready` event。
 - 邊界不變：helper 只接受 `ready` entry，非 `ready` / review / failed entry 會被 ready-event factory 拒絕；它不接 registry persistence、不訂閱 lifecycle、不在 import 時寫 log、不 import displaytools / visual-compressor / vis_2_dis，也不讀 `.npz` 或 renderer payload。

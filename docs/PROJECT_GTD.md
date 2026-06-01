@@ -3,6 +3,7 @@
 Last updated: 2026-06-02
 
 ## 目前工作焦點 / Active Focus
+- [x] 2026-06-02 Visual/Skin lifecycle display profile 已補 UI-neutral 顯示契約：新增 `skin_asset_status_display_profile()`，讓 `planned` / `building` / `review_required` 等狀態可輸出 `🚧`、tone、label、next_action 與 readiness flags；Tk/Web/未來 Qt 不需要自行推論施工中狀態，也不能把 contract-only renderer 能力顯示成已交付。
 - [x] 2026-06-02 Visual/Skin registry-entry ready-event writer 已補顯式一鍵路徑：新增 `api_launcher.visual_asset_event_logging.log_visual_asset_ready_registry_entry()`，會把 `ready` `RendererSkinAssetRegistryEntry` 轉成 `VisualAssetReadyEvent` 後寫入 bounded `visual_asset_ready` event；它拒絕非 `ready` entry，不接 registry persistence，不自動 lifecycle emission，也不讀 renderer payload。
 - [x] 2026-06-02 Visual/Skin ready-event writer 已補顯式 event log adapter：新增 `api_launcher.visual_asset_event_logging.log_visual_asset_ready_event()`，可把 `VisualAssetReadyEvent` 寫成 `visual_asset_ready` JSONL event，並支援 injected logger 測試；它只使用 bounded context，不在 import 時寫 log，也尚未接 registry persistence 或自動 lifecycle emission。
 - [x] 2026-06-02 Visual/Skin ready-event log context 已補 bounded projection：新增 `visual_asset_ready_event_log_context()`，把 `VisualAssetReadyEvent` 投影成可寫入 event log 的安全摘要；它只白名單輸出 manifest reference、lineage、status、renderer targets、safety flags 與 registry projection metadata，不輸出任意 metadata、secret、payload bytes 或 renderer internals，也尚未實際呼叫 `log_event()`。

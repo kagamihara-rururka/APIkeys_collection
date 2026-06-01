@@ -70,6 +70,7 @@ flowchart TD
 | `visual_asset_ready_event_log_context()` | 把 `VisualAssetReadyEvent` 投影成 bounded event-log context，白名單輸出 manifest reference、lineage、status、renderer targets 與 safety flags。 | 不直接呼叫 `log_event()`，不輸出任意 metadata、secret、payload bytes 或 renderer internals。 |
 | `log_visual_asset_ready_event()` | 顯式把 `VisualAssetReadyEvent` 寫入 RRKAL event log，使用 bounded context 且支援注入 test logger。 | 不在 import 時寫 log，不自動訂閱 lifecycle，不寫任意 metadata 或 renderer payload。 |
 | `log_visual_asset_ready_registry_entry()` | 從 `ready` registry entry 建立 ready event，再用同一個 bounded writer 寫入 RRKAL event log。 | 不接受非 `ready` entry，不接 registry persistence，不自動監聽 lifecycle，也不讀 renderer payload。 |
+| `skin_asset_status_display_profile()` | 把 lifecycle status 轉成 UI-neutral `status_icon`、`display_tone`、`display_label`、`next_action` 與 readiness flags。 | 前端不需要自己推論 planned/building/review_required 是否施工中，也不代表 renderer payload 已實作。 |
 
 ## Lifecycle 狀態
 
@@ -111,6 +112,7 @@ flowchart TD
 - Ready-event log context 只輸出 bounded manifest reference 與白名單 metadata，避免任意 metadata、secret 或 payload bytes 進入 event log。
 - Ready-event log writer 只在顯式呼叫時寫入 `visual_asset_ready` event，並使用同一份 bounded context。
 - Registry-entry ready-event writer 只接受 `ready` entry，會先經過 ready-event factory，再寫入 bounded event log。
+- Lifecycle display profile 會把 `planned`、`building`、`review_required` 標成施工中 / review 類 tone，讓 Tk / Web / 未來 Qt 直接消費後端顯示契約。
 - Contract module 不 import `RRKAL_displaytools`、`rrkal-visual-compressor`、`vis_2_dis`、Taichi、PyQt。
 - Project maturity renderer row 保持 `contract_only` / `🚧`，並輸出 registry contract 與 empty summary。
 
