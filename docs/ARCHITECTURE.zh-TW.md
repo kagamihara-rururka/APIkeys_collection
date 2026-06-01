@@ -163,7 +163,7 @@ Unreal 是 rendering/UI consumer，不是資料 owner。Raw data、version、che
 
 Renderer bridge 資產是可管理資料資產，不是隱形 glue。Tile manifest、cache、mesh、texture atlas、chart index、material preset 都應逐步帶 source dataset version、checksum、compatibility target、rebuild recipe、health status。
 
-`api_launcher/visual_asset_contracts.py` 是 RRKAL Core 對未來 RendererSkinAsset 的控制面契約。它只記錄 `SkinBuildRequest`、`SkinBuildResult`、`RendererSkinAssetReference`、`VisualAssetReadyEvent`、`RendererSkinAssetRegistryEntry` 與 lifecycle status；不得 import `RRKAL_displaytools`、`rrkal-visual-compressor`、`vis_2_dis`，也不得讀 `.npz`、GPU buffer、Qt/Taichi payload 或 renderer 專案檔。詳細欄位與已驗證邊界見 `docs/VISUAL_SKIN_ASSET_CONTRACT.zh-TW.md`。
+`api_launcher/visual_asset_contracts.py` 是 RRKAL Core 對未來 RendererSkinAsset 的控制面契約。它只記錄 `SkinBuildRequest`、`SkinBuildResult`、`RendererSkinAssetReference`、`VisualAssetReadyEvent`、`RendererSkinAssetRegistryEntry`、`renderer_skin_asset_manifest_projection()` 與 lifecycle status；不得 import `RRKAL_displaytools`、`rrkal-visual-compressor`、`vis_2_dis`，也不得讀 `.npz`、GPU buffer、Qt/Taichi payload 或 renderer 專案檔。詳細欄位與已驗證邊界見 `docs/VISUAL_SKIN_ASSET_CONTRACT.zh-TW.md`。
 
 ### Mobile / remote control
 

@@ -20,7 +20,7 @@ from api_launcher.simulation_bridge import DEFAULT_SIMULATION_BACKENDS
 from api_launcher.visual_asset_contracts import SKIN_ASSET_LIFECYCLE_STATUSES, visual_asset_registry_summary
 
 
-MATRIX_VERSION = "2026-06-01"
+MATRIX_VERSION = "2026-06-02"
 
 
 @dataclass(frozen=True)
@@ -287,6 +287,7 @@ def _renderer_bridge_metrics() -> dict[str, Any]:
         "simulation_backend_contract_count": len(DEFAULT_SIMULATION_BACKENDS),
         "visual_skin_asset_contract_schema": "api_launcher.visual_asset_contracts",
         "visual_skin_asset_registry_entry_contract": "RendererSkinAssetRegistryEntry",
+        "visual_skin_asset_manifest_projection_contract": "renderer_skin_asset_manifest_projection",
         "skin_asset_lifecycle_statuses": sorted(SKIN_ASSET_LIFECYCLE_STATUSES),
         "skin_asset_lifecycle_status_count": len(SKIN_ASSET_LIFECYCLE_STATUSES),
         "empty_visual_asset_registry_summary": visual_asset_registry_summary(()),

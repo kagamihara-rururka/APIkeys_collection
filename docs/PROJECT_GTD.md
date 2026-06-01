@@ -3,6 +3,7 @@
 Last updated: 2026-06-02
 
 ## 目前工作焦點 / Active Focus
+- [x] 2026-06-02 Visual/Skin Asset contract 已補 compact manifest projection：新增 `renderer_skin_asset_manifest_projection()`，讓 RRKAL Core 可把 registry entry 投影成下游可讀的 manifest reference envelope；projection 只包含 reference、lineage、status、renderer targets 與 safety flags，不輸出完整 source request internals，也不讀 renderer payload。
 - [x] 2026-06-02 Visual/Skin Asset control-plane contract 已補正式專題文件：新增 `docs/VISUAL_SKIN_ASSET_CONTRACT.zh-TW.md`，把 `api_launcher/visual_asset_contracts.py` 的 request / reference / result / registry entry / ready event / lifecycle / lineage guard 與「不讀 renderer payload、不 import 下游專案」邊界集中成可查契約。
 - [x] 2026-06-02 Visual/Skin Asset registry entry 已補 lineage fail-fast guard：source request、curated asset、build result 與 skin asset id 若對不上，會在建立 registry entry 時直接拒絕，避免未來跨專案 visual asset lifecycle 記錄出現錯誤 lineage。
 - [x] 2026-06-02 RRKAL Core Visual/Skin Asset Registry contract 已補 registry entry 與 summary：新增 `RendererSkinAssetRegistryEntry` / `visual_asset_registry_summary()`，只登錄 manifest reference、lifecycle、renderer target、review flag 與 control-plane metadata；project maturity renderer row 會輸出空 registry summary，明確表示尚未有實際 renderer asset records，也不讀 renderer payload。

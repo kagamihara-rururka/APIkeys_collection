@@ -256,6 +256,45 @@ def visual_asset_registry_summary(entries: Iterable[RendererSkinAssetRegistryEnt
     }
 
 
+def renderer_skin_asset_manifest_projection(entry: RendererSkinAssetRegistryEntry) -> dict[str, Any]:
+    """Project a registry entry into a compact cross-project manifest reference.
+
+    This envelope is intentionally smaller than ``entry.to_dict()``. It is the
+    payload RRKAL Core can hand to displaytools, a future skin builder, or an
+    event log without exposing source request internals or touching renderer
+    payload bytes.
+    """
+
+    skin_asset = entry.skin_asset
+    return {
+        "schema_version": VISUAL_ASSET_CONTRACT_SCHEMA_VERSION,
+        "projection_type": "renderer_skin_asset_manifest_reference",
+        "registry_entry_id": entry.registry_entry_id,
+        "skin_asset_id": skin_asset.skin_asset_id,
+        "manifest_path": skin_asset.manifest_path,
+        "lifecycle_status": skin_asset.status,
+        "lifecycle_status_label": skin_asset_status_label(skin_asset.status),
+        "renderer_targets": list(skin_asset.renderer_targets),
+        "asset_format": skin_asset.asset_format,
+        "checksum": skin_asset.checksum,
+        "size_bytes": skin_asset.size_bytes,
+        "generated_by": skin_asset.generated_by,
+        "review_required": entry.review_required,
+        "registered_at": entry.registered_at,
+        "updated_at": entry.updated_at,
+        "lineage": {
+            "source_request_id": skin_asset.source_request_id,
+            "source_curated_asset_id": skin_asset.source_curated_asset_id,
+            "dataset_uid": skin_asset.dataset_uid,
+        },
+        "safety": {
+            "control_plane_only": True,
+            "payload_loading": False,
+            "imports_renderer_projects": False,
+        },
+    }
+
+
 def skin_asset_status_label(status: SkinAssetLifecycleStatus | str) -> str:
     return _SKIN_ASSET_STATUS_LABELS.get(_status_value(status), "皮層資產狀態待確認")
 
@@ -317,6 +356,7 @@ __all__ = [
     "SkinBuildResult",
     "VISUAL_ASSET_CONTRACT_SCHEMA_VERSION",
     "VisualAssetReadyEvent",
+    "renderer_skin_asset_manifest_projection",
     "skin_asset_status_label",
     "visual_asset_registry_summary",
 ]

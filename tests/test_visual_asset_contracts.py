@@ -12,6 +12,7 @@ from api_launcher.visual_asset_contracts import (
     SkinBuildRequest,
     SkinBuildResult,
     VisualAssetReadyEvent,
+    renderer_skin_asset_manifest_projection,
     skin_asset_status_label,
     visual_asset_registry_summary,
 )
@@ -210,6 +211,45 @@ class VisualAssetContractTest(unittest.TestCase):
         self.assertEqual(1, summary["renderer_target_counts"]["qt_preview"])
         self.assertTrue(summary["control_plane_only"])
         self.assertFalse(summary["payload_loading"])
+
+    def test_manifest_projection_is_compact_renderer_safe_reference(self) -> None:
+        skin_asset = RendererSkinAssetReference(
+            skin_asset_id="skin-ready",
+            source_request_id="request-ready",
+            source_curated_asset_id="curated-ready",
+            dataset_uid="dataset-ready",
+            manifest_path="state/visual_assets/ready.manifest.json",
+            lifecycle_status=SkinAssetLifecycleStatus.READY,
+            renderer_targets=("displaytools",),
+            asset_format="renderer_skin_asset_manifest",
+            checksum="abc123",
+            size_bytes=4096,
+            generated_by="external_builder",
+        )
+        entry = RendererSkinAssetRegistryEntry(
+            "entry-ready",
+            skin_asset,
+            review_required=False,
+            registered_at="2026-06-02T00:00:00Z",
+            updated_at="2026-06-02T00:01:00Z",
+        )
+
+        projection = renderer_skin_asset_manifest_projection(entry)
+
+        self.assertEqual("renderer_skin_asset_manifest_reference", projection["projection_type"])
+        self.assertEqual("entry-ready", projection["registry_entry_id"])
+        self.assertEqual("skin-ready", projection["skin_asset_id"])
+        self.assertEqual("state/visual_assets/ready.manifest.json", projection["manifest_path"])
+        self.assertEqual("ready", projection["lifecycle_status"])
+        self.assertEqual("可供 renderer 使用", projection["lifecycle_status_label"])
+        self.assertEqual(["displaytools"], projection["renderer_targets"])
+        self.assertEqual("request-ready", projection["lineage"]["source_request_id"])
+        self.assertTrue(projection["safety"]["control_plane_only"])
+        self.assertFalse(projection["safety"]["payload_loading"])
+        self.assertFalse(projection["safety"]["imports_renderer_projects"])
+        self.assertNotIn("source_request", projection)
+        self.assertNotIn("latest_build_result", projection)
+        self.assertNotIn("payload_bytes", str(projection))
 
     def test_registry_entry_rejects_mismatched_source_request(self) -> None:
         source = CuratedDataAssetReference(
