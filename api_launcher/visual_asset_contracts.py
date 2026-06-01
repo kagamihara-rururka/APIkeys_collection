@@ -8,6 +8,7 @@ from api_launcher.db import utc_now_iso
 
 
 VISUAL_ASSET_CONTRACT_SCHEMA_VERSION = 1
+VISUAL_ASSET_REGISTRY_TABLE_NAME = "visual_skin_asset_registry"
 
 
 class SkinAssetLifecycleStatus(str, Enum):
@@ -232,6 +233,31 @@ class RendererSkinAssetRegistryEntry:
         }
 
 
+@dataclass(frozen=True)
+class VisualAssetRegistryColumn:
+    """Column contract for future visual asset registry persistence.
+
+    This descriptor is intentionally schema-only. It lets RRKAL Core document
+    which control-plane fields may be persisted without creating tables,
+    opening renderer payloads, or emitting lifecycle events automatically.
+    """
+
+    name: str
+    storage_type: str
+    required: bool
+    source: str
+    description: str
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "name": self.name,
+            "storage_type": self.storage_type,
+            "required": self.required,
+            "source": self.source,
+            "description": self.description,
+        }
+
+
 def visual_asset_registry_summary(entries: Iterable[RendererSkinAssetRegistryEntry]) -> dict[str, Any]:
     """Summarize registry entries without inspecting renderer payloads."""
 
@@ -260,6 +286,151 @@ def visual_asset_registry_summary(entries: Iterable[RendererSkinAssetRegistryEnt
         "renderer_target_counts": renderer_target_counts,
         "control_plane_only": True,
         "payload_loading": False,
+    }
+
+
+VISUAL_ASSET_REGISTRY_COLUMNS: tuple[VisualAssetRegistryColumn, ...] = (
+    VisualAssetRegistryColumn(
+        "registry_entry_id",
+        "TEXT",
+        True,
+        "RendererSkinAssetRegistryEntry.registry_entry_id",
+        "Stable primary key for the RRKAL control-plane registry row.",
+    ),
+    VisualAssetRegistryColumn(
+        "skin_asset_id",
+        "TEXT",
+        True,
+        "RendererSkinAssetReference.skin_asset_id",
+        "External renderer skin asset reference id; not a payload locator by itself.",
+    ),
+    VisualAssetRegistryColumn(
+        "lifecycle_status",
+        "TEXT",
+        True,
+        "RendererSkinAssetReference.lifecycle_status",
+        "Lifecycle vocabulary value used for display, filtering, and ready-event guards.",
+    ),
+    VisualAssetRegistryColumn(
+        "manifest_path",
+        "TEXT",
+        True,
+        "RendererSkinAssetReference.manifest_path",
+        "Path to a renderer-safe manifest reference; RRKAL Core must not open payload bytes here.",
+    ),
+    VisualAssetRegistryColumn(
+        "source_request_id",
+        "TEXT",
+        True,
+        "RendererSkinAssetReference.source_request_id",
+        "Skin build request lineage id.",
+    ),
+    VisualAssetRegistryColumn(
+        "source_curated_asset_id",
+        "TEXT",
+        True,
+        "RendererSkinAssetReference.source_curated_asset_id",
+        "Curated data asset lineage id.",
+    ),
+    VisualAssetRegistryColumn(
+        "dataset_uid",
+        "TEXT",
+        True,
+        "RendererSkinAssetReference.dataset_uid",
+        "RRKAL dataset uid used to trace the upstream data asset.",
+    ),
+    VisualAssetRegistryColumn(
+        "renderer_targets_json",
+        "TEXT",
+        True,
+        "RendererSkinAssetReference.renderer_targets",
+        "JSON array of renderer targets allowed to consume this manifest reference.",
+    ),
+    VisualAssetRegistryColumn(
+        "review_required",
+        "INTEGER",
+        True,
+        "RendererSkinAssetRegistryEntry.review_required",
+        "Boolean review gate; stored as 0/1 by concrete persistence layers.",
+    ),
+    VisualAssetRegistryColumn(
+        "checksum",
+        "TEXT",
+        False,
+        "RendererSkinAssetReference.checksum",
+        "Checksum of the manifest reference or external builder output, when provided.",
+    ),
+    VisualAssetRegistryColumn(
+        "size_bytes",
+        "INTEGER",
+        False,
+        "RendererSkinAssetReference.size_bytes",
+        "Declared manifest or artifact size, not loaded by this contract.",
+    ),
+    VisualAssetRegistryColumn(
+        "registered_at",
+        "TEXT",
+        True,
+        "RendererSkinAssetRegistryEntry.registered_at",
+        "UTC timestamp for first registry entry creation.",
+    ),
+    VisualAssetRegistryColumn(
+        "updated_at",
+        "TEXT",
+        True,
+        "RendererSkinAssetRegistryEntry.updated_at",
+        "UTC timestamp for latest registry entry update.",
+    ),
+    VisualAssetRegistryColumn(
+        "metadata_json",
+        "TEXT",
+        False,
+        "RendererSkinAssetRegistryEntry.metadata",
+        "Bounded control-plane metadata serialized by a concrete persistence layer.",
+    ),
+)
+
+
+VISUAL_ASSET_REGISTRY_INDEXES: tuple[dict[str, Any], ...] = (
+    {"name": "idx_visual_skin_asset_registry_status", "columns": ("lifecycle_status",), "unique": False},
+    {"name": "idx_visual_skin_asset_registry_dataset", "columns": ("dataset_uid",), "unique": False},
+    {"name": "idx_visual_skin_asset_registry_curated", "columns": ("source_curated_asset_id",), "unique": False},
+    {"name": "idx_visual_skin_asset_registry_skin_asset", "columns": ("skin_asset_id",), "unique": False},
+)
+
+
+def visual_asset_registry_persistence_schema() -> dict[str, Any]:
+    """Return the future persistence schema contract without creating storage.
+
+    The concrete repository/migration layer should consume this only after an
+    OpenSpec or migration guard exists. Keeping it here prevents UI or renderer
+    code from inventing a divergent registry table shape.
+    """
+
+    return {
+        "schema_version": VISUAL_ASSET_CONTRACT_SCHEMA_VERSION,
+        "table_name": VISUAL_ASSET_REGISTRY_TABLE_NAME,
+        "persistence_status": "schema_contract_only",
+        "primary_key": "registry_entry_id",
+        "columns": [column.to_dict() for column in VISUAL_ASSET_REGISTRY_COLUMNS],
+        "indexes": [
+            {**index, "columns": list(index["columns"])}
+            for index in VISUAL_ASSET_REGISTRY_INDEXES
+        ],
+        "allowed_lifecycle_statuses": sorted(SKIN_ASSET_LIFECYCLE_STATUSES),
+        "migration_guards": {
+            "create_table_automatically": False,
+            "payload_columns_allowed": False,
+            "auto_event_emission": False,
+            "event_writer": "log_visual_asset_ready_registry_entry",
+            "requires_explicit_migration": True,
+        },
+        "safety": {
+            "control_plane_only": True,
+            "payload_loading": False,
+            "imports_renderer_projects": False,
+            "reads_npz_or_gpu_buffers": False,
+        },
     }
 
 
@@ -522,10 +693,15 @@ __all__ = [
     "SkinBuildResult",
     "VISUAL_ASSET_CONTRACT_SCHEMA_VERSION",
     "VisualAssetReadyEvent",
+    "VisualAssetRegistryColumn",
+    "VISUAL_ASSET_REGISTRY_COLUMNS",
+    "VISUAL_ASSET_REGISTRY_INDEXES",
+    "VISUAL_ASSET_REGISTRY_TABLE_NAME",
     "renderer_skin_asset_manifest_projection",
     "skin_asset_status_display_profile",
     "skin_asset_status_label",
     "visual_asset_ready_event_from_registry_entry",
     "visual_asset_ready_event_log_context",
+    "visual_asset_registry_persistence_schema",
     "visual_asset_registry_summary",
 ]

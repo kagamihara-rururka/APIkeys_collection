@@ -17,6 +17,7 @@ from api_launcher.visual_asset_contracts import (
     skin_asset_status_label,
     visual_asset_ready_event_from_registry_entry,
     visual_asset_ready_event_log_context,
+    visual_asset_registry_persistence_schema,
     visual_asset_registry_summary,
 )
 
@@ -256,6 +257,33 @@ class VisualAssetContractTest(unittest.TestCase):
         self.assertEqual(1, summary["renderer_target_counts"]["qt_preview"])
         self.assertTrue(summary["control_plane_only"])
         self.assertFalse(summary["payload_loading"])
+
+    def test_registry_persistence_schema_is_control_plane_only(self) -> None:
+        schema = visual_asset_registry_persistence_schema()
+
+        self.assertEqual("visual_skin_asset_registry", schema["table_name"])
+        self.assertEqual("schema_contract_only", schema["persistence_status"])
+        self.assertEqual("registry_entry_id", schema["primary_key"])
+        self.assertEqual(sorted(SKIN_ASSET_LIFECYCLE_STATUSES), schema["allowed_lifecycle_statuses"])
+        self.assertFalse(schema["migration_guards"]["create_table_automatically"])
+        self.assertFalse(schema["migration_guards"]["payload_columns_allowed"])
+        self.assertFalse(schema["migration_guards"]["auto_event_emission"])
+        self.assertEqual("log_visual_asset_ready_registry_entry", schema["migration_guards"]["event_writer"])
+        self.assertTrue(schema["safety"]["control_plane_only"])
+        self.assertFalse(schema["safety"]["payload_loading"])
+        self.assertFalse(schema["safety"]["imports_renderer_projects"])
+        self.assertFalse(schema["safety"]["reads_npz_or_gpu_buffers"])
+
+        column_names = {column["name"] for column in schema["columns"]}
+        self.assertIn("manifest_path", column_names)
+        self.assertIn("renderer_targets_json", column_names)
+        self.assertIn("metadata_json", column_names)
+        self.assertNotIn("payload_bytes", column_names)
+        self.assertNotIn("npz_payload", column_names)
+
+        index_names = {index["name"] for index in schema["indexes"]}
+        self.assertIn("idx_visual_skin_asset_registry_status", index_names)
+        self.assertIn("idx_visual_skin_asset_registry_dataset", index_names)
 
     def test_manifest_projection_is_compact_renderer_safe_reference(self) -> None:
         skin_asset = RendererSkinAssetReference(
