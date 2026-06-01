@@ -1,4 +1,9 @@
 # Agent 接力卡
+## 2026-06-02 06:05 +08:00 Visual/Skin registry persistence schema contract
+- 本輪新增 `visual_asset_registry_persistence_schema()` 與 `VisualAssetRegistryColumn`，先把未來 `visual_skin_asset_registry` 的欄位、index、allowed lifecycle status 與 migration guard 做成 machine-readable contract。Project maturity renderer row 也會輸出這份 schema contract。
+- 邊界不變：這是 `schema_contract_only`，不自動建表、不連 SQLite / MySQL、不寫 registry persistence、不自動 lifecycle emission，也不讀 `.npz`、GPU buffer 或 renderer payload。若未來要落地 DB persistence，仍需 OpenSpec / migration guard。
+- 已驗證：source compile check OK；`py -3 -B -m unittest tests.test_visual_asset_contracts tests.test_project_maturity -v` 通過 24 tests；`--project-maturity-json` 抽查 `visual_asset_registry_persistence_schema_contract=visual_asset_registry_persistence_schema`，且 migration guard 為 `create_table_automatically=false`、`auto_event_emission=false`；完整 smoke `state\logs\pre_push_smoke_20260602_060226.log` 通過，1064 tests / 4 skipped，MVP demo `download_import_completed` / `row_count=3`；GitHub Actions manual run `26784919740` 通過 Ubuntu、Windows 與 real DB smoke。Code commit：`39a458f Add visual asset registry persistence schema`。
+
 ## 2026-06-02 05:50 +08:00 Visual/Skin registry summary display profile
 - 本輪讓 `visual_asset_registry_summary()` 在 `status_counts` 旁輸出 `status_display_profiles`。Dashboard / future UI 可以直接用後端提供的 status icon / tone / label / next_action 呈現 lifecycle count，不需要自己維護 status 對照表。
 - 邊界不變：summary 仍只彙總 registry control-plane rows，不掃 manifest、不讀 `.npz`、不做 payload health check，也不 import displaytools / visual-compressor / vis_2_dis。

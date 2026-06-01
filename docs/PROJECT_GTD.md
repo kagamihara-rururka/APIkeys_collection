@@ -3,6 +3,7 @@
 Last updated: 2026-06-02
 
 ## 目前工作焦點 / Active Focus
+- [x] 2026-06-02 Visual/Skin registry persistence schema contract 已補：新增 `visual_asset_registry_persistence_schema()`，定義未來 `visual_skin_asset_registry` 的欄位、index、lifecycle vocabulary 與 migration guard；它明確標示 `schema_contract_only`，不自動建表、不讀 payload、不自動發 event。
 - [x] 2026-06-02 Visual/Skin registry summary display profile 已補：`visual_asset_registry_summary()` 現在會輸出每個 lifecycle status 的 display profile，讓 dashboard / future UI 顯示 status counts 時不用自行維護 status -> icon / tone / label 對照。
 - [x] 2026-06-02 Visual/Skin build result display profile 已補：`SkinBuildResult.to_dict()` 即使沒有 `skin_asset` 也會輸出 lifecycle display profile，讓 failed / review-required build result 可由 UI 顯示後端定義的 tone / label / next_action，而不是前端自行猜測。
 - [x] 2026-06-02 Visual/Skin lifecycle display profile 已補 UI-neutral 顯示契約：新增 `skin_asset_status_display_profile()`，讓 `planned` / `building` / `review_required` 等狀態可輸出 `🚧`、tone、label、next_action 與 readiness flags；Tk/Web/未來 Qt 不需要自行推論施工中狀態，也不能把 contract-only renderer 能力顯示成已交付。
