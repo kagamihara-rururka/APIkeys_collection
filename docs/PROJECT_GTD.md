@@ -3,6 +3,7 @@
 Last updated: 2026-06-02
 
 ## 目前工作焦點 / Active Focus
+- [x] 2026-06-02 Visual/Skin ready-event log context 已補 bounded projection：新增 `visual_asset_ready_event_log_context()`，把 `VisualAssetReadyEvent` 投影成可寫入 event log 的安全摘要；它只白名單輸出 manifest reference、lineage、status、renderer targets、safety flags 與 registry projection metadata，不輸出任意 metadata、secret、payload bytes 或 renderer internals，也尚未實際呼叫 `log_event()`。
 - [x] 2026-06-02 Visual/Skin ready-event factory 已補 contract guard：新增 `visual_asset_ready_event_from_registry_entry()`，只允許 `ready` registry entry 產生 `VisualAssetReadyEvent`，並自動帶入 source request lineage 與 registry metadata；目前尚未接 runtime event log。
 - [x] 2026-06-02 Visual/Skin Asset contract 已補 compact manifest projection：新增 `renderer_skin_asset_manifest_projection()`，讓 RRKAL Core 可把 registry entry 投影成下游可讀的 manifest reference envelope；projection 只包含 reference、lineage、status、renderer targets 與 safety flags，不輸出完整 source request internals，也不讀 renderer payload。
 - [x] 2026-06-02 Visual/Skin Asset control-plane contract 已補正式專題文件：新增 `docs/VISUAL_SKIN_ASSET_CONTRACT.zh-TW.md`，把 `api_launcher/visual_asset_contracts.py` 的 request / reference / result / registry entry / ready event / lifecycle / lineage guard 與「不讀 renderer payload、不 import 下游專案」邊界集中成可查契約。

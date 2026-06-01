@@ -1,6 +1,6 @@
 # RuRuKa Asset Launcher 架構
 
-最後更新：2026-06-01
+最後更新：2026-06-02
 
 RuRuKa Asset Launcher 是一個類 Steam 的科學資料集、爬蟲資產與本機資料庫 launcher。它負責整理 provider/catalog、治理資料取得能力、產生下載計畫、下載與匯入資料、追蹤已安裝資產，並把整理後的資料交給 Taichi、Unreal 或其他下游 renderer / 分析工具。
 
@@ -150,7 +150,7 @@ flowchart TD
 | Downloading | `api_launcher/downloads/*` | job queue、HTTP adapter、staging、manifest repair、transfer tools。 |
 | Import / curation | `api_launcher/importers/*` | CSV/JSON/archive raw -> curated SQLite。 |
 | Data store | `api_launcher/data_store_connections.py`, `database_self_check.py`, `database_repair.py` | SQLite/MySQL/PostgreSQL profile、self-check、repair guard。 |
-| Renderer bridge | `renderer_contracts.py`, `visual_asset_contracts.py`, `tile_manifests.py`, `rendering_profiles.py`, `render_effects.py`, `simulation_bridge.py`, `unreal_bridge.py` | dataset 到 renderer/cache/tile/simulation/skin asset reference 的 contract；不在 Core 讀 renderer payload。 |
+| Renderer bridge | `renderer_contracts.py`, `visual_asset_contracts.py`, `tile_manifests.py`, `rendering_profiles.py`, `render_effects.py`, `simulation_bridge.py`, `unreal_bridge.py` | dataset 到 renderer/cache/tile/simulation/skin asset reference、manifest projection、ready event 與 bounded event-log context 的 contract；不在 Core 讀 renderer payload，也不直接呼叫下游 renderer。 |
 | Tests | `tests/` | 保護 catalog、crawler、download、import、registry、renderer、UI 行為。 |
 
 ## 重要邊界

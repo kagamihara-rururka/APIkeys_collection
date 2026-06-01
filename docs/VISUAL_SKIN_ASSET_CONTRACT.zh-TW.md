@@ -67,6 +67,7 @@ flowchart TD
 | `visual_asset_registry_summary()` | 彙總 registry entries 的 status count、ready count、review count、renderer target count。 | 不掃 manifest 內容，不做 payload health check。 |
 | `renderer_skin_asset_manifest_projection()` | 把 registry entry 投影成 compact cross-project manifest reference，給 event log、displaytools 或 future builder 讀取。 | 不輸出完整 source request internals，不讀或嵌入 renderer payload。 |
 | `visual_asset_ready_event_from_registry_entry()` | 從 `ready` registry entry 產生 `VisualAssetReadyEvent`，自動帶入 source request lineage 與 registry metadata。 | 不對非 `ready` asset 發 ready event，不寫入 runtime event log。 |
+| `visual_asset_ready_event_log_context()` | 把 `VisualAssetReadyEvent` 投影成 bounded event-log context，白名單輸出 manifest reference、lineage、status、renderer targets 與 safety flags。 | 不直接呼叫 `log_event()`，不輸出任意 metadata、secret、payload bytes 或 renderer internals。 |
 
 ## Lifecycle 狀態
 
@@ -105,6 +106,7 @@ flowchart TD
 - Registry entry lineage mismatch fail-fast。
 - Compact manifest projection 只輸出 manifest reference、lineage、renderer target、status 與 safety flags。
 - Ready-event factory 只接受 `ready` registry entry，避免對 review / failed asset 發出可消費事件。
+- Ready-event log context 只輸出 bounded manifest reference 與白名單 metadata，避免任意 metadata、secret 或 payload bytes 進入 event log。
 - Contract module 不 import `RRKAL_displaytools`、`rrkal-visual-compressor`、`vis_2_dis`、Taichi、PyQt。
 - Project maturity renderer row 保持 `contract_only` / `🚧`，並輸出 registry contract 與 empty summary。
 
@@ -112,7 +114,7 @@ flowchart TD
 
 - `py -3 -B -m unittest tests.test_visual_asset_contracts tests.test_project_maturity -v`
 - `.\scripts\pre_push_smoke_brief.cmd`
-- GitHub Actions manual run `26779213359`
+- GitHub Actions manual run `26781404396`
 
 ## 尚未實作
 
@@ -133,7 +135,7 @@ flowchart TD
 安全的後續切片：
 
 1. 定義 registry persistence OpenSpec，先規格化資料庫欄位與 migration guard。
-2. 把 `visual_asset_ready_event_from_registry_entry()` 的 output 接到 event log，但仍只寫 manifest reference。
+2. 把 `visual_asset_ready_event_log_context()` 接到 `log_event()` 或後續 registry persistence，但仍只寫 manifest reference，不寫任意 metadata 或 renderer payload。
 3. 與 displaytools / compressor 透過 `L:\AGENT_EXCHANGE` 或正式 OpenSpec 對齊欄位，不直接 import 對方 repo。
 4. 若下游需要更多欄位，先版本化 projection schema，不要讓 downstream 直接依賴 `entry.to_dict()` 的完整內部形狀。
 

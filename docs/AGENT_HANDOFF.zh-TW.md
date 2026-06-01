@@ -1,4 +1,8 @@
 # Agent 接力卡
+## 2026-06-02 04:55 +08:00 Visual/Skin ready-event log context guard
+- 本輪新增 `visual_asset_ready_event_log_context()`，把 `VisualAssetReadyEvent` 投影成 bounded event-log context。context 只輸出 event id/type、skin asset id、manifest path、lifecycle status/label、renderer targets、asset format、checksum、size、generated_by、emitted_at、lineage 與 safety flags。
+- 安全邊界：這不是 runtime event log writer，不呼叫 `log_event()`，不 import displaytools / visual-compressor / vis_2_dis，不讀 renderer payload；任意 `event.metadata`、`skin_asset.metadata`、secret、token、payload bytes 都不會進入 context，只有 `registry_entry_id` 與 `projection_type` 兩個白名單 metadata 會保留。
+- 已驗證：source compile check OK；`py -3 -B -m unittest tests.test_visual_asset_contracts tests.test_project_maturity -v` 通過 21 tests；`--project-maturity-json` 抽查 `visual_asset_ready_event_log_context_contract=visual_asset_ready_event_log_context`；完整 smoke `state\logs\pre_push_smoke_20260602_044955.log` 通過，1057 tests / 4 skipped，MVP demo `download_import_completed` / `row_count=3`；GitHub Actions manual run `26781404396` 通過 Ubuntu、Windows 與 real DB smoke。Code commit：`3ed3a31 Add visual asset ready event log context`。
 ## 2026-06-02 04:35 +08:00 Visual/Skin ready-event factory guard
 - 本輪新增 `visual_asset_ready_event_from_registry_entry()`，從 `RendererSkinAssetRegistryEntry` 安全產生 `VisualAssetReadyEvent`。factory 只接受 `ready` registry entry，會自動使用 `skin_asset.source_request_id`，並把 `registry_entry_id` 與 projection type 放進 metadata。
 - 邊界不變：這只是 event object factory，不寫 runtime event log、不呼叫 renderer、不 import displaytools / visual-compressor / vis_2_dis、不讀 renderer payload。下一步若接 event log，仍只能寫 manifest reference。
