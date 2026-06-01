@@ -129,7 +129,7 @@ flowchart TD
 - `py -3 -B -m unittest tests.test_visual_asset_contracts tests.test_project_maturity -v`
 - `.\scripts\pre_push_smoke_brief.cmd`
 - Full smoke `state\logs\pre_push_smoke_20260602_064026.log`：1066 tests / 4 skipped，MVP demo `download_import_completed` / `row_count=3`
-- GitHub Actions manual run `26784919740`（schema contract checkpoint）；DDL preview checkpoint 的 GitHub Actions 需看本輪後續 run。
+- GitHub Actions manual run `26786612078`（DDL preview checkpoint，Ubuntu / Windows / real DB smoke 通過）。
 
 ## 尚未實作
 
