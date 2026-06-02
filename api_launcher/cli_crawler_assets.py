@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 import argparse
-import json
 from pathlib import Path
 from typing import Callable
 
+from api_launcher.cli_json import print_cli_json
 from api_launcher.crawler_asset_closure import (
     CrawlerAssetRecommendedSeedClosureResult,
     recommended_seed_closure_payload,
@@ -215,16 +215,16 @@ def run_crawler_asset_cli(
         closure_results=closure_results,
     )
     if args.crawler_asset_listing_json:
-        print(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True))
+        print_cli_json(payload, sort_keys=True)
         return
     if args.crawler_asset_seeds_json:
-        print(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True))
+        print_cli_json(payload, sort_keys=True)
         return
     if getattr(args, "crawler_seed_download_import_json", False):
-        print(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True))
+        print_cli_json(payload, sort_keys=True)
         return
     if getattr(args, "crawler_asset_closure_json", False):
-        print(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True))
+        print_cli_json(payload, sort_keys=True)
         return
 
     for result in results:

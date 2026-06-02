@@ -4,6 +4,7 @@ import argparse
 import json
 import sqlite3
 
+from api_launcher.cli_json import print_cli_json
 from api_launcher.crawler_audit_smoke import crawler_handler_audit_smoke_report
 from api_launcher.dataset_discovery import (
     DEFAULT_DATASET_DISCOVERY_SOURCES_NAME,
@@ -68,7 +69,7 @@ def dataset_discovery_command_active(args: argparse.Namespace) -> bool:
 
 def discover_dataset_candidates_cli(conn: sqlite3.Connection, args: argparse.Namespace) -> None:
     if args.dataset_discovery_handler_smoke_json:
-        print(json.dumps(crawler_handler_audit_smoke_report(), ensure_ascii=False, indent=2))
+        print_cli_json(crawler_handler_audit_smoke_report())
         return
 
     sources = filtered_dataset_discovery_sources(args)
@@ -192,7 +193,7 @@ def maybe_write_or_print_seed_coverage(args: argparse.Namespace, sources) -> Non
         output_path.write_text(render_dataset_seed_coverage_markdown(payload), encoding="utf-8")
         print(f"[dataset-seed-coverage] wrote {output_path}")
     if args.dataset_discovery_seed_coverage_json:
-        print(json.dumps(payload, ensure_ascii=False, indent=2))
+        print_cli_json(payload)
 
 
 def promote_local_discovery_catalog_cli(args: argparse.Namespace) -> None:
@@ -291,7 +292,7 @@ def review_dataset_candidates_cli(conn: sqlite3.Connection, args: argparse.Names
                 for dataset in candidates
             ],
         }
-        print(json.dumps(payload, ensure_ascii=False, indent=2))
+        print_cli_json(payload)
         return
     if not candidates:
         print(f"[dataset-candidate] no candidates status={args.dataset_candidate_status}")

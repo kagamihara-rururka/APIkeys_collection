@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 import argparse
-import json
 from typing import Callable
 
+from api_launcher.cli_json import print_cli_json
 from api_launcher.db import resolve_project_path
 from api_launcher.downloads.plan_runner import load_download_plan_file
 from api_launcher.ingestion_pipeline import (
@@ -71,7 +71,7 @@ def run_download_plan_cli(args: argparse.Namespace, repository: ApiCatalogReposi
     )
     if args.run_download_plan_json:
         # JSON mode 是 heartbeat/agent 的穩定交接格式；人類 CLI 摘要維持在預設路徑。
-        print(json.dumps(run.to_dict(), ensure_ascii=False, indent=2))
+        print_cli_json(run.to_dict())
         return
     for line in render_download_import_cli_lines(run):
         print(line)

@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 import argparse
-import json
 from pathlib import Path
 
+from api_launcher.cli_json import print_cli_json
 from api_launcher.db import resolve_project_path
 from api_launcher.importers.csv_importer import import_csv_manifest_to_sqlite
 from api_launcher.importers.json_importer import import_json_manifest_to_sqlite
@@ -45,7 +45,7 @@ def write_local_file_manifest_cli(args: argparse.Namespace, repository: ApiCatal
     ensure_local_file_manifest_provider(repository, result.provider_id)
     raw_asset_id = register_local_file_manifest(repository, result.manifest_path)
     if args.manual_import_json:
-        print(json.dumps(local_file_manifest_payload(args, result, raw_asset_id), ensure_ascii=False, indent=2))
+        print_cli_json(local_file_manifest_payload(args, result, raw_asset_id))
         return
     print(
         "[local-manifest] "
@@ -96,13 +96,7 @@ def import_local_file_cli(args: argparse.Namespace, repository: ApiCatalogReposi
     else:
         raise ValueError(f"Unsupported local-file import kind for {result.source_format}: {result.payload_path}")
     if args.manual_import_json:
-        print(
-            json.dumps(
-                local_file_import_payload(result, raw_asset_id, import_result.to_dict()),
-                ensure_ascii=False,
-                indent=2,
-            )
-        )
+        print_cli_json(local_file_import_payload(result, raw_asset_id, import_result.to_dict()))
         return
     print(
         "[local-import] "

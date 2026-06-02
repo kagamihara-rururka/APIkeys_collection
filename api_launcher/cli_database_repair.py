@@ -2,10 +2,10 @@ from __future__ import annotations
 
 import argparse
 import contextlib
-import json
 from pathlib import Path
 from typing import Callable
 
+from api_launcher.cli_json import print_cli_json
 from api_launcher.database_repair import (
     database_repair_sql_path_for_asset,
     reimport_missing_sqlite_table_asset,
@@ -100,7 +100,7 @@ def run_database_repairs(
             "results": result_payloads,
         }
         log_database_repair_completed(db_path, action, result_payloads, log_event_func)
-        print(json.dumps(payload, ensure_ascii=False, indent=2))
+        print_cli_json(payload)
     else:
         log_database_repair_completed(db_path, action, result_payloads, log_event_func)
 

@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 import argparse
-import json
 
+from api_launcher.cli_json import print_cli_json
 from api_launcher.crawler_run_records import DEFAULT_CRAWLER_RUN_EVENT_SCAN_LIMIT, crawler_run_summary_from_events
 from api_launcher.event_log import latest_events
 
@@ -34,7 +34,7 @@ def run_crawler_run_record_cli(args: argparse.Namespace) -> None:
     payload = crawler_run_summary_from_events(events)
     payload["event_count"] = len(events)
     payload["event_limit"] = event_limit
-    print(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True))
+    print_cli_json(payload, sort_keys=True)
 
 
 __all__ = [

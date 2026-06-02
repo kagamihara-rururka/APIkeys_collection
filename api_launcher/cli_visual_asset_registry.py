@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 import argparse
-import json
 from pathlib import Path
 
+from api_launcher.cli_json import print_cli_json
 from api_launcher.db import resolve_project_path
 from api_launcher.visual_asset_event_logging import (
     log_visual_asset_ready_from_owned_test_database,
@@ -79,7 +79,7 @@ def _run_visual_asset_registry_summary_json(args: argparse.Namespace) -> None:
         db_path,
         allow_owned_test_database=bool(args.visual_registry_owned_test_db),
     )
-    print(json.dumps(summary, ensure_ascii=False, indent=2, sort_keys=True))
+    print_cli_json(summary, sort_keys=True)
 
 
 def _run_visual_asset_registry_ready_event_json(args: argparse.Namespace) -> None:
@@ -103,7 +103,7 @@ def _run_visual_asset_registry_ready_event_json(args: argparse.Namespace) -> Non
         log_path=log_path,
     )
     payload = record.to_dict() if hasattr(record, "to_dict") else record
-    print(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True))
+    print_cli_json(payload, sort_keys=True)
 
 
 def _visual_registry_db_path(args: argparse.Namespace) -> Path:
