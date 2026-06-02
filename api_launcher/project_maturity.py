@@ -19,7 +19,7 @@ from api_launcher.crawler_asset_download import (
     run_crawler_asset_download_import,
     run_crawler_seed_download_import,
 )
-from api_launcher.dataset_adapters import DATASET_ADAPTERS
+from api_launcher.dataset_adapters import dataset_adapter_report
 from api_launcher.importers.compatibility_shims import importer_compatibility_shim_report
 from api_launcher.mvp_readiness import build_mvp_readiness_payload
 from api_launcher.repository import ApiCatalogRepository
@@ -351,6 +351,18 @@ def _crawler_asset_download_import_metrics() -> dict[str, Any]:
     }
 
 
+def _provider_specific_deep_adapter_metrics() -> dict[str, Any]:
+    """Expose deep-adapter coverage without overclaiming source-type coverage."""
+
+    report = dataset_adapter_report()
+    return {
+        **report,
+        "deep_adapter_scope": "provider_specific_dataset_records",
+        "source_crawler_scope": "source_pattern_candidate_discovery",
+        "coverage_not_equal_to_supported_source_types": True,
+    }
+
+
 def _renderer_bridge_metrics() -> dict[str, Any]:
     """Expose control-plane renderer/skin contract evidence without implying real renderer I/O."""
 
@@ -453,7 +465,7 @@ def _matrix_rows(mvp_readiness: dict[str, Any]) -> tuple[MaturityMatrixRow, ...]
             verified_behavior_source=("api_launcher.dataset_adapters.DATASET_ADAPTERS", "tests.test_adapter_plan_resolver"),
             current_limitations=("Supported source crawler types are broader than deep provider adapter coverage.",),
             next_actions=("Do not claim all supported source types have deep adapters; add adapters only where they close a real import/download path.",),
-            metrics={"dataset_adapter_count": len(DATASET_ADAPTERS)},
+            metrics=_provider_specific_deep_adapter_metrics(),
         ),
         MaturityMatrixRow(
             area_id="tk_and_web_user_surfaces",

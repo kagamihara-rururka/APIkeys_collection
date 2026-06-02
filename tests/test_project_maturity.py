@@ -65,6 +65,22 @@ class ProjectMaturityTests(unittest.TestCase):
         self.assertEqual("deliverable_100", rows["canonical_mvp_demo_closure"]["maturity_level"])
         self.assertEqual("partial_bounded", rows["provider_specific_deep_adapters"]["maturity_level"])
         self.assertEqual(3, rows["provider_specific_deep_adapters"]["metrics"]["dataset_adapter_count"])
+        adapter_metrics = rows["provider_specific_deep_adapters"]["metrics"]
+        self.assertEqual(
+            ("gebco_topography", "hyg_star_catalog", "yfinance_market_data"),
+            tuple(adapter_metrics["adapter_ids"]),
+        )
+        self.assertEqual(
+            ("gebco", "hyg_database", "yahoo_finance_yfinance"),
+            tuple(adapter_metrics["provider_ids"]),
+        )
+        self.assertEqual(
+            "provider_specific_dataset_adapter_not_source_crawler_handler",
+            adapter_metrics["source_type_scope"],
+        )
+        self.assertTrue(adapter_metrics["coverage_not_equal_to_supported_source_types"])
+        self.assertIn("do not imply", adapter_metrics["coverage_boundary"])
+        self.assertEqual(3, len(adapter_metrics["registered_adapters"]))
         self.assertEqual("contract_only", rows["renderer_unreal_simulation"]["maturity_level"])
         self.assertEqual("🚧", rows["renderer_unreal_simulation"]["status_icon"])
         self.assertEqual("review", rows["renderer_unreal_simulation"]["display_tone"])
