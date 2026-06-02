@@ -90,7 +90,7 @@ from api_launcher.database_self_check import (
     database_self_check_agent_payload,
     database_self_check_issues,
 )
-from api_launcher.dataset_adapters import adapters_for_provider
+from api_launcher.dataset_adapters import adapters_for_provider, dataset_adapter_report
 from api_launcher.dataset_updates import DatasetUpdatePlan, plan_dataset_update
 from api_launcher.dataset_versions import DatasetVersionOption, version_options_for_dataset, version_options_for_datasets
 from api_launcher.db import SCRIPT_DIR, connect_db, init_db, resolve_project_path, utc_now_iso
@@ -655,6 +655,7 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     add_visual_asset_registry_args(parser)
     parser.add_argument("--crawler-registry-report-json", action="store_true", help="emit crawler registry matrix/capability report as JSON")
     parser.add_argument("--content-registry-report-json", action="store_true", help="emit content parser/import registry report as JSON")
+    parser.add_argument("--dataset-adapter-report-json", action="store_true", help="emit provider-specific dataset adapter registry report as JSON")
     add_yfinance_args(parser)
     parser.add_argument("--adapter-review-plan", help="list adapter-required items from a download plan JSON")
     parser.add_argument("--adapter-review-json", action="store_true", help="emit --adapter-review-plan as agent-readable JSON")
@@ -822,6 +823,7 @@ class CatalogLauncherCli:
             run_visual_asset_registry_cli(self.args)
             self.show_crawler_registry_report()
             self.show_content_registry_report()
+            self.show_dataset_adapter_report()
             run_yfinance_cli(self.args)
             run_download_plan_cli(self.args, self.repository, log_event)
             self.show_adapter_review_plan()
@@ -892,6 +894,7 @@ class CatalogLauncherCli:
             or self.args.visual_registry_emit_ready_event_json
             or self.args.crawler_registry_report_json
             or self.args.content_registry_report_json
+            or self.args.dataset_adapter_report_json
             or self.args.adapter_review_json
             or self.args.resolve_adapter_plan_json
             or self.args.manual_import_json
@@ -1076,6 +1079,10 @@ class CatalogLauncherCli:
     def show_content_registry_report(self) -> None:
         if self.args.content_registry_report_json:
             print_cli_json(content_registry_report())
+
+    def show_dataset_adapter_report(self) -> None:
+        if self.args.dataset_adapter_report_json:
+            print_cli_json(dataset_adapter_report())
 
     def show_adapter_review_plan(self) -> None:
         if not self.args.adapter_review_plan:

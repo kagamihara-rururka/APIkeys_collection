@@ -46,6 +46,7 @@ def command_requested(args: argparse.Namespace) -> bool:
         visual_asset_registry_command_active(args),
         args.crawler_registry_report_json,
         args.content_registry_report_json,
+        args.dataset_adapter_report_json,
         yfinance_command_active(args),
         bool(args.adapter_review_plan),
         args.adapter_review_json,
