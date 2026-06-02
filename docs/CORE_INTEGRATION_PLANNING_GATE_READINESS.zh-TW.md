@@ -23,6 +23,7 @@
 | Core review queue readiness CI | `c6e8da4` / GitHub Actions run `26837600265` PASS |
 | Core job-status diagnostic | `--core-job-status-report-json` / `core_job_status_report.v1` |
 | Core bounded scheduler plan diagnostic | `--core-bounded-scheduler-plan-json` / `core_bounded_scheduler_plan_report.v1` |
+| Core bounded scheduler plan CI | `5b1b831` / GitHub Actions run `26838847085` PASS |
 | Core lifecycle audit diagnostic | `--core-lifecycle-audit-json` / `core_lifecycle_audit_report.v1` |
 | Core manifest-reference diagnostic | `--core-manifest-reference-report-json` / `core_manifest_reference_report.v1` |
 | Core deep-adapter coverage diagnostic | `--core-deep-adapter-coverage-json` / `core_deep_adapter_coverage_report.v1` |
@@ -255,6 +256,7 @@ Update 2026-06-03 01:58 +08:00: Bounded Scheduler Contract Plan is now covered b
 - Current lifecycle audit JSON: `core_lifecycle_audit_report.v1`, status `partial`。
 - Current manifest-reference JSON: `core_manifest_reference_report.v1`, status `partial`。
 - Current deep-adapter coverage JSON: `core_deep_adapter_coverage_report.v1`, status `partial`; code checkpoint `56a1158`, GitHub Actions run `26836263789` passed。
+- Current bounded scheduler plan JSON: `core_bounded_scheduler_plan_report.v1`, status `partial`; code checkpoint `5b1b831`, GitHub Actions run `26838847085` passed。
 - Cross-repo touch: none.
 - Renderer/compressor/SkinAsset implementation: none.
 - Lifecycle schema/status change: none.
