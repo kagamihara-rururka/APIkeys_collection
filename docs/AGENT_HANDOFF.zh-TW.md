@@ -1,4 +1,9 @@
 # Agent 接力卡
+## 2026-06-03 06:28 +08:00 Core readiness evidence packet
+- 本輪新增 repo-side evidence packet：`docs/CORE_READINESS_EVIDENCE_PACKET.zh-TW.md`，供 `n_1` 對齊 Notion summary。它整理 baseline `a2a937b`、GitHub Actions run `26849553709` PASS、8 個 Core JSON diagnostics 以本機 temp DB parse 成功、OpenSpec validate 3 specs PASS、L-drive stale permission warning 與 Core gate `partial`。
+- 邊界：這是 evidence aggregation / docs-only slice，不新增 Core product behavior、不改 readiness gate、不碰 displaytools / visual-compressor、不實作 RendererSkinAsset / SkinAsset、不讀 `.npz` / renderer payload、不改 lifecycle schema/status、不宣稱 integration ready。
+- 操作提醒：Notion 是 coordination dashboard；GitHub commits、CI、smoke、OpenSpec validate 與 CLI JSON diagnostics 才是 product evidence。若後續要動 lifecycle schema/status、cross-repo contract、SkinAsset / RendererSkinAsset 或 integration wording，先送 `o_1` review。
+
 ## 2026-06-03 05:39 +08:00 Core JSON diagnostics sweep note
 - 本輪額外做 Core diagnostic JSON parse sweep。直接使用預設 DB path 時，L 槽雲端 SQLite 發生 `sqlite3.OperationalError: disk I/O error`；改用本機 temp DB (`--db %TEMP%\...sqlite`) 後，以下 8 個 JSON diagnostics 全部可由 downstream `json.load(sys.stdin)` 解析：`--core-readiness-report-json`、`--core-review-required-report-json`、`--core-review-queue-readiness-json`、`--core-job-status-report-json`、`--core-manifest-reference-report-json`、`--core-lifecycle-audit-json`、`--core-deep-adapter-coverage-json`、`--core-bounded-scheduler-plan-json`。
 - 操作規則：automation / smoke / agent-readable JSON sweep 應明確傳入本機 temp `--db`，不要依賴 L 槽雲端預設 SQLite。這是操作邊界紀錄，不是產品碼變更。
