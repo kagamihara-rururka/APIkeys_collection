@@ -11,7 +11,14 @@ from api_launcher.visual_asset_contracts import (
     SkinAssetLifecycleStatus,
     VisualAssetReadyEvent,
 )
-from api_launcher.visual_asset_event_logging import log_visual_asset_ready_event, log_visual_asset_ready_registry_entry
+from api_launcher.visual_asset_event_logging import (
+    log_visual_asset_ready_event,
+    log_visual_asset_ready_from_owned_test_database,
+    log_visual_asset_ready_registry_entry,
+)
+from api_launcher.visual_asset_registry_persistence import (
+    write_visual_asset_registry_entry_for_owned_test_database,
+)
 
 
 class VisualAssetEventLoggingTests(unittest.TestCase):
@@ -144,6 +151,102 @@ class VisualAssetEventLoggingTests(unittest.TestCase):
 
         with self.assertRaisesRegex(ValueError, "ready skin assets"):
             log_visual_asset_ready_registry_entry(entry)
+
+    def test_ready_event_from_owned_test_database_requires_explicit_workflow(self) -> None:
+        entry = _ready_registry_entry("entry-ready", "skin-ready")
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            db_path = Path(tmpdir) / "visual-registry.sqlite"
+            log_path = Path(tmpdir) / "events.jsonl"
+            write_visual_asset_registry_entry_for_owned_test_database(
+                db_path,
+                entry,
+                allow_owned_test_database=True,
+            )
+
+            record = log_visual_asset_ready_from_owned_test_database(
+                db_path,
+                "entry-ready",
+                allow_owned_test_database=True,
+                log_path=log_path,
+            )
+            events = latest_events(log_path=log_path)
+
+        self.assertEqual("visual_asset_ready", record.event)
+        self.assertEqual(1, len(events))
+        self.assertEqual("entry-ready", events[0]["context"]["metadata"]["registry_entry_id"])
+        self.assertEqual("skin-ready", events[0]["context"]["skin_asset_id"])
+
+    def test_ready_event_from_owned_test_database_rejects_duplicate_by_default(self) -> None:
+        entry = _ready_registry_entry("entry-ready", "skin-ready")
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            db_path = Path(tmpdir) / "visual-registry.sqlite"
+            log_path = Path(tmpdir) / "events.jsonl"
+            write_visual_asset_registry_entry_for_owned_test_database(
+                db_path,
+                entry,
+                allow_owned_test_database=True,
+            )
+            log_visual_asset_ready_from_owned_test_database(
+                db_path,
+                "entry-ready",
+                allow_owned_test_database=True,
+                log_path=log_path,
+            )
+
+            with self.assertRaisesRegex(ValueError, "already exists"):
+                log_visual_asset_ready_from_owned_test_database(
+                    db_path,
+                    "entry-ready",
+                    allow_owned_test_database=True,
+                    log_path=log_path,
+                )
+
+            events = latest_events(log_path=log_path)
+
+        self.assertEqual(1, len(events))
+
+    def test_ready_event_from_owned_test_database_can_allow_duplicate_explicitly(self) -> None:
+        entry = _ready_registry_entry("entry-ready", "skin-ready")
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            db_path = Path(tmpdir) / "visual-registry.sqlite"
+            log_path = Path(tmpdir) / "events.jsonl"
+            write_visual_asset_registry_entry_for_owned_test_database(
+                db_path,
+                entry,
+                allow_owned_test_database=True,
+            )
+            log_visual_asset_ready_from_owned_test_database(
+                db_path,
+                "entry-ready",
+                allow_owned_test_database=True,
+                log_path=log_path,
+            )
+            log_visual_asset_ready_from_owned_test_database(
+                db_path,
+                "entry-ready",
+                allow_owned_test_database=True,
+                duplicate_policy="allow_duplicate",
+                log_path=log_path,
+            )
+            events = latest_events(log_path=log_path)
+
+        self.assertEqual(2, len(events))
+
+
+def _ready_registry_entry(registry_entry_id: str, skin_asset_id: str) -> RendererSkinAssetRegistryEntry:
+    skin_asset = RendererSkinAssetReference(
+        skin_asset_id=skin_asset_id,
+        source_request_id="request-ready",
+        source_curated_asset_id="curated-ready",
+        dataset_uid="dataset-ready",
+        manifest_path="state/visual_assets/ready.manifest.json",
+        lifecycle_status=SkinAssetLifecycleStatus.READY,
+        renderer_targets=("displaytools",),
+    )
+    return RendererSkinAssetRegistryEntry(registry_entry_id, skin_asset)
 
 
 if __name__ == "__main__":

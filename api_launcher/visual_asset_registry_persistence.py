@@ -127,6 +127,20 @@ def read_visual_asset_registry_entry_payload_for_owned_test_database(
 ) -> dict[str, Any] | None:
     """Read one persisted visual registry entry from an owned test DB only."""
 
+    record = _read_visual_asset_registry_record_for_owned_test_database(
+        sqlite_path,
+        registry_entry_id,
+        allow_owned_test_database=allow_owned_test_database,
+    )
+    return _entry_payload_from_persistence_record(record) if record else None
+
+
+def _read_visual_asset_registry_record_for_owned_test_database(
+    sqlite_path: str | Path,
+    registry_entry_id: str,
+    *,
+    allow_owned_test_database: bool = False,
+) -> dict[str, Any] | None:
     if not allow_owned_test_database:
         raise ValueError(
             "Refusing to read visual asset registry entry without allow_owned_test_database=True"
@@ -140,9 +154,27 @@ def read_visual_asset_registry_entry_payload_for_owned_test_database(
         with closing(sqlite3.connect(path, timeout=30)) as conn:
             conn.row_factory = sqlite3.Row
             _require_owned_test_database(conn)
-            record = _fetch_registry_record(conn, registry_entry_id)
+            return _fetch_registry_record(conn, registry_entry_id)
 
-    return _entry_payload_from_persistence_record(record) if record else None
+def read_visual_asset_registry_entry_for_owned_test_database(
+    sqlite_path: str | Path,
+    registry_entry_id: str,
+    *,
+    allow_owned_test_database: bool = False,
+) -> RendererSkinAssetRegistryEntry | None:
+    """Read one registry entry object from an owned test DB only.
+
+    This object-returning helper is intentionally separate from write/upsert so
+    explicit event workflows can opt into emission without making persistence
+    itself know about event logging.
+    """
+
+    record = _read_visual_asset_registry_record_for_owned_test_database(
+        sqlite_path,
+        registry_entry_id,
+        allow_owned_test_database=allow_owned_test_database,
+    )
+    return _entry_from_persistence_record(record) if record else None
 
 
 def list_visual_asset_registry_entry_payloads_for_owned_test_database(
@@ -354,8 +386,17 @@ def _record_from_row(row: sqlite3.Row) -> dict[str, Any]:
 
 def _entry_payload_from_persistence_record(record: dict[str, Any]) -> dict[str, Any]:
     entry = _entry_from_persistence_record(record)
+    return _entry_payload_from_persistence_entry(entry, persistence_record=record)
+
+
+def _entry_payload_from_persistence_entry(
+    entry: RendererSkinAssetRegistryEntry,
+    *,
+    persistence_record: dict[str, Any] | None = None,
+) -> dict[str, Any]:
     payload = entry.to_dict()
-    payload["persistence_record"] = dict(record)
+    if persistence_record is not None:
+        payload["persistence_record"] = dict(persistence_record)
     payload["owned_test_database"] = True
     payload["auto_event_emission"] = False
     payload["control_plane_only"] = True
@@ -510,6 +551,7 @@ __all__ = [
     "OWNED_TEST_DATABASE_MARKER_TABLE",
     "VISUAL_ASSET_REGISTRY_OWNED_TEST_MARKER",
     "create_visual_asset_registry_table_for_owned_test_database",
+    "read_visual_asset_registry_entry_for_owned_test_database",
     "list_visual_asset_registry_entry_payloads_for_owned_test_database",
     "read_visual_asset_registry_entry_payload_for_owned_test_database",
     "visual_asset_registry_owned_test_drop_preview",

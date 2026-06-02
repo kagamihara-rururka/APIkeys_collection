@@ -885,6 +885,7 @@ class CatalogLauncherCli:
             or self.args.mvp_readiness_json
             or self.args.project_maturity_json
             or self.args.visual_registry_summary_json
+            or self.args.visual_registry_emit_ready_event_json
             or self.args.crawler_registry_report_json
             or self.args.adapter_review_json
             or self.args.resolve_adapter_plan_json

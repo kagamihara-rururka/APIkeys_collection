@@ -19,9 +19,9 @@
 
 ## 4. Explicit Event Boundary
 
-- [ ] 4.1 Add a separate explicit workflow/CLI helper that can call `log_visual_asset_ready_registry_entry()` for a persisted ready entry.
-- [ ] 4.2 Add duplicate-event policy tests before enabling event emission from persisted entries.
-- [ ] 4.3 Prove ordinary table write/upsert does not emit `visual_asset_ready` events.
+- [x] 4.1 Add a separate explicit workflow/CLI helper that can call `log_visual_asset_ready_registry_entry()` for a persisted ready entry.
+- [x] 4.2 Add duplicate-event policy tests before enabling event emission from persisted entries.
+- [x] 4.3 Prove ordinary table write/upsert does not emit `visual_asset_ready` events.
 
 ## 5. Documentation And Handoff
 

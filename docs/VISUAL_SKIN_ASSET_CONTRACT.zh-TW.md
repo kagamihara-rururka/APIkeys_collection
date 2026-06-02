@@ -70,12 +70,14 @@ flowchart TD
 | `visual_asset_ready_event_log_context()` | 把 `VisualAssetReadyEvent` 投影成 bounded event-log context，白名單輸出 manifest reference、lineage、status、renderer targets 與 safety flags。 | 不直接呼叫 `log_event()`，不輸出任意 metadata、secret、payload bytes 或 renderer internals。 |
 | `log_visual_asset_ready_event()` | 顯式把 `VisualAssetReadyEvent` 寫入 RRKAL event log，使用 bounded context 且支援注入 test logger。 | 不在 import 時寫 log，不自動訂閱 lifecycle，不寫任意 metadata 或 renderer payload。 |
 | `log_visual_asset_ready_registry_entry()` | 從 `ready` registry entry 建立 ready event，再用同一個 bounded writer 寫入 RRKAL event log。 | 不接受非 `ready` entry，不接 registry persistence，不自動監聽 lifecycle，也不讀 renderer payload。 |
+| `log_visual_asset_ready_from_owned_test_database()` | 從明確 acknowledged 的 RRKAL owned test registry DB 讀取指定 persisted ready entry，經 duplicate policy 檢查後顯式寫入 `visual_asset_ready` event。 | 不在 ordinary table write/upsert 時自動發 event；不接受非 owned DB，不讀 renderer payload，預設拒絕同一 registry entry / skin asset 的重複 ready event。 |
 | `skin_asset_status_display_profile()` | 把 lifecycle status 轉成 UI-neutral `status_icon`、`display_tone`、`display_label`、`next_action` 與 readiness flags。 | 前端不需要自己推論 planned/building/review_required 是否施工中，也不代表 renderer payload 已實作。 |
 | `visual_asset_registry_persistence_schema()` | 定義未來 `visual_skin_asset_registry` 的欄位、index、allowed status 與 migration guard。 | 不建立資料表、不連 DB、不自動發 event、不讀 renderer payload。 |
 | `visual_asset_registry_entry_persistence_record()` | 把 registry entry 投影成符合 persistence schema 的扁平 row，並序列化 renderer targets / bounded metadata。 | 不寫 DB、不執行 migration、不保存 payload / secret / token 類 metadata。 |
 | `visual_asset_registry_sqlite_ddl_preview()` | 依據 persistence schema 產生可審閱的 SQLite `CREATE TABLE` / `CREATE INDEX` dry-run SQL。 | 不連 SQLite、不建立資料表、不寫檔、不自動發 event；正式 migration 仍需 explicit guard。 |
 | `create_visual_asset_registry_table_for_owned_test_database()` | 只在明確 `allow_owned_test_database=True` 的 RRKAL owned test SQLite DB 中 materialize registry table 與 marker table。 | 不可作產品 migration；拒絕已有非 owned marker 的 SQLite DB，不寫使用者資料庫、不發 event、不讀 renderer payload。 |
 | `write_visual_asset_registry_entry_for_owned_test_database()` | 只在明確 `allow_owned_test_database=True` 的 RRKAL owned test SQLite DB 中 upsert 一筆 registry row，且 row shape 來自 `visual_asset_registry_entry_persistence_record()`。 | 不可作產品 repository write；拒絕未 opt-in / 非 owned DB，不自動發 ready event，不讀 renderer payload。 |
+| `read_visual_asset_registry_entry_for_owned_test_database()` | 只從 RRKAL owned test SQLite DB 讀回一筆 `RendererSkinAssetRegistryEntry` object，供 explicit workflow / CLI 進一步處理。 | 不寫 event、不掃使用者 DB；沒有 owned marker 時拒絕，不讀 manifest / `.npz` / renderer payload。 |
 | `read_visual_asset_registry_entry_payload_for_owned_test_database()` | 只從 RRKAL owned test SQLite DB 讀回一筆 `RendererSkinAssetRegistryEntry` 相容 control-plane payload。 | 不可掃使用者 DB；沒有 owned marker 時拒絕，不讀 manifest / `.npz` / renderer payload。 |
 | `list_visual_asset_registry_entry_payloads_for_owned_test_database()` | 只從 RRKAL owned test SQLite DB 列出 registry control-plane payloads。 | 不可作正式 UI repository list；沒有 owned marker 時拒絕，不觸發 lifecycle event。 |
 | `visual_asset_registry_summary_for_owned_test_database()` | 只從 RRKAL owned test SQLite DB 讀取 registry rows 並回傳 lifecycle counts、status display profiles、review count、renderer target counts 與 safety flags。 | 不可作正式 UI repository summary；沒有 owned marker 時拒絕，不讀 manifest / `.npz` / renderer payload，不 import 下游專案。 |
@@ -122,13 +124,14 @@ flowchart TD
 - Ready-event log context 只輸出 bounded manifest reference 與白名單 metadata，避免任意 metadata、secret 或 payload bytes 進入 event log。
 - Ready-event log writer 只在顯式呼叫時寫入 `visual_asset_ready` event，並使用同一份 bounded context。
 - Registry-entry ready-event writer 只接受 `ready` entry，會先經過 ready-event factory，再寫入 bounded event log。
+- Persisted-entry ready-event writer / CLI 只在顯式呼叫時從 RRKAL owned test DB 讀取指定 ready entry；預設 duplicate policy 會拒絕同一 registry entry 或 skin asset 的重複 `visual_asset_ready` event，除非明確使用 allow-duplicate path。
 - Lifecycle display profile 會把 `planned`、`building`、`review_required` 標成施工中 / review 類 tone，讓 Tk / Web / 未來 Qt 直接消費後端顯示契約。
 - `SkinBuildResult` 即使沒有 `skin_asset`，也會輸出 lifecycle display profile，讓 failed / review-required build result 可被 UI 安全顯示。
 - Registry persistence schema contract 已輸出 `visual_skin_asset_registry` 欄位、index、lifecycle vocabulary 與 migration guard，並明確標示 `schema_contract_only`、不自動建表、不自動發 event。
 - Registry persistence row projection 可把 entry 轉成 schema-aligned flat row，且 bounded metadata 會過濾 payload / secret / token 類 key。
 - Registry persistence SQLite DDL preview 可由 schema contract 產生 dry-run `CREATE TABLE` / `CREATE INDEX` SQL，且不連 DB、不建表、不包含 payload 欄位；project maturity 仍標示 renderer row 為 `contract_only`。
 - Owned test-only table creation helper 需要明確 `allow_owned_test_database=True`；它會建立 RRKAL marker table、materialize registry table/index，並拒絕已有非 owned marker 的 SQLite DB。
-- Owned test-only write/read/list helpers 需要明確 `allow_owned_test_database=True`；write 會消費 schema-aligned persistence record，read/list 會回傳 registry-entry 相容 control-plane payload，並保持 `auto_event_emission=false` / `payload_loading=false`。
+- Owned test-only write/read/list helpers 需要明確 `allow_owned_test_database=True`；write 會消費 schema-aligned persistence record，read/list 會回傳 registry-entry object 或相容 control-plane payload，並保持 `auto_event_emission=false` / `payload_loading=false`。
 - Owned test-only rollback/drop preview 需要明確 `allow_owned_test_database=True` 與 owned marker；它只回傳 DROP preview statements，並保持 `destructive_execution_enabled=false` / `mutates_database_state=false`。
 - Owned test-only read-side summary helper 需要明確 `allow_owned_test_database=True` 與 owned marker；它只輸出 lifecycle counts、status display profiles、review count、renderer target counts 與 safety flags，並保持 `auto_event_emission=false` / `payload_loading=false`。
 - Contract module 不 import `RRKAL_displaytools`、`rrkal-visual-compressor`、`vis_2_dis`、Taichi、PyQt。
@@ -162,7 +165,7 @@ flowchart TD
 安全的後續切片：
 
 1. 若要真正落地 registry persistence，先由 `visual_asset_registry_sqlite_ddl_preview()` 審閱 migration SQL，再消費 `visual_asset_registry_persistence_schema()` 與 `visual_asset_registry_entry_persistence_record()`，不得讓 repository layer 自行發明欄位或 row shape；正式 DB 路徑不能直接沿用 owned test helper 的 opt-in。
-2. 規格化何時由 registry persistence 或 explicit workflow 呼叫 `log_visual_asset_ready_registry_entry()`；不得在 import、普通 serialization、table write 或 lifecycle status set 時自動發 event。
+2. 若要把 owned test-only explicit event CLI 推進到正式 repository workflow，必須先定義正式 DB ownership / migration guard 與 duplicate-event policy 的持久化策略；不得讓 table write/upsert 自動發 event。
 3. 與 displaytools / compressor 透過 `L:\AGENT_EXCHANGE` 或正式 OpenSpec 對齊欄位，不直接 import 對方 repo。
 4. 若下游需要更多欄位，先版本化 projection schema，不要讓 downstream 直接依賴 `entry.to_dict()` 的完整內部形狀。
 

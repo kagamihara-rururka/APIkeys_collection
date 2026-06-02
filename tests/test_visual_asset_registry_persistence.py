@@ -366,7 +366,15 @@ class VisualAssetRegistryPersistenceTests(unittest.TestCase):
 
     def test_persistence_module_does_not_import_downstream_renderer_projects(self) -> None:
         source = Path("api_launcher/visual_asset_registry_persistence.py").read_text(encoding="utf-8")
-        forbidden = ("RRKAL_displaytools", "rrkal_visual_compressor", "vis_2_dis", "taichi", "PyQt")
+        forbidden = (
+            "RRKAL_displaytools",
+            "rrkal_visual_compressor",
+            "vis_2_dis",
+            "taichi",
+            "PyQt",
+            "visual_asset_event_logging",
+            "log_event",
+        )
         for token in forbidden:
             self.assertNotIn(token, source)
 

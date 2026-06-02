@@ -17,7 +17,11 @@ from api_launcher.importers.compatibility_shims import importer_compatibility_sh
 from api_launcher.mvp_readiness import build_mvp_readiness_payload
 from api_launcher.repository import ApiCatalogRepository
 from api_launcher.simulation_bridge import DEFAULT_SIMULATION_BACKENDS
-from api_launcher.visual_asset_event_logging import log_visual_asset_ready_event, log_visual_asset_ready_registry_entry
+from api_launcher.visual_asset_event_logging import (
+    log_visual_asset_ready_event,
+    log_visual_asset_ready_from_owned_test_database,
+    log_visual_asset_ready_registry_entry,
+)
 from api_launcher.visual_asset_contracts import (
     SKIN_ASSET_LIFECYCLE_STATUSES,
     skin_asset_status_display_profile,
@@ -309,6 +313,9 @@ def _renderer_bridge_metrics() -> dict[str, Any]:
         "visual_asset_ready_event_log_context_contract": visual_asset_ready_event_log_context.__name__,
         "visual_asset_ready_event_log_writer_contract": log_visual_asset_ready_event.__name__,
         "visual_asset_ready_registry_entry_log_writer_contract": log_visual_asset_ready_registry_entry.__name__,
+        "visual_asset_ready_owned_test_db_log_writer_contract": (
+            log_visual_asset_ready_from_owned_test_database.__name__
+        ),
         "skin_asset_lifecycle_display_profile_contract": skin_asset_status_display_profile.__name__,
         "visual_asset_registry_persistence_schema_contract": visual_asset_registry_persistence_schema.__name__,
         "visual_asset_registry_entry_persistence_record_contract": visual_asset_registry_entry_persistence_record.__name__,

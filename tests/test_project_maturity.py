@@ -95,6 +95,10 @@ class ProjectMaturityTests(unittest.TestCase):
             renderer_metrics["visual_asset_ready_registry_entry_log_writer_contract"],
         )
         self.assertEqual(
+            "log_visual_asset_ready_from_owned_test_database",
+            renderer_metrics["visual_asset_ready_owned_test_db_log_writer_contract"],
+        )
+        self.assertEqual(
             "visual_asset_registry_sqlite_ddl_preview",
             renderer_metrics["visual_asset_registry_sqlite_ddl_preview_contract"],
         )
