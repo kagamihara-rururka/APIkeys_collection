@@ -2,7 +2,7 @@
 ## 2026-06-02 16:42 +08:00 Content registry declarative review rules
 - 本輪把 `api_launcher/content_registry.py` 的 review-only content format 分派收斂成 `ContentReviewRule` / `CONTENT_REVIEW_RULES`，並新增 `content_registry_report()`，讓 archive、scientific grid、geospatial asset、columnar table、database snapshot、document/markup 的 review lane 變成可查的宣告式 contract。
 - 邊界：這不新增 NetCDF / GeoTIFF / Parquet parser，不改 CSV/JSON/Socrata bounded sample 的可匯入行為，不改下載、匯入、Web/Tk 顯示或 adapter review 決策；只是把既有 content parser review routing 從散落分支收斂為可測 registry/report。
-- 已驗證：`py -3 -B -m py_compile api_launcher\content_registry.py api_launcher\project_maturity.py tests\test_content_registry.py tests\test_project_maturity.py` OK；`py -3 -B -m unittest tests.test_content_registry tests.test_project_maturity -v` 通過 20 tests；`git diff --check` OK。CI 尚待 push 後確認。
+- 已驗證：`py -3 -B -m py_compile api_launcher\content_registry.py api_launcher\project_maturity.py tests\test_content_registry.py tests\test_project_maturity.py` OK；`py -3 -B -m unittest tests.test_content_registry tests.test_project_maturity -v` 通過 20 tests；完整 smoke `state\logs\pre_push_smoke_20260602_164342.log` 通過 1091 tests / 4 skipped，MVP demo `download_import_completed` / `row_count=3`；GitHub Actions run `26808977279` 通過 Ubuntu、Windows 與 real DB smoke。Code commit：`def2e02 Declarativize content registry review rules`。
 
 ## 2026-06-02 16:24 +08:00 Tk background job start result contract
 - 本輪補強 `frontends/tk/background_jobs.py`：新增 `TkBackgroundJobStartResult` 與 `start_single_flight_thread_result()`，讓 single-flight helper 可結構化回報 `started` / `duplicate` / `capacity`、active job count 與 capacity limit；既有 `start_single_flight_thread()` 仍維持 bool 相容回傳。
