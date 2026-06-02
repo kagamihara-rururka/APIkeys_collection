@@ -62,7 +62,7 @@ class DeveloperDiagnosticsTests(unittest.TestCase):
                 "display_label": "可展示小閉環",
                 "status_icon": "🚧",
             }
-            with patch("api_launcher.core.crawler_registry_report", return_value=unicode_report), redirect_stdout(stdout):
+            with patch("api_launcher.cli_registry_reports.crawler_registry_report", return_value=unicode_report), redirect_stdout(stdout):
                 rc = main(
                     [
                         "--db",

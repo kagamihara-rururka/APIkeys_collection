@@ -69,7 +69,7 @@ class DatasetAdapterRegistryTests(unittest.TestCase):
                 "display_label": "少數 deep adapter 已落地",
                 "status_icon": "🚧",
             }
-            with patch("api_launcher.core.dataset_adapter_report", return_value=unicode_report), redirect_stdout(stdout):
+            with patch("api_launcher.cli_registry_reports.dataset_adapter_report", return_value=unicode_report), redirect_stdout(stdout):
                 rc = main(
                     [
                         "--db",

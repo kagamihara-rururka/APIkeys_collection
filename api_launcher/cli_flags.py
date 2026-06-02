@@ -19,6 +19,7 @@ def command_requested(args: argparse.Namespace) -> bool:
     from api_launcher.cli_manifest_import import manifest_import_command_active
     from api_launcher.cli_manual_import import manual_import_command_active
     from api_launcher.cli_portal_intake import portal_intake_command_active
+    from api_launcher.cli_registry_reports import registry_report_command_active
     from api_launcher.cli_visual_asset_registry import visual_asset_registry_command_active
     from api_launcher.cli_yfinance import yfinance_command_active
 
@@ -44,9 +45,7 @@ def command_requested(args: argparse.Namespace) -> bool:
         bool(args.write_project_maturity_json),
         bool(args.project_maturity_markdown),
         visual_asset_registry_command_active(args),
-        args.crawler_registry_report_json,
-        args.content_registry_report_json,
-        args.dataset_adapter_report_json,
+        registry_report_command_active(args),
         yfinance_command_active(args),
         bool(args.adapter_review_plan),
         args.adapter_review_json,
