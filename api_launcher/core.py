@@ -65,6 +65,7 @@ from api_launcher.cli_manual_import import (
     validate_manual_import_args,
     write_local_file_manifest_cli,
 )
+from api_launcher.cli_project_maturity import add_project_maturity_args, project_maturity_command_active, run_project_maturity_cli
 from api_launcher.cli_visual_asset_registry import add_visual_asset_registry_args, run_visual_asset_registry_cli
 from api_launcher.cli_yfinance import add_yfinance_args, run_yfinance_cli
 from api_launcher.cli_registry_reports import add_registry_report_args, registry_report_command_active, run_registry_report_cli
@@ -105,11 +106,6 @@ from api_launcher.heartbeat import (
     write_heartbeat_report,
 )
 from api_launcher.mvp_readiness import build_mvp_readiness_payload
-from api_launcher.project_maturity import (
-    build_project_maturity_payload,
-    render_project_maturity_markdown,
-    write_project_maturity_payload,
-)
 from api_launcher.downloads.http import HTTPDownloadAdapter, download_target_from_plan_entry
 from api_launcher.integrations import (
     active_ai_profile,
@@ -648,9 +644,7 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     parser.add_argument("--run-mvp-demo-smoke-json", help="write the canonical MVP demo flow and run its offline download/import smoke as JSON")
     parser.add_argument("--mvp-readiness-json", action="store_true", help="emit canonical MVP closure readiness as JSON")
     parser.add_argument("--write-mvp-readiness-json", default="", help="write canonical MVP closure readiness JSON")
-    parser.add_argument("--project-maturity-json", action="store_true", help="emit RRKAL project maturity matrix as JSON")
-    parser.add_argument("--write-project-maturity-json", default="", help="write RRKAL project maturity matrix JSON")
-    parser.add_argument("--project-maturity-markdown", default="", help="write RRKAL project maturity matrix Markdown")
+    add_project_maturity_args(parser)
     add_visual_asset_registry_args(parser)
     add_registry_report_args(parser)
     add_yfinance_args(parser)
@@ -816,7 +810,7 @@ class CatalogLauncherCli:
             self.write_mvp_demo_flow()
             self.run_mvp_demo_smoke()
             self.show_mvp_readiness()
-            self.show_project_maturity()
+            run_project_maturity_cli(self.args, self.repository)
             run_visual_asset_registry_cli(self.args)
             run_registry_report_cli(self.args)
             run_yfinance_cli(self.args)
@@ -884,7 +878,7 @@ class CatalogLauncherCli:
             or self.args.run_download_plan_json
             or bool(self.args.run_mvp_demo_smoke_json)
             or self.args.mvp_readiness_json
-            or self.args.project_maturity_json
+            or project_maturity_command_active(self.args)
             or self.args.visual_registry_summary_json
             or self.args.visual_registry_emit_ready_event_json
             or registry_report_command_active(self.args)
@@ -1041,28 +1035,6 @@ class CatalogLauncherCli:
             if not self.args.mvp_readiness_json:
                 print(f"[mvp-readiness] wrote {output_path}")
         if self.args.mvp_readiness_json:
-            print_cli_json(payload)
-
-    def show_project_maturity(self) -> None:
-        if not (
-            self.args.project_maturity_json
-            or self.args.write_project_maturity_json
-            or self.args.project_maturity_markdown
-        ):
-            return
-        payload = build_project_maturity_payload(self.repository, db_path=self.args.db)
-        if self.args.write_project_maturity_json:
-            output_path = resolve_project_path(self.args.write_project_maturity_json)
-            write_project_maturity_payload(output_path, payload)
-            if not self.args.project_maturity_json:
-                print(f"[project-maturity] wrote {output_path}")
-        if self.args.project_maturity_markdown:
-            output_path = resolve_project_path(self.args.project_maturity_markdown)
-            output_path.parent.mkdir(parents=True, exist_ok=True)
-            output_path.write_text(render_project_maturity_markdown(payload), encoding="utf-8")
-            if not self.args.project_maturity_json:
-                print(f"[project-maturity] wrote {output_path}")
-        if self.args.project_maturity_json:
             print_cli_json(payload)
 
     def show_adapter_review_plan(self) -> None:

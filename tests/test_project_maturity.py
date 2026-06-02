@@ -338,7 +338,7 @@ class ProjectMaturityTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmpdir:
             stdout = io.StringIO()
             with patch(
-                "api_launcher.core.build_project_maturity_payload",
+                "api_launcher.cli_project_maturity.build_project_maturity_payload",
                 return_value={
                     "matrix_version": "test",
                     "reporting_rule": "Use matrix.",
