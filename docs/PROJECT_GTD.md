@@ -3,6 +3,7 @@
 Last updated: 2026-06-02
 
 ## 目前工作焦點 / Active Focus
+- [x] 2026-06-02 `crawler_asset_download_import` maturity metrics 已補：`--project-maturity-json` 現在會列出 formal asset/seed download-import service、recommended seed closure、shared display payload、CLI JSON surfaces、Web/Tk surfaces、credential blocking 與 partial 原因；這是進度證據 surface，不改產品流程、不把全部 provider 視為已閉環。
 - [x] 2026-06-02 Content registry report CLI JSON 已補：新增 `--content-registry-report-json`，可直接輸出 `content_registry_report()` 的 agent-readable JSON，列出 direct SQLite importer、resolver-backed format、review rules 與 unknown fallback；這只是診斷/契約 surface，不新增 parser、不改下載或匯入行為。
 - [x] 2026-06-02 Content registry review rules 已宣告式化：`api_launcher/content_registry.py` 新增 `ContentReviewRule` / `CONTENT_REVIEW_RULES` / `content_registry_report()`，把 archive、scientific grid、geospatial asset、columnar table、database snapshot、document/markup 的 review lane 轉成可查 contract；不新增大 parser、不改 CSV/JSON/Socrata bounded sample 匯入行為。
 - [x] 2026-06-02 Tk background job start result contract 已補：`frontends/tk/background_jobs.py` 新增 `TkBackgroundJobStartResult` / `start_single_flight_thread_result()`，讓 single-flight helper 可回報 `started`、`duplicate`、`capacity` 與 active/capacity counts；既有 workflow 仍用 bool wrapper，不改 Tk 行為。`--project-maturity-json` 的 background scheduler metrics 也已暴露這個 contract 與 guard test。

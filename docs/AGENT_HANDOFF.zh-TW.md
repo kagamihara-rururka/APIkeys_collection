@@ -1,4 +1,9 @@
 # Agent 接力卡
+## 2026-06-02 17:19 +08:00 Crawler asset download/import maturity evidence
+- 本輪把 `--project-maturity-json` 的 `crawler_asset_download_import` row 補上可查 metrics：formal asset / seed download-import service、recommended seed closure service、shared display payload、agent-readable CLI surfaces、Web/Tk surfaces、credential-blocking flag 與 partial 原因。
+- 邊界：這不改 Web/Tk/CLI 操作、不改下載或匯入行為、不新增 provider adapter、不新增 content parser，也不把此 row 升級成 100%；它只是把既有小閉環證據從空 metrics 改成可審 payload。
+- 已驗證：`py -3 -B -m py_compile api_launcher\project_maturity.py tests\test_project_maturity.py` OK；`py -3 -B -m unittest tests.test_project_maturity -v` 通過 6 tests；`--project-maturity-json` 可見 `crawler_asset_download_import.metrics`；完整 smoke `state\logs\pre_push_smoke_20260602_171323.log` 通過 1092 tests / 4 skipped，MVP demo `download_import_completed` / `row_count=3`；GitHub Actions run `26810453332` 通過 Ubuntu、Windows 與 real DB smoke。Code commit：`a7521ec Expose crawler asset maturity evidence`。
+
 ## 2026-06-02 17:06 +08:00 Content registry report CLI JSON
 - 本輪新增 `--content-registry-report-json`，讓 `api_launcher/content_registry.py` 的 `content_registry_report()` 可直接由 agent-readable CLI 輸出；它會列出 direct SQLite importer、resolver-backed format、review rule、unknown fallback parser/review bucket。
 - 邊界：這是 content parser/import contract 的診斷入口，不新增 NetCDF / GeoTIFF / Parquet parser，不改 CSV/JSON/Socrata bounded sample 的可匯入行為，不改下載、匯入、Web/Tk 顯示、adapter review 或 maturity 計算。
