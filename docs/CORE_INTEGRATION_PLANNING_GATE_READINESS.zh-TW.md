@@ -21,6 +21,7 @@
 | Core review-required diagnostic | `--core-review-required-report-json` / `core_review_required_report.v1` |
 | Core job-status diagnostic | `--core-job-status-report-json` / `core_job_status_report.v1` |
 | Core lifecycle audit diagnostic | `--core-lifecycle-audit-json` / `core_lifecycle_audit_report.v1` |
+| Core manifest-reference diagnostic | `--core-manifest-reference-report-json` / `core_manifest_reference_report.v1` |
 
 `partial` 是刻意保守的狀態。它表示 Core 已有 registry / lifecycle / manifest / review / lineage 的 evidence surface，但仍缺 runtime state machine、unified scheduler、review queue persistence、deep adapter coverage 等證據。不得把此狀態解讀為 integration 已可開工。
 
@@ -122,6 +123,19 @@
 
 它不新增 lifecycle status，不改 schema，不定義 transition persistence，不啟用 automatic transition，也不接 cross-repo builder lifecycle adapter。
 
+## Manifest Reference Report
+
+`--core-manifest-reference-report-json` 是 Core-only diagnostic，用來把 download sidecar manifest、Visual/Skin manifest reference、registry persistence projection 與 ready-event manifest context 從完整 readiness report 中獨立拉出。它不是正式 user DB persistence，也不是 downstream renderer/compressor consumer contract。
+
+目前輸出重點：
+
+- `schema_version = core_manifest_reference_report.v1`
+- `status = partial`
+- existing evidence 包含 `AssetManifest` sidecar contract、`RendererSkinAssetReference` manifest reference、`visual_asset_registry_entry_persistence_record()` row projection、`visual_asset_ready_event_log_context()` event context。
+- missing evidence 包含 formal user DB manifest persistence、manifest payload health check 與 cross-project manifest consumer contract。
+- blocked surface 明確包含 renderer payload loading disabled、`.npz` reading disabled、automatic manifest ready-event emission disabled。
+- `o_1` triggers 包含 cross-project manifest consumer contract、payload health check、formal manifest reference migration、automatic ready event emission，以及任何 Core 讀 `.npz` / renderer payload 的需求。
+
 ## Integration Planning Gate Input Summary
 
 Core 可以提供：
@@ -167,11 +181,7 @@ Core 尚不能提供：
 
 ## Proposed Next Core-Only Slices
 
-1. **Manifest Reference Persistence Readiness**
-   - 目標：把 visual registry schema contract、DDL preview、owned-test persistence helper、formal DB gap 整理成 readiness report。
-   - 邊界：不建立正式 user DB table，不跑 migration。
-
-2. **Deep Adapter Coverage Plan**
+1. **Deep Adapter Coverage Plan**
    - 目標：列出 14 個 source crawler type 與 3 個 deep adapter 的差距，標示哪些只需要 metadata crawler、哪些需要真正 download/import adapter。
    - 邊界：不新增 adapter，避免 class explosion。
 
@@ -189,6 +199,7 @@ Core 尚不能提供：
 - Current review-required JSON: `core_review_required_report.v1`, status `partial`。
 - Current job-status JSON: `core_job_status_report.v1`, status `partial`。
 - Current lifecycle audit JSON: `core_lifecycle_audit_report.v1`, status `partial`。
+- Current manifest-reference JSON: `core_manifest_reference_report.v1`, status `partial`。
 - Cross-repo touch: none.
 - Renderer/compressor/SkinAsset implementation: none.
 - Lifecycle schema/status change: none.

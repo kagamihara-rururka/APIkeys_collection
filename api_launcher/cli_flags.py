@@ -15,6 +15,7 @@ def command_requested(args: argparse.Namespace) -> bool:
     from api_launcher.cli_core_review_required import core_review_required_command_active
     from api_launcher.cli_core_job_status import core_job_status_command_active
     from api_launcher.cli_core_lifecycle_audit import core_lifecycle_audit_command_active
+    from api_launcher.cli_core_manifest_reference import core_manifest_reference_command_active
     from api_launcher.cli_crawler_assets import crawler_asset_command_active
     from api_launcher.cli_crawler_run_records import crawler_run_record_command_active
     from api_launcher.cli_dataset_discovery import dataset_discovery_command_active
@@ -50,6 +51,7 @@ def command_requested(args: argparse.Namespace) -> bool:
         core_review_required_command_active(args),
         core_job_status_command_active(args),
         core_lifecycle_audit_command_active(args),
+        core_manifest_reference_command_active(args),
         visual_asset_registry_command_active(args),
         registry_report_command_active(args),
         yfinance_command_active(args),
