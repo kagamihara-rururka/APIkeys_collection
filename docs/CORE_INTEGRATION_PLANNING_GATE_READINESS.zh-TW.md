@@ -23,6 +23,8 @@
 | Core review queue readiness CI | `c6e8da4` / GitHub Actions run `26837600265` PASS |
 | Core review item identity contract draft | `9327669` / `core_review_item_identity_contract_draft.v1` exposed through `--core-review-queue-readiness-json` |
 | Core review item identity contract draft CI | GitHub Actions run `26848479833` PASS |
+| Core readiness review item identity aggregation | `feb183a` / `core_review_item_identity_contract_draft.v1` exposed through `--core-readiness-report-json` review evidence |
+| Core readiness review item identity aggregation CI | GitHub Actions run `26849126467` PASS |
 | Core job-status diagnostic | `--core-job-status-report-json` / `core_job_status_report.v1` |
 | Core bounded scheduler plan diagnostic | `--core-bounded-scheduler-plan-json` / `core_bounded_scheduler_plan_report.v1` |
 | Core bounded scheduler plan CI | `5b1b831` / GitHub Actions run `26838847085` PASS |
