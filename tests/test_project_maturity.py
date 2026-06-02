@@ -284,8 +284,17 @@ class ProjectMaturityTests(unittest.TestCase):
                 return_value={
                     "matrix_version": "test",
                     "reporting_rule": "Use matrix.",
-                    "rows": [],
-                    "canonical_delivery_scope": {"closure_percent": 100},
+                    "rows": [
+                        {
+                            "area_id": "renderer_unreal_simulation",
+                            "display_label": "施工中 / 合約",
+                            "status_icon": "🚧",
+                        }
+                    ],
+                    "canonical_delivery_scope": {
+                        "closure_percent": 100,
+                        "status_label": "可展示小閉環",
+                    },
                 },
             ):
                 with redirect_stdout(stdout):
@@ -303,8 +312,12 @@ class ProjectMaturityTests(unittest.TestCase):
         self.assertEqual(0, rc)
         self.assertEqual("test", payload["matrix_version"])
         self.assertEqual(100, payload["canonical_delivery_scope"]["closure_percent"])
+        self.assertEqual("可展示小閉環", payload["canonical_delivery_scope"]["status_label"])
+        self.assertEqual("施工中 / 合約", payload["rows"][0]["display_label"])
+        self.assertEqual("🚧", payload["rows"][0]["status_icon"])
         self.assertNotIn("[db]", stdout.getvalue())
         self.assertNotIn("[seed]", stdout.getvalue())
+        self.assertTrue(stdout.getvalue().isascii())
 
 
 if __name__ == "__main__":

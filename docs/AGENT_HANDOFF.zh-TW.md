@@ -1,4 +1,9 @@
 # Agent 接力卡
+## 2026-06-02 08:40 +08:00 Project maturity JSON stdout pipeline guard
+- 本輪修正 `--project-maturity-json` 的 stdout JSON 輸出：stdout 改用 ASCII-escaped JSON，避免 Windows PowerShell legacy pipeline / redirection 在外部程式之間轉碼時，把成熟度矩陣的中文與 emoji label 變成 `????`。寫檔路徑仍保留 UTF-8 中文；解析 JSON 後仍可還原「可展示小閉環」「施工中 / 合約」等顯示文案。
+- 邊界：這只改 agent-readable stdout encoding safety，不改 maturity matrix 計算、不改 Web/Tk 顯示、不改 renderer/crawler/download/import 行為，也不表示所有 JSON CLI 已完成同樣收斂；這次先守住使用者查詢整體進度時最常用的正式入口。
+- 已驗證：`py -3 -B -m unittest tests.test_project_maturity -v` 通過 6 tests；`py -3 -B -m py_compile api_launcher\core.py tests\test_project_maturity.py` OK；PowerShell pipeline `py -3 -B APIkeys_collection.py --project-maturity-json | py -3 -B -c "import sys,json; ..."` 可正常 parse 並輸出 Unicode escape，證明值未在 pipe 中被破壞。
+
 ## 2026-06-02 08:31 +08:00 Visual/Skin registry persistence OpenSpec ready to archive
 - `openspec/changes/visual-asset-registry-persistence/tasks.md` 已全數勾選完成。此 change 已完成 dry-run schema、owned test persistence、read-side summary、CLI JSON/debug endpoint、explicit ready-event boundary、duplicate-event guard、ordinary upsert no-auto-event guard，以及 docs/checks/smoke/CI。
 - 邊界：這只是把 OpenSpec task state 標成 ready-to-archive，不改產品行為、不接 UI、不接正式 user DB repository、不讀 renderer payload、不 import displaytools / visual-compressor / vis_2_dis。尚未執行 OpenSpec archive；若要 archive，下一輪應走 archive 流程。

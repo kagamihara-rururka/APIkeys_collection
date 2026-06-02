@@ -1062,7 +1062,10 @@ class CatalogLauncherCli:
             if not self.args.project_maturity_json:
                 print(f"[project-maturity] wrote {output_path}")
         if self.args.project_maturity_json:
-            print(json.dumps(payload, ensure_ascii=False, indent=2))
+            # Stdout JSON is read by agents and may be piped through Windows
+            # PowerShell. ASCII escaping keeps the stream parseable even when
+            # the shell decodes external-process output with a legacy codepage.
+            print(json.dumps(payload, ensure_ascii=True, indent=2))
 
     def show_crawler_registry_report(self) -> None:
         if self.args.crawler_registry_report_json:
