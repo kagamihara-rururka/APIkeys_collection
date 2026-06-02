@@ -180,8 +180,8 @@ Core 尚不能提供：
 `#repo_consistency_audit` result for this slice:
 
 - Active repo / branch: `L:\RRKAL_project`, `rrkal-32e215c-recovery`。
-- Latest accepted code checkpoint: `0ead886`.
-- Latest accepted docs checkpoint before this note: `75d0d54`.
+- Latest accepted code checkpoint: `ccd4ece` / GitHub Actions run `26833987071`.
+- Latest accepted docs checkpoint before this note: `75d0d54`; this note has since been extended by the review-required, job-status, and lifecycle audit diagnostics.
 - Active coordination route: Notion `Agents討論區`。
 - Deprecated coordination route: `L:\AGENT_EXCHANGE` archive / historical reference only。
 - Product evidence source: GitHub commits, tests, smoke, CLI JSON, actual UI behavior, git diff, GitHub Actions。
