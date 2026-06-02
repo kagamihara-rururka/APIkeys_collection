@@ -54,6 +54,7 @@ from api_launcher.cli_crawler_assets import add_crawler_asset_args, run_crawler_
 from api_launcher.cli_crawler_run_records import add_crawler_run_record_args, run_crawler_run_record_cli
 from api_launcher.cli_download_plan import run_download_plan_cli
 from api_launcher.cli_json import print_cli_json
+from api_launcher.cli_handoff import add_handoff_args, handoff_json_stdout_active, run_handoff_cli
 from api_launcher.cli_manifest_import import (
     import_csv_manifest_cli,
     import_json_manifest_cli,
@@ -99,7 +100,6 @@ from api_launcher.downloads.eligibility import DownloadEligibility, assess_provi
 from api_launcher.downloads.plan_runner import load_download_plan_file
 from api_launcher.environment import EnvironmentCheck, run_startup_checks
 from api_launcher.event_log import latest_events, log_event, log_exception
-from api_launcher.handoff import build_handoff_snapshot, handoff_snapshot_to_dict, render_handoff_markdown
 from api_launcher.heartbeat import (
     build_heartbeat_payload,
     write_heartbeat_agent_prompt,
@@ -678,8 +678,7 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     parser.add_argument("--show-logs", type=int, default=0, help="print recent structured launcher log events")
     add_crawler_asset_args(parser)
     add_crawler_run_record_args(parser)
-    parser.add_argument("--handoff-report", help="write a Markdown handoff report for humans and agents")
-    parser.add_argument("--handoff-report-json", action="store_true", help="emit handoff snapshot as agent-readable JSON")
+    add_handoff_args(parser)
     parser.add_argument("--heartbeat-report", help="write a heartbeat readiness Markdown report")
     parser.add_argument("--heartbeat-plan-json", action="store_true", help="emit heartbeat readiness and next-task plan as JSON")
     parser.add_argument("--write-heartbeat-plan-json", default="", help="write heartbeat readiness and next-task plan JSON")
@@ -820,7 +819,7 @@ class CatalogLauncherCli:
             self.show_logs()
             run_crawler_asset_cli(self.args, self.repository, log_event)
             run_crawler_run_record_cli(self.args)
-            self.write_handoff_report()
+            run_handoff_cli(self.args, self.repository)
             self.run_heartbeat_report()
             self.show_workspace_inventory()
             portal_intake_cli(self.args)
@@ -876,7 +875,7 @@ class CatalogLauncherCli:
             or self.args.resolve_adapter_plan_json
             or self.args.manual_import_json
             or self.args.dataset_discovery_seed_coverage_json
-            or self.args.handoff_report_json
+            or handoff_json_stdout_active(self.args)
             or self.args.crawler_asset_listing_json
             or self.args.crawler_asset_seeds_json
             or self.args.crawler_seed_download_import_json
@@ -1111,19 +1110,6 @@ class CatalogLauncherCli:
                     f"{event.get('component', '')}:{event.get('event', '')} "
                     f"{event.get('message', '')}"
                 )
-
-    def write_handoff_report(self) -> None:
-        if self.args.handoff_report or self.args.handoff_report_json:
-            snapshot = build_handoff_snapshot(self.repository)
-            if self.args.handoff_report:
-                output_path = resolve_project_path(self.args.handoff_report)
-                output_path.parent.mkdir(parents=True, exist_ok=True)
-                output_path.write_text(render_handoff_markdown(snapshot), encoding="utf-8")
-                if not self.args.handoff_report_json:
-                    print(f"[handoff] wrote {output_path}")
-            if self.args.handoff_report_json:
-                # JSON mode 直接輸出同一份 snapshot；避免混入 `[handoff] wrote ...` 破壞 parser。
-                print_cli_json(handoff_snapshot_to_dict(snapshot))
 
     def run_heartbeat_report(self) -> None:
         if not (

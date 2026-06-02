@@ -16,6 +16,7 @@ def command_requested(args: argparse.Namespace) -> bool:
     from api_launcher.cli_dataset_discovery import dataset_discovery_command_active
     from api_launcher.cli_discovery import discovery_command_active
     from api_launcher.cli_download_plan import download_plan_command_active
+    from api_launcher.cli_handoff import handoff_command_active
     from api_launcher.cli_manifest_import import manifest_import_command_active
     from api_launcher.cli_manual_import import manual_import_command_active
     from api_launcher.cli_mvp import mvp_command_active
@@ -58,8 +59,7 @@ def command_requested(args: argparse.Namespace) -> bool:
         args.show_logs > 0,
         crawler_asset_command_active(args),
         crawler_run_record_command_active(args),
-        bool(args.handoff_report),
-        args.handoff_report_json,
+        handoff_command_active(args),
         bool(args.heartbeat_report),
         args.heartbeat_plan_json,
         bool(args.write_heartbeat_plan_json),
