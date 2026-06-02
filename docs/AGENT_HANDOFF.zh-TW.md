@@ -1,4 +1,9 @@
 # Agent 接力卡
+## 2026-06-02 17:54 +08:00 Dataset adapter report CLI JSON
+- 本輪新增 `--dataset-adapter-report-json`，讓 `dataset_adapter_report()` 可直接由 CLI 輸出 agent-readable JSON；它列出現有 provider-specific deep adapter inventory、adapter ids、provider ids、registered adapter metadata 與 coverage boundary。
+- 邊界：這是 developer/agent 診斷入口，不新增 adapter、不改 adapter discovery、不改 source crawler、download/import、Web/Tk 或 maturity 計算邏輯；一般使用者流程不受影響。
+- 已驗證：不寫 pyc 的 `compile()` 檢查通過；`py -3 -B -m unittest tests.test_dataset_adapters tests.test_cli_json -v` 通過 6 tests；實跑 `--dataset-adapter-report-json` 可由下游 Python `json.load(sys.stdin)` 解析；第一次完整 smoke `state\logs\pre_push_smoke_20260602_174437.log` 在 MVP demo CLI 讀 `APIkeys_collection.py` 時遇到 L 槽 transient `[Errno 13] Permission denied`，立即重跑 `state\logs\pre_push_smoke_20260602_174739.log` 通過 1096 tests / 4 skipped，MVP demo `download_import_completed` / `row_count=3`；GitHub Actions run `26812174056` 通過 Ubuntu、Windows 與 real DB smoke。Code commit：`cabdbe0 Add dataset adapter report CLI JSON`。
+
 ## 2026-06-02 17:37 +08:00 Provider-specific deep adapter maturity evidence
 - 本輪新增 `dataset_adapter_report()` / `DatasetAdapterRegistryEntry`，讓 `--project-maturity-json` 的 `provider_specific_deep_adapters` row 不再只有 count，而是列出三個現有 deep adapter：`gebco_topography`、`hyg_star_catalog`、`yfinance_market_data`，以及 provider id、adapter class、module、delivery boundary、supported formats 與 coverage boundary。
 - 邊界：這不新增 adapter、不改 `adapters_for_provider()` 行為、不改下載 / 匯入 / Web / Tk / source crawler handler；它只把「provider-specific deep adapter 覆蓋不等於 14 個 source crawler type 覆蓋」做成可查 payload。
