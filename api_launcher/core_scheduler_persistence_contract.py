@@ -1,16 +1,22 @@
 from __future__ import annotations
 
+import sqlite3
 from dataclasses import dataclass
+from contextlib import closing
+from pathlib import Path
 from typing import Any
 
 from api_launcher.core_scheduler_contracts import (
     CORE_SCHEDULER_JOB_CONTRACT_SCHEMA_VERSION,
     SCHEDULER_JOB_STATUS_VALUES,
 )
+from api_launcher.sqlite_write_gate import sqlite_write_gate
 
 
 CORE_SCHEDULER_QUEUE_SCHEMA_VERSION = "core_scheduler_queue_persistence_contract.v1"
 CORE_SCHEDULER_QUEUE_TABLE_NAME = "core_scheduler_job_queue"
+OWNED_TEST_DATABASE_MARKER_TABLE = "__rrkal_owned_test_database_marker"
+SCHEDULER_QUEUE_OWNED_TEST_MARKER = "core_scheduler_queue_persistence"
 
 
 @dataclass(frozen=True)
@@ -156,6 +162,127 @@ def scheduler_queue_sqlite_ddl_preview() -> dict[str, Any]:
     }
 
 
+def scheduler_queue_owned_test_table_helper_contract() -> dict[str, Any]:
+    """Describe the owned-test table helper without opening a database."""
+
+    return {
+        "helper": "create_scheduler_queue_table_for_owned_test_database",
+        "scope": "owned_test_database_only",
+        "requires_allow_owned_test_database": True,
+        "rejects_existing_unowned_database": True,
+        "materializes_schema": True,
+        "writes_job_rows": False,
+        "implements_scheduler_runtime": False,
+        "user_database_write_allowed": False,
+        "auto_lifecycle_event_emission": False,
+        "safety": {
+            "control_plane_only": True,
+            "changes_lifecycle_schema": False,
+            "changes_lifecycle_statuses": False,
+            "imports_renderer_projects": False,
+            "imports_compressor_projects": False,
+            "reads_renderer_payloads": False,
+            "reads_npz": False,
+            "cross_repo_implementation": False,
+        },
+    }
+
+
+def create_scheduler_queue_table_for_owned_test_database(
+    sqlite_path: str | Path,
+    *,
+    allow_owned_test_database: bool = False,
+) -> dict[str, Any]:
+    """Materialize the queue table only in an explicitly owned test database.
+
+    This is not a product migration and it does not write scheduler jobs. It
+    exists to prove the dry-run DDL can be executed under a strict ownership
+    guard while leaving user databases untouched by default.
+    """
+
+    if not allow_owned_test_database:
+        raise ValueError(
+            "Refusing to create scheduler queue table without allow_owned_test_database=True"
+        )
+
+    path = Path(sqlite_path).expanduser().resolve(strict=False)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    preview = scheduler_queue_sqlite_ddl_preview()
+
+    with sqlite_write_gate(path):
+        with closing(sqlite3.connect(path, timeout=30)) as conn:
+            conn.row_factory = sqlite3.Row
+            _ensure_owned_test_database(conn)
+            _create_queue_table_in_owned_connection(conn, preview)
+            conn.commit()
+            table_names = _sqlite_table_names(conn)
+            index_names = _sqlite_index_names(conn)
+
+    return {
+        "operation": "create_scheduler_queue_table_for_owned_test_database",
+        "database_path": str(path),
+        "table_name": CORE_SCHEDULER_QUEUE_TABLE_NAME,
+        "owned_test_database": True,
+        "ownership_marker": SCHEDULER_QUEUE_OWNED_TEST_MARKER,
+        "creates_database_state": True,
+        "dry_run": False,
+        "scope": "owned_test_database_only",
+        "statements_executed": len(preview["statements"]),
+        "table_exists": CORE_SCHEDULER_QUEUE_TABLE_NAME in table_names,
+        "marker_table_exists": OWNED_TEST_DATABASE_MARKER_TABLE in table_names,
+        "index_names": sorted(index_names),
+        "writes_job_rows": False,
+        "auto_lifecycle_event_emission": False,
+        "control_plane_only": True,
+        "implements_scheduler_runtime": False,
+        "payload_loading": False,
+    }
+
+
+def _ensure_owned_test_database(conn: sqlite3.Connection) -> None:
+    table_names = _sqlite_table_names(conn)
+    if table_names and OWNED_TEST_DATABASE_MARKER_TABLE not in table_names:
+        raise ValueError(
+            "Refusing to modify unowned existing SQLite database for scheduler queue persistence"
+        )
+    conn.execute(
+        f"CREATE TABLE IF NOT EXISTS {_sqlite_identifier(OWNED_TEST_DATABASE_MARKER_TABLE)} ("
+        "marker TEXT PRIMARY KEY, created_at TEXT DEFAULT CURRENT_TIMESTAMP)"
+    )
+    conn.execute(
+        f"INSERT OR IGNORE INTO {_sqlite_identifier(OWNED_TEST_DATABASE_MARKER_TABLE)} (marker) "
+        "VALUES (?)",
+        (SCHEDULER_QUEUE_OWNED_TEST_MARKER,),
+    )
+
+
+def _create_queue_table_in_owned_connection(
+    conn: sqlite3.Connection,
+    preview: dict[str, Any] | None = None,
+) -> None:
+    ddl = preview or scheduler_queue_sqlite_ddl_preview()
+    for statement in ddl["statements"]:
+        conn.execute(str(statement))
+
+
+def _sqlite_table_names(conn: sqlite3.Connection) -> set[str]:
+    return {
+        str(row["name"] if isinstance(row, sqlite3.Row) else row[0])
+        for row in conn.execute(
+            "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'"
+        ).fetchall()
+    }
+
+
+def _sqlite_index_names(conn: sqlite3.Connection) -> set[str]:
+    return {
+        str(row["name"] if isinstance(row, sqlite3.Row) else row[0])
+        for row in conn.execute(
+            "SELECT name FROM sqlite_master WHERE type='index' AND name NOT LIKE 'sqlite_%'"
+        ).fetchall()
+    }
+
+
 def _sqlite_storage_type(storage_type: str) -> str:
     normalized = storage_type.upper()
     allowed = {"TEXT", "INTEGER", "REAL", "BLOB"}
@@ -180,9 +307,13 @@ def _sqlite_index_statement(table_name: str, index: dict[str, Any]) -> str:
 __all__ = [
     "CORE_SCHEDULER_QUEUE_SCHEMA_VERSION",
     "CORE_SCHEDULER_QUEUE_TABLE_NAME",
+    "OWNED_TEST_DATABASE_MARKER_TABLE",
+    "SCHEDULER_QUEUE_OWNED_TEST_MARKER",
     "SchedulerQueueColumn",
     "SCHEDULER_QUEUE_COLUMNS",
     "SCHEDULER_QUEUE_INDEXES",
+    "create_scheduler_queue_table_for_owned_test_database",
+    "scheduler_queue_owned_test_table_helper_contract",
     "scheduler_queue_persistence_schema",
     "scheduler_queue_sqlite_ddl_preview",
 ]

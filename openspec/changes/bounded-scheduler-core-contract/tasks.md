@@ -7,8 +7,8 @@
 ## 2. Owned-Test Or Dry-Run Persistence
 
 - [x] 2.1 Add a dry-run queue DDL preview or owned-test-only queue table helper with explicit ownership guard.
-- [ ] 2.2 Add tests proving user databases are not modified unless an owned-test flag or explicit migration guard is present.
-- [ ] 2.3 Add tests proving process-local SQLite write gate evidence is reported as process-local, not cross-process.
+- [x] 2.2 Add tests proving user databases are not modified unless an owned-test flag or explicit migration guard is present.
+- [x] 2.3 Add tests proving process-local SQLite write gate evidence is reported as process-local, not cross-process.
 
 ## 3. Status And Policy Bridge
 

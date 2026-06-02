@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 import json
+import sqlite3
 import subprocess
 import sys
 import tempfile
 import unittest
+from contextlib import closing
 from pathlib import Path
 
 from api_launcher.cli_flags import command_requested
@@ -21,6 +23,8 @@ from api_launcher.core_scheduler_contracts import (
 from api_launcher.core_scheduler_persistence_contract import (
     CORE_SCHEDULER_QUEUE_SCHEMA_VERSION,
     CORE_SCHEDULER_QUEUE_TABLE_NAME,
+    OWNED_TEST_DATABASE_MARKER_TABLE,
+    create_scheduler_queue_table_for_owned_test_database,
     scheduler_queue_sqlite_ddl_preview,
 )
 
@@ -42,7 +46,7 @@ class CoreBoundedSchedulerPlanReportTests(unittest.TestCase):
             report["missing_evidence"],
         )
         self.assertIn(
-            "durable_job_queue_persistence_not_materialized",
+            "durable_job_queue_persistence_not_promoted_beyond_owned_test",
             report["missing_evidence"],
         )
         self.assertIn(
@@ -194,6 +198,90 @@ class CoreBoundedSchedulerPlanReportTests(unittest.TestCase):
         self.assertFalse(safety["reads_renderer_payloads"])
         self.assertFalse(safety["reads_npz"])
         self.assertFalse(safety["cross_repo_implementation"])
+
+    def test_scheduler_queue_owned_test_table_creation_requires_explicit_gate(self) -> None:
+        report = build_core_bounded_scheduler_plan_report()
+        helper = report["existing_evidence"]["scheduler_owned_test_table_helper"]
+        self.assertEqual("owned_test_database_only", helper["scope"])
+        self.assertTrue(helper["requires_allow_owned_test_database"])
+        self.assertTrue(helper["rejects_existing_unowned_database"])
+        self.assertFalse(helper["writes_job_rows"])
+        self.assertFalse(helper["implements_scheduler_runtime"])
+        self.assertFalse(helper["user_database_write_allowed"])
+        self.assertFalse(helper["auto_lifecycle_event_emission"])
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            db_path = Path(tmpdir) / "scheduler.sqlite"
+
+            with self.assertRaisesRegex(ValueError, "allow_owned_test_database=True"):
+                create_scheduler_queue_table_for_owned_test_database(db_path)
+
+            self.assertFalse(db_path.exists())
+
+    def test_scheduler_queue_owned_test_table_materializes_schema_only(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            db_path = Path(tmpdir) / "scheduler.sqlite"
+
+            result = create_scheduler_queue_table_for_owned_test_database(
+                db_path,
+                allow_owned_test_database=True,
+            )
+
+            self.assertEqual("create_scheduler_queue_table_for_owned_test_database", result["operation"])
+            self.assertTrue(result["creates_database_state"])
+            self.assertFalse(result["dry_run"])
+            self.assertEqual("owned_test_database_only", result["scope"])
+            self.assertTrue(result["table_exists"])
+            self.assertTrue(result["marker_table_exists"])
+            self.assertFalse(result["writes_job_rows"])
+            self.assertFalse(result["auto_lifecycle_event_emission"])
+            self.assertFalse(result["implements_scheduler_runtime"])
+            self.assertFalse(result["payload_loading"])
+
+            with closing(sqlite3.connect(db_path)) as conn:
+                conn.row_factory = sqlite3.Row
+                table_names = {
+                    row["name"]
+                    for row in conn.execute(
+                        "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'"
+                    ).fetchall()
+                }
+                columns = [
+                    row["name"]
+                    for row in conn.execute(
+                        f'PRAGMA table_info("{CORE_SCHEDULER_QUEUE_TABLE_NAME}")'
+                    ).fetchall()
+                ]
+
+            self.assertIn(CORE_SCHEDULER_QUEUE_TABLE_NAME, table_names)
+            self.assertIn(OWNED_TEST_DATABASE_MARKER_TABLE, table_names)
+            self.assertIn("job_id", columns)
+            self.assertIn("status", columns)
+            self.assertNotIn("payload_bytes", columns)
+            self.assertNotIn("npz_payload", columns)
+
+    def test_scheduler_queue_owned_test_table_rejects_existing_unowned_database(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            db_path = Path(tmpdir) / "user.sqlite"
+            with closing(sqlite3.connect(db_path)) as conn:
+                conn.execute("CREATE TABLE user_data (id INTEGER PRIMARY KEY)")
+                conn.commit()
+
+            with self.assertRaisesRegex(ValueError, "unowned existing SQLite database"):
+                create_scheduler_queue_table_for_owned_test_database(
+                    db_path,
+                    allow_owned_test_database=True,
+                )
+
+            with closing(sqlite3.connect(db_path)) as conn:
+                table_names = {
+                    row[0]
+                    for row in conn.execute(
+                        "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'"
+                    ).fetchall()
+                }
+
+            self.assertEqual({"user_data"}, table_names)
 
 
 if __name__ == "__main__":
