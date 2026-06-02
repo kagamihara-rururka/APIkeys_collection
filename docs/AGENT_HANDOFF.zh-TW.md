@@ -1,4 +1,9 @@
 # Agent 接力卡
+## 2026-06-02 08:10 +08:00 Visual/Skin registry summary CLI JSON
+- 本輪完成 OpenSpec task 3.3：新增 `api_launcher.cli_visual_asset_registry`，並在 `APIkeys_collection.py` 接上 `--visual-registry-summary-json`、`--visual-registry-summary-db PATH`、`--visual-registry-owned-test-db`。CLI 只讀明確 acknowledged 的 RRKAL owned test DB，輸出 agent-readable summary JSON；沒有 DB 時回傳空 summary 且不建 visual DB。
+- 邊界：這是 debug/agent JSON 入口，不是 UI integration，不是正式 user DB repository，不做 migration，不讀 manifest / `.npz` / renderer payload，不 import displaytools / visual-compressor / vis_2_dis，不發 lifecycle event。
+- 已驗證：`py -3 -B -m unittest tests.test_visual_asset_registry_cli tests.test_visual_asset_registry_persistence tests.test_project_maturity tests.test_visual_asset_contracts -v` 通過 42 tests；完整 smoke `state\logs\pre_push_smoke_20260602_075755.log` 通過 1082 tests / 4 skipped，MVP demo `download_import_completed` / `row_count=3`。測試明確用 `encoding="utf-8"` capture subprocess stdout，避免 Windows cp950 解碼破壞含中文/emoji 的 JSON。下一步若繼續此 OpenSpec，進入 4.x explicit event boundary；不可讓 ordinary DB write/upsert 自動 emit ready event。
+
 ## 2026-06-02 07:50 +08:00 Visual/Skin registry owned test read-side summary
 - 本輪完成 OpenSpec task 3.1-3.2：新增 `api_launcher.visual_asset_registry_persistence.visual_asset_registry_summary_for_owned_test_database()`。helper 必須傳入 `allow_owned_test_database=True`；若 DB 不存在，回傳空 summary 且不建檔；若 DB 存在，必須有 RRKAL owned marker，否則拒絕。
 - 回傳 payload 只含 control-plane summary：lifecycle counts、`status_display_profiles`、`review_required_count`、`renderer_target_counts`、DB ownership/table flags 與 safety flags。它不讀 manifest / `.npz` / renderer payload、不 import displaytools / visual-compressor / vis_2_dis、不發 `visual_asset_ready` event。

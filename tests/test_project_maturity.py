@@ -123,6 +123,10 @@ class ProjectMaturityTests(unittest.TestCase):
             renderer_metrics["visual_asset_registry_owned_test_summary_contract"],
         )
         self.assertEqual(
+            "--visual-registry-summary-json",
+            renderer_metrics["visual_asset_registry_owned_test_summary_cli"],
+        )
+        self.assertEqual(
             "skin_asset_status_display_profile",
             renderer_metrics["skin_asset_lifecycle_display_profile_contract"],
         )

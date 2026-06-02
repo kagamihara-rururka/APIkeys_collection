@@ -331,6 +331,7 @@ def _renderer_bridge_metrics() -> dict[str, Any]:
         "visual_asset_registry_owned_test_summary_contract": (
             visual_asset_registry_summary_for_owned_test_database.__name__
         ),
+        "visual_asset_registry_owned_test_summary_cli": "--visual-registry-summary-json",
         "skin_asset_lifecycle_statuses": sorted(SKIN_ASSET_LIFECYCLE_STATUSES),
         "skin_asset_lifecycle_status_count": len(SKIN_ASSET_LIFECYCLE_STATUSES),
         "visual_asset_registry_persistence_schema": visual_asset_registry_persistence_schema(),

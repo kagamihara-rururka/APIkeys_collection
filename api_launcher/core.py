@@ -64,6 +64,7 @@ from api_launcher.cli_manual_import import (
     validate_manual_import_args,
     write_local_file_manifest_cli,
 )
+from api_launcher.cli_visual_asset_registry import add_visual_asset_registry_args, run_visual_asset_registry_cli
 from api_launcher.cli_yfinance import add_yfinance_args, run_yfinance_cli
 from api_launcher.adapter_review import adapter_review_agent_payload, adapter_review_items
 from api_launcher.adapter_plan_resolver import resolve_adapter_review_plan_payload
@@ -649,6 +650,7 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     parser.add_argument("--project-maturity-json", action="store_true", help="emit RRKAL project maturity matrix as JSON")
     parser.add_argument("--write-project-maturity-json", default="", help="write RRKAL project maturity matrix JSON")
     parser.add_argument("--project-maturity-markdown", default="", help="write RRKAL project maturity matrix Markdown")
+    add_visual_asset_registry_args(parser)
     parser.add_argument("--crawler-registry-report-json", action="store_true", help="emit crawler registry matrix/capability report as JSON")
     add_yfinance_args(parser)
     parser.add_argument("--adapter-review-plan", help="list adapter-required items from a download plan JSON")
@@ -814,6 +816,7 @@ class CatalogLauncherCli:
             self.run_mvp_demo_smoke()
             self.show_mvp_readiness()
             self.show_project_maturity()
+            run_visual_asset_registry_cli(self.args)
             self.show_crawler_registry_report()
             run_yfinance_cli(self.args)
             run_download_plan_cli(self.args, self.repository, log_event)
@@ -881,6 +884,7 @@ class CatalogLauncherCli:
             or bool(self.args.run_mvp_demo_smoke_json)
             or self.args.mvp_readiness_json
             or self.args.project_maturity_json
+            or self.args.visual_registry_summary_json
             or self.args.crawler_registry_report_json
             or self.args.adapter_review_json
             or self.args.resolve_adapter_plan_json

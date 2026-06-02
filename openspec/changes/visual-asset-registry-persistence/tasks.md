@@ -15,7 +15,7 @@
 
 - [x] 3.1 Add read-side summary helper that returns lifecycle counts, `status_display_profiles`, review counts, renderer target counts, and safety flags.
 - [x] 3.2 Add tests proving read payloads do not import displaytools / visual-compressor / vis_2_dis and do not read payload files.
-- [ ] 3.3 Add CLI JSON or debug endpoint only after service tests pass; UI integration remains a later slice.
+- [x] 3.3 Add CLI JSON or debug endpoint only after service tests pass; UI integration remains a later slice.
 
 ## 4. Explicit Event Boundary
 
