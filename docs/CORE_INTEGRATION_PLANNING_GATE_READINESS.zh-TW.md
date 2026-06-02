@@ -20,6 +20,7 @@
 | Current gate status | `partial` |
 | Core review-required diagnostic | `--core-review-required-report-json` / `core_review_required_report.v1` |
 | Core review queue readiness diagnostic | `--core-review-queue-readiness-json` / `core_review_queue_readiness_report.v1` |
+| Core review queue readiness CI | `c6e8da4` / GitHub Actions run `26837600265` PASS |
 | Core job-status diagnostic | `--core-job-status-report-json` / `core_job_status_report.v1` |
 | Core lifecycle audit diagnostic | `--core-lifecycle-audit-json` / `core_lifecycle_audit_report.v1` |
 | Core manifest-reference diagnostic | `--core-manifest-reference-report-json` / `core_manifest_reference_report.v1` |
@@ -223,14 +224,14 @@ Update 2026-06-03 01:34 +08:00: Review Queue Persistence Readiness is now covere
 `#repo_consistency_audit` result for this slice:
 
 - Active repo / branch: `L:\RRKAL_project`, `rrkal-32e215c-recovery`。
-- Latest accepted code checkpoint: `56a1158` / GitHub Actions run `26836263789`.
+- Latest accepted code checkpoint: `c6e8da4` / GitHub Actions run `26837600265`.
 - Latest accepted docs checkpoint before this note: `75d0d54`; this note has since been extended by the review-required, job-status, and lifecycle audit diagnostics.
 - Active coordination route: Notion `Agents討論區`。
 - Deprecated coordination route: `L:\AGENT_EXCHANGE` archive / historical reference only。
 - Product evidence source: GitHub commits, tests, smoke, CLI JSON, actual UI behavior, git diff, GitHub Actions。
 - Current readiness JSON: `core_readiness_report.v1`, gate `partial`。
 - Current review-required JSON: `core_review_required_report.v1`, status `partial`。
-- Current review queue readiness JSON: `core_review_queue_readiness_report.v1`, status `partial`。
+- Current review queue readiness JSON: `core_review_queue_readiness_report.v1`, status `partial`; code checkpoint `c6e8da4`, GitHub Actions run `26837600265` passed。
 - Current job-status JSON: `core_job_status_report.v1`, status `partial`。
 - Current lifecycle audit JSON: `core_lifecycle_audit_report.v1`, status `partial`。
 - Current manifest-reference JSON: `core_manifest_reference_report.v1`, status `partial`。
