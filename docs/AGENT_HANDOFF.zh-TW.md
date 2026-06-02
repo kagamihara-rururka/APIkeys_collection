@@ -1,4 +1,8 @@
 # Agent 接力卡
+## 2026-06-02 08:31 +08:00 Visual/Skin registry persistence OpenSpec ready to archive
+- `openspec/changes/visual-asset-registry-persistence/tasks.md` 已全數勾選完成。此 change 已完成 dry-run schema、owned test persistence、read-side summary、CLI JSON/debug endpoint、explicit ready-event boundary、duplicate-event guard、ordinary upsert no-auto-event guard，以及 docs/checks/smoke/CI。
+- 邊界：這只是把 OpenSpec task state 標成 ready-to-archive，不改產品行為、不接 UI、不接正式 user DB repository、不讀 renderer payload、不 import displaytools / visual-compressor / vis_2_dis。尚未執行 OpenSpec archive；若要 archive，下一輪應走 archive 流程。
+
 ## 2026-06-02 08:16 +08:00 Visual/Skin registry explicit ready-event CLI JSON
 - 本輪完成 OpenSpec task 4.1-4.3：新增 `api_launcher.visual_asset_event_logging.log_visual_asset_ready_from_owned_test_database()`，並在 CLI 接上 `--visual-registry-emit-ready-event-json`、`--visual-registry-db PATH`、`--visual-registry-entry-id ENTRY_ID`、`--visual-registry-event-log PATH`。此入口只從明確 acknowledged 的 RRKAL owned test DB 讀取指定 persisted `ready` registry entry，然後顯式寫入 `visual_asset_ready` event。
 - 邊界：ordinary table write/upsert 仍不會自動發 lifecycle event；persistence module 不 import `visual_asset_event_logging` / `log_event`。預設 duplicate policy 會拒絕同一 registry entry 或 skin asset 的重複 ready event；若測試或 debug 需要重複 event，必須明確使用 allow-duplicate CLI/path。這仍不是正式 user DB repository、不是 UI integration、不讀 manifest / `.npz` / renderer payload、不 import displaytools / visual-compressor / vis_2_dis。

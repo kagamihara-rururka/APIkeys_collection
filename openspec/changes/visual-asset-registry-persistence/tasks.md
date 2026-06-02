@@ -27,4 +27,4 @@
 
 - [x] 5.1 Update `docs/VISUAL_SKIN_ASSET_CONTRACT.zh-TW.md` after each implemented slice.
 - [x] 5.2 Update `docs/PROJECT_MATURITY_MATRIX.zh-TW.md`, `docs/PROJECT_GTD.md`, `docs/AGENT_HANDOFF.zh-TW.md`, and `docs/DEVELOPMENT_LOG.zh-TW.md`.
-- [ ] 5.3 Run docs/OpenSpec mojibake scan, `git diff --check`, focused tests, pre-push smoke, and GitHub Actions before marking the change ready to archive.
+- [x] 5.3 Run docs/OpenSpec mojibake scan, `git diff --check`, focused tests, pre-push smoke, and GitHub Actions before marking the change ready to archive.
