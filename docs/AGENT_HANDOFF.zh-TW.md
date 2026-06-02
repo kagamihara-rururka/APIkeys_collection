@@ -1,4 +1,9 @@
 # Agent 接力卡
+## 2026-06-02 17:37 +08:00 Provider-specific deep adapter maturity evidence
+- 本輪新增 `dataset_adapter_report()` / `DatasetAdapterRegistryEntry`，讓 `--project-maturity-json` 的 `provider_specific_deep_adapters` row 不再只有 count，而是列出三個現有 deep adapter：`gebco_topography`、`hyg_star_catalog`、`yfinance_market_data`，以及 provider id、adapter class、module、delivery boundary、supported formats 與 coverage boundary。
+- 邊界：這不新增 adapter、不改 `adapters_for_provider()` 行為、不改下載 / 匯入 / Web / Tk / source crawler handler；它只把「provider-specific deep adapter 覆蓋不等於 14 個 source crawler type 覆蓋」做成可查 payload。
+- 已驗證：不寫 pyc 的 `compile()` 檢查通過；`py -3 -B -m unittest tests.test_dataset_adapters tests.test_project_maturity -v` 通過 9 tests；`--project-maturity-json` 可見 `provider_specific_deep_adapters.metrics.registered_adapters` 與 `coverage_not_equal_to_supported_source_types=true`；完整 smoke `state\logs\pre_push_smoke_20260602_173017.log` 通過 1095 tests / 4 skipped，MVP demo `download_import_completed` / `row_count=3`；GitHub Actions run `26811334953` 通過 Ubuntu、Windows 與 real DB smoke。Code commit：`9a3c767 Expose dataset adapter maturity evidence`。
+
 ## 2026-06-02 17:19 +08:00 Crawler asset download/import maturity evidence
 - 本輪把 `--project-maturity-json` 的 `crawler_asset_download_import` row 補上可查 metrics：formal asset / seed download-import service、recommended seed closure service、shared display payload、agent-readable CLI surfaces、Web/Tk surfaces、credential-blocking flag 與 partial 原因。
 - 邊界：這不改 Web/Tk/CLI 操作、不改下載或匯入行為、不新增 provider adapter、不新增 content parser，也不把此 row 升級成 100%；它只是把既有小閉環證據從空 metrics 改成可審 payload。
