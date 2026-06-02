@@ -79,6 +79,22 @@ class CoreReadinessReportTests(unittest.TestCase):
         review = report["review_required_evidence"]
         self.assertIn("unsupported_payload_format", review["blocked_surfaces"])
         self.assertTrue(review["existing_evidence"]["visual_review_status_available"])
+        self.assertEqual(
+            "core_review_item_identity_contract_draft.v1",
+            review["existing_evidence"]["review_item_identity_contract_draft"]["schema_version"],
+        )
+        self.assertIn(
+            "stable_review_item_identity_not_persisted",
+            review["missing_evidence"],
+        )
+        self.assertIn(
+            "core_review_item_identity_contract_draft",
+            review["contract_only_surfaces"],
+        )
+        self.assertIn(
+            "treating_display_counts_as_persisted_queue",
+            review["blocked_surfaces"],
+        )
 
     def test_job_status_evidence_includes_scheduler_contract_surfaces(self) -> None:
         report = build_core_readiness_report()

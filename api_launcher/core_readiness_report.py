@@ -13,6 +13,7 @@ from api_launcher.core_scheduler_contracts import (
     scheduler_next_action_payload_contract,
     scheduler_o1_review_gate_contract,
 )
+from api_launcher.core_review_item_contracts import review_item_identity_contract_draft
 from api_launcher.core_scheduler_persistence_contract import (
     scheduler_queue_owned_test_table_helper_contract,
     scheduler_queue_sqlite_ddl_preview,
@@ -49,7 +50,10 @@ def build_core_readiness_report(repository: Any | None = None) -> dict[str, Any]
         "registry_evidence": _registry_evidence(crawler_report, content_report, adapter_report),
         "lifecycle_evidence": _lifecycle_evidence(visual_schema, empty_visual_summary),
         "manifest_reference_evidence": _manifest_reference_evidence(visual_schema),
-        "review_required_evidence": _review_required_evidence(content_report, empty_visual_summary),
+        "review_required_evidence": _review_required_evidence(
+            content_report,
+            empty_visual_summary,
+        ),
         "job_status_evidence": _job_status_evidence(visual_schema, maturity_payload),
         "asset_lineage_evidence": _asset_lineage_evidence(visual_schema),
     }
@@ -164,7 +168,10 @@ def _manifest_reference_evidence(visual_schema: dict[str, Any]) -> dict[str, Any
     }
 
 
-def _review_required_evidence(content_report: dict[str, Any], empty_summary: dict[str, Any]) -> dict[str, Any]:
+def _review_required_evidence(
+    content_report: dict[str, Any],
+    empty_summary: dict[str, Any],
+) -> dict[str, Any]:
     content_review_rules = _review_rule_ids(content_report)
     return {
         "existing_evidence": {
@@ -173,15 +180,31 @@ def _review_required_evidence(content_report: dict[str, Any], empty_summary: dic
             "unknown_fallback_review_bucket": content_report.get("unknown_fallback_review_bucket"),
             "visual_registry_review_required_count": int(empty_summary.get("review_required_count") or 0),
             "visual_review_status_available": "review_required" in SKIN_ASSET_LIFECYCLE_STATUSES,
+            "review_item_identity_contract_draft": review_item_identity_contract_draft(),
         },
-        "missing_evidence": ("review_queue_persistence_not_unified",),
-        "blocked_surfaces": ("unsupported_payload_format",),
+        "missing_evidence": (
+            "review_queue_persistence_not_unified",
+            "stable_review_item_identity_not_persisted",
+            "review_item_resolution_state_not_defined",
+        ),
+        "blocked_surfaces": (
+            "unsupported_payload_format",
+            "treating_display_counts_as_persisted_queue",
+            "promoting_review_required_items_to_ready_without_resolution",
+        ),
         "review_required_surfaces": tuple(content_review_rules) + ("visual_skin_asset_review_required",),
-        "contract_only_surfaces": ("visual_review_required_lifecycle_contract",),
-        "planned_surfaces": ("unified_review_dashboard",),
+        "contract_only_surfaces": (
+            "visual_review_required_lifecycle_contract",
+            "core_review_item_identity_contract_draft",
+        ),
+        "planned_surfaces": (
+            "unified_review_dashboard",
+            "review_queue_persistence_schema_after_o1_review",
+        ),
         "next_safe_actions": (
             "surface_review_required_from_backend_payloads",
             "do_not_promote_unknown_or_heavy_formats_to_ready_without_parser_evidence",
+            "keep_review_item_identity_contract_separate_from_persistence_schema",
         ),
     }
 
