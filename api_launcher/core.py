@@ -68,6 +68,11 @@ from api_launcher.cli_core_job_status import (
     core_job_status_command_active,
     run_core_job_status_cli,
 )
+from api_launcher.cli_core_bounded_scheduler_plan import (
+    add_core_bounded_scheduler_plan_args,
+    core_bounded_scheduler_plan_command_active,
+    run_core_bounded_scheduler_plan_cli,
+)
 from api_launcher.cli_core_lifecycle_audit import (
     add_core_lifecycle_audit_args,
     core_lifecycle_audit_command_active,
@@ -677,6 +682,7 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     add_core_review_required_args(parser)
     add_core_review_queue_readiness_args(parser)
     add_core_job_status_args(parser)
+    add_core_bounded_scheduler_plan_args(parser)
     add_core_lifecycle_audit_args(parser)
     add_core_manifest_reference_args(parser)
     add_core_deep_adapter_coverage_args(parser)
@@ -847,6 +853,7 @@ class CatalogLauncherCli:
             run_core_review_required_cli(self.args, self.repository)
             run_core_review_queue_readiness_cli(self.args, self.repository)
             run_core_job_status_cli(self.args, self.repository)
+            run_core_bounded_scheduler_plan_cli(self.args, self.repository)
             run_core_lifecycle_audit_cli(self.args, self.repository)
             run_core_manifest_reference_cli(self.args, self.repository)
             run_core_deep_adapter_coverage_cli(self.args)
@@ -921,6 +928,7 @@ class CatalogLauncherCli:
             or core_review_required_command_active(self.args)
             or core_review_queue_readiness_command_active(self.args)
             or core_job_status_command_active(self.args)
+            or core_bounded_scheduler_plan_command_active(self.args)
             or core_lifecycle_audit_command_active(self.args)
             or core_manifest_reference_command_active(self.args)
             or core_deep_adapter_coverage_command_active(self.args)

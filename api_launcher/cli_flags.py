@@ -17,6 +17,9 @@ def command_requested(args: argparse.Namespace) -> bool:
         core_review_queue_readiness_command_active,
     )
     from api_launcher.cli_core_job_status import core_job_status_command_active
+    from api_launcher.cli_core_bounded_scheduler_plan import (
+        core_bounded_scheduler_plan_command_active,
+    )
     from api_launcher.cli_core_lifecycle_audit import core_lifecycle_audit_command_active
     from api_launcher.cli_core_manifest_reference import core_manifest_reference_command_active
     from api_launcher.cli_core_deep_adapter_coverage import core_deep_adapter_coverage_command_active
@@ -55,6 +58,7 @@ def command_requested(args: argparse.Namespace) -> bool:
         core_review_required_command_active(args),
         core_review_queue_readiness_command_active(args),
         core_job_status_command_active(args),
+        core_bounded_scheduler_plan_command_active(args),
         core_lifecycle_audit_command_active(args),
         core_manifest_reference_command_active(args),
         core_deep_adapter_coverage_command_active(args),

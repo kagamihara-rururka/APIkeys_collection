@@ -22,6 +22,7 @@
 | Core review queue readiness diagnostic | `--core-review-queue-readiness-json` / `core_review_queue_readiness_report.v1` |
 | Core review queue readiness CI | `c6e8da4` / GitHub Actions run `26837600265` PASS |
 | Core job-status diagnostic | `--core-job-status-report-json` / `core_job_status_report.v1` |
+| Core bounded scheduler plan diagnostic | `--core-bounded-scheduler-plan-json` / `core_bounded_scheduler_plan_report.v1` |
 | Core lifecycle audit diagnostic | `--core-lifecycle-audit-json` / `core_lifecycle_audit_report.v1` |
 | Core manifest-reference diagnostic | `--core-manifest-reference-report-json` / `core_manifest_reference_report.v1` |
 | Core deep-adapter coverage diagnostic | `--core-deep-adapter-coverage-json` / `core_deep_adapter_coverage_report.v1` |
@@ -118,6 +119,23 @@
 
 它不新增 scheduler schema，不啟用 auto lifecycle event，不新增/改名 lifecycle status，也不接 cross-repo builder job adapter。
 
+## Bounded Scheduler Plan Report
+
+`--core-bounded-scheduler-plan-json` 是 Core-only planning diagnostic，用來把現有 Tk background policy registry、`TkBackgroundJobStartResult`、process-local SQLite write gate 與 job-status report bridge 轉成下一步 bounded scheduler 設計輸入。它刻意不實作 scheduler runtime，避免把 thread hardening 誤寫成已完成的 unified scheduler。
+
+目前輸出：
+
+- `schema_version = core_bounded_scheduler_plan_report.v1`
+- `status = partial`
+- `integration_planning_gate.ready_for_scheduler_runtime_poc = false`
+- `existing_evidence.tk_policy_registry.policy_count = 11`
+- `existing_evidence.sqlite_write_gate.scope = process_per_sqlite_path`
+- missing evidence 包含 unified scheduler contract schema、durable queue persistence、cross-process SQLite coordination、cancellation/retry/timeout policy、job event status stream。
+- blocked surfaces 包含 treating Tk policy registry as full scheduler、treating process-local SQLite gate as cross-process lock、without `o_1` 啟用 auto lifecycle events、未經 OpenSpec 全面 asyncio rewrite。
+- safety flags 明確標示不實作 scheduler runtime、不新增 scheduler schema、不改 lifecycle schema/status、不啟用 auto lifecycle event、不 import downstream repo。
+
+它不新增 scheduler schema，不寫 queue/persistence，不改 lifecycle vocabulary，不接 renderer/compressor job adapter，也不全面切換 asyncio。
+
 ## Lifecycle Audit Report
 
 `--core-lifecycle-audit-json` 是 Core-only audit，用來把 lifecycle vocabulary / display profiles / ready-event guard 從完整 readiness report 中獨立拉出。它不是 transition runtime，也不是正式 state machine。
@@ -210,13 +228,14 @@ Core 尚不能提供：
 
 ## Proposed Next Core-Only Slices
 
-Update 2026-06-03 01:34 +08:00: Review Queue Persistence Readiness is now covered by `--core-review-queue-readiness-json` / `core_review_queue_readiness_report.v1`. The next safe Core-only work should be either Bounded Scheduler Contract Plan or a Review Queue OpenSpec draft. Do not create queue schema or DB writes without `o_1`.
+Update 2026-06-03 01:58 +08:00: Bounded Scheduler Contract Plan is now covered by `--core-bounded-scheduler-plan-json` / `core_bounded_scheduler_plan_report.v1`. The next safe Core-only work should be either a bounded scheduler OpenSpec draft or an owned-test scheduler status JSON PoC. Do not create scheduler schema, durable queue writes, automatic lifecycle events, or async runtime migration without `o_1`.
 
 1. **Review Queue Persistence Readiness**
    - 目標：把 content review rules、visual `review_required` lifecycle、unknown/heavy payload fallback 與 missing unified review queue persistence 收成更細的 Core-only evidence。
    - 邊界：不建立正式 review queue schema，不把 review-required promoted 成 ready。
 2. **Bounded Scheduler Contract Plan**
    - 目標：把 Tk single-flight policies、SQLite write gate、missing unified scheduler 與 job status evidence 整理成不改 schema 的 planning input。
+   - 狀態：已由 `--core-bounded-scheduler-plan-json` 覆蓋。
    - 邊界：不全面改 asyncio，不新增 scheduler persistence，不啟用 automatic lifecycle events。
 
 ## Repo Consistency Audit
