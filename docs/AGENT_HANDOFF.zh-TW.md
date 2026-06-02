@@ -1,4 +1,9 @@
 # Agent 接力卡
+## 2026-06-02 17:06 +08:00 Content registry report CLI JSON
+- 本輪新增 `--content-registry-report-json`，讓 `api_launcher/content_registry.py` 的 `content_registry_report()` 可直接由 agent-readable CLI 輸出；它會列出 direct SQLite importer、resolver-backed format、review rule、unknown fallback parser/review bucket。
+- 邊界：這是 content parser/import contract 的診斷入口，不新增 NetCDF / GeoTIFF / Parquet parser，不改 CSV/JSON/Socrata bounded sample 的可匯入行為，不改下載、匯入、Web/Tk 顯示、adapter review 或 maturity 計算。
+- 已驗證：`py -3 -B -m py_compile api_launcher\core.py api_launcher\cli_flags.py tests\test_content_registry.py` OK；`py -3 -B -m unittest tests.test_content_registry tests.test_cli_json -v` 通過 17 tests；PowerShell pipe `--content-registry-report-json` 可由下游 Python `json.load(sys.stdin)` 解析；完整 smoke `state\logs\pre_push_smoke_20260602_165908.log` 通過 1092 tests / 4 skipped，MVP demo `download_import_completed` / `row_count=3`；GitHub Actions run `26809788678` 通過 Ubuntu、Windows 與 real DB smoke。Code commit：`543e510 Add content registry report CLI JSON`。
+
 ## 2026-06-02 16:42 +08:00 Content registry declarative review rules
 - 本輪把 `api_launcher/content_registry.py` 的 review-only content format 分派收斂成 `ContentReviewRule` / `CONTENT_REVIEW_RULES`，並新增 `content_registry_report()`，讓 archive、scientific grid、geospatial asset、columnar table、database snapshot、document/markup 的 review lane 變成可查的宣告式 contract。
 - 邊界：這不新增 NetCDF / GeoTIFF / Parquet parser，不改 CSV/JSON/Socrata bounded sample 的可匯入行為，不改下載、匯入、Web/Tk 顯示或 adapter review 決策；只是把既有 content parser review routing 從散落分支收斂為可測 registry/report。
