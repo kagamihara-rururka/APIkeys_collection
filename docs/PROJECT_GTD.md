@@ -1,8 +1,9 @@
 ﻿# RuRuKa Asset Launcher GTD
 
-Last updated: 2026-06-02
+Last updated: 2026-06-03
 
 ## 目前工作焦點 / Active Focus
+- [x] 2026-06-03 Core job-status report JSON 已補：新增 `--core-job-status-report-json` / `core_job_status_report.v1`，獨立列出 Visual/Skin lifecycle statuses、auto event disabled guard、explicit event writer contract、Tk background job policy registry、single-flight start result、SQLite write gate、missing unified bounded scheduler 與 `o_1` review triggers；這是 Core-only diagnostic，不新增 scheduler schema、不改 lifecycle schema/status、不啟用 auto lifecycle event、不做 cross-repo integration。
 - [x] 2026-06-02 Core review-required report JSON 已補：新增 `--core-review-required-report-json` / `core_review_required_report.v1`，獨立列出 content review rules、unknown fallback、visual `review_required` surface、missing review queue persistence、blocked unsupported payload format 與 `o_1` review triggers；這是 Core-only diagnostic，不新增 review queue schema、不改 lifecycle schema/status。
 - [x] 2026-06-02 Core Integration Planning Gate readiness audit 已補：新增 `docs/CORE_INTEGRATION_PLANNING_GATE_READINESS.zh-TW.md`，把 `--core-readiness-report-json` 的 `registry_evidence`、`lifecycle_evidence`、`manifest_reference_evidence`、`review_required_evidence`、`job_status_evidence`、`asset_lineage_evidence` 與 `integration_planning_gate` 整理成 gap table、`o_1` review triggers 與下一批 Core-only slices；這是 planning/evidence note，不授權 cross-repo integration。
 - [x] 2026-06-02 Core readiness report JSON diagnostic 已補：新增 `--core-readiness-report-json`，以 `core_readiness_report.v1` 聚合 RRKAL Core 的 registry、lifecycle、manifest reference、review_required、job status 與 asset lineage evidence；`integration_planning_gate.status` 保守維持 `partial`，明確列出 missing / blocked / contract_only / planned surfaces。這是 Integration Planning Gate 前的 evidence aggregation，不是 renderer/compressor/SkinAsset integration，也不改 lifecycle schema。

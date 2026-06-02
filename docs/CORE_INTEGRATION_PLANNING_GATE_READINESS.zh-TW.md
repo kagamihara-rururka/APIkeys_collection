@@ -1,6 +1,6 @@
 # Core Integration Planning Gate Readiness
 
-最後更新：2026-06-02
+最後更新：2026-06-03
 
 這份文件整理 RRKAL Core 目前可提供給未來 Integration Planning Gate 的證據與缺口。它只描述 Core control-plane readiness，不授權 renderer、compressor、SkinAsset、RendererSkinAsset 或跨 repo integration。
 
@@ -19,6 +19,7 @@
 | Current readiness schema | `core_readiness_report.v1` |
 | Current gate status | `partial` |
 | Core review-required diagnostic | `--core-review-required-report-json` / `core_review_required_report.v1` |
+| Core job-status diagnostic | `--core-job-status-report-json` / `core_job_status_report.v1` |
 
 `partial` 是刻意保守的狀態。它表示 Core 已有 registry / lifecycle / manifest / review / lineage 的 evidence surface，但仍缺 runtime state machine、unified scheduler、review queue persistence、deep adapter coverage 等證據。不得把此狀態解讀為 integration 已可開工。
 
@@ -78,6 +79,27 @@
 
 它不新增 review queue schema，不改 lifecycle vocabulary，不把 unknown/heavy payload promoted 成 ready，也不碰下游 repo。
 
+## Job Status Evidence Report
+
+`--core-job-status-report-json` 是 Core-only diagnostic，用來把 job-status / scheduler hardening evidence 從完整 readiness report 中獨立拉出，避免後續 agent 把 Tk 單飛政策誤解成完整 unified scheduler。
+
+目前輸出：
+
+- `schema_version = core_job_status_report.v1`
+- `status = partial`
+- `missing_evidence = ["unified_bounded_job_scheduler_not_yet_implemented"]`
+- `blocked_surfaces = ["auto_lifecycle_event_emission_disabled"]`
+- `existing_evidence.visual_lifecycle.auto_event_emission = false`
+- `existing_evidence.background_job_policy.bounded_tk_policy_count = 11`
+- `existing_evidence.background_job_policy.single_flight_start_result_contract = TkBackgroundJobStartResult`
+- `existing_evidence.background_job_policy.max_active_jobs_by_policy.sqlite_import = 1`
+- `safety.changes_scheduler_schema = false`
+- `safety.changes_lifecycle_schema = false`
+- `safety.changes_lifecycle_statuses = false`
+- `safety.cross_repo_implementation = false`
+
+它不新增 scheduler schema，不啟用 auto lifecycle event，不新增/改名 lifecycle status，也不接 cross-repo builder job adapter。
+
 ## Integration Planning Gate Input Summary
 
 Core 可以提供：
@@ -123,19 +145,15 @@ Core 尚不能提供：
 
 ## Proposed Next Core-Only Slices
 
-1. **Job Status Evidence Report**
-   - 目標：聚合 Tk background job policy、single-flight result contract、download/import job status 與 visual lifecycle event boundary。
-   - 邊界：不做 asyncio 重寫，不新增 scheduler schema。
-
-2. **Lifecycle Transition Audit Draft**
+1. **Lifecycle Transition Audit Draft**
    - 目標：只讀整理目前 lifecycle vocabulary、allowed transitions candidate、blocked transitions 與 review triggers。
    - 邊界：不新增 status，不改 transition runtime。
 
-3. **Manifest Reference Persistence Readiness**
+2. **Manifest Reference Persistence Readiness**
    - 目標：把 visual registry schema contract、DDL preview、owned-test persistence helper、formal DB gap 整理成 readiness report。
    - 邊界：不建立正式 user DB table，不跑 migration。
 
-4. **Deep Adapter Coverage Plan**
+3. **Deep Adapter Coverage Plan**
    - 目標：列出 14 個 source crawler type 與 3 個 deep adapter 的差距，標示哪些只需要 metadata crawler、哪些需要真正 download/import adapter。
    - 邊界：不新增 adapter，避免 class explosion。
 
@@ -151,6 +169,7 @@ Core 尚不能提供：
 - Product evidence source: GitHub commits, tests, smoke, CLI JSON, actual UI behavior, git diff, GitHub Actions。
 - Current readiness JSON: `core_readiness_report.v1`, gate `partial`。
 - Current review-required JSON: `core_review_required_report.v1`, status `partial`。
+- Current job-status JSON: `core_job_status_report.v1`, status `partial`。
 - Cross-repo touch: none.
 - Renderer/compressor/SkinAsset implementation: none.
 - Lifecycle schema/status change: none.
