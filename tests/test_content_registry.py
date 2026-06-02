@@ -2,7 +2,14 @@ from __future__ import annotations
 
 import unittest
 
-from api_launcher.content_registry import content_import_profile, content_parser_capability, detect_content_format, normalize_content_format
+from api_launcher.content_registry import (
+    content_import_profile,
+    content_parser_capability,
+    content_registry_report,
+    detect_content_format,
+    iter_content_review_rules,
+    normalize_content_format,
+)
 from api_launcher.dataset_versions import DatasetVersionOption
 from api_launcher.downloads.eligibility import DownloadEligibility
 from api_launcher.models import Dataset
@@ -10,6 +17,19 @@ from api_launcher.plans import dataset_import_plan_entry
 
 
 class ContentRegistryTest(unittest.TestCase):
+    def test_review_rules_are_declarative_and_reported(self) -> None:
+        rules = iter_content_review_rules()
+        report = content_registry_report()
+
+        self.assertEqual(6, len(rules))
+        self.assertEqual(6, report["review_rule_count"])
+        self.assertEqual("archive_or_compressed_review", rules[0].rule_id)
+        self.assertIn("zip", rules[0].formats)
+        self.assertEqual("scientific_grid_or_array", report["review_rules"][1]["content_family"])
+        self.assertEqual("unknown_content_review", report["unknown_fallback_parser_id"])
+        self.assertGreater(report["supported_sqlite_format_count"], 0)
+        self.assertEqual(1, report["resolver_backed_format_count"])
+
     def test_detector_uses_hints_and_url_suffix_for_netcdf(self) -> None:
         detection = detect_content_format(
             url="https://example.test/ocean/sample.nc",

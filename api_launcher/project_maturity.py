@@ -12,6 +12,7 @@ from api_launcher.crawlers.dataset_sources import (
     list_crawlers_by_dims,
 )
 from api_launcher.crawlers.registry import CAPABILITY_CODE_WIDTH
+from api_launcher.content_registry import content_registry_report
 from api_launcher.dataset_adapters import DATASET_ADAPTERS
 from api_launcher.importers.compatibility_shims import importer_compatibility_shim_report
 from api_launcher.mvp_readiness import build_mvp_readiness_payload
@@ -298,8 +299,12 @@ def _content_parser_import_metrics() -> dict[str, Any]:
     """Expose importer capability evidence without implying every format is parsed."""
 
     shim_report = importer_compatibility_shim_report()
+    registry_report = content_registry_report()
     return {
         "supported_sqlite_importers": ("csv_to_sqlite", "json_to_sqlite"),
+        "content_registry_report": registry_report,
+        "content_review_rule_count": registry_report["review_rule_count"],
+        "resolver_backed_format_count": registry_report["resolver_backed_format_count"],
         "compatibility_shim_count": shim_report["shim_count"],
         "compatibility_shim_runtime_scope": shim_report["runtime_scope"],
         "global_monkeypatch": shim_report["global_monkeypatch"],

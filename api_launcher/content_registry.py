@@ -112,6 +112,39 @@ class ContentParserCapability:
 
 
 @dataclass(frozen=True)
+class ContentReviewRule:
+    """Declarative review route for formats that are not direct SQLite imports."""
+
+    rule_id: str
+    formats: frozenset[str]
+    content_family: str
+    import_status: str
+    parser_id: str
+    review_bucket: str
+    reason: str
+
+    def to_capability(self, source_format: str) -> ContentParserCapability:
+        return ContentParserCapability(
+            source_format=source_format,
+            content_family=self.content_family,
+            import_status=self.import_status,
+            parser_id=self.parser_id,
+            review_bucket=self.review_bucket,
+            reason=self.reason,
+        )
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "rule_id": self.rule_id,
+            "formats": sorted(self.formats),
+            "content_family": self.content_family,
+            "import_status": self.import_status,
+            "parser_id": self.parser_id,
+            "review_bucket": self.review_bucket,
+        }
+
+
+@dataclass(frozen=True)
 class ContentDetection:
     source_format: str
     confidence: float
@@ -126,6 +159,64 @@ class ContentDetection:
             "capability": self.capability.to_dict(),
             "import_profile": content_import_profile_from_capability(self.capability).to_dict(),
         }
+
+
+CONTENT_REVIEW_RULES: tuple[ContentReviewRule, ...] = (
+    ContentReviewRule(
+        rule_id="archive_or_compressed_review",
+        formats=ARCHIVE_OR_COMPRESSED_FORMATS,
+        content_family="archive_or_compressed",
+        import_status="requires_unpack_or_adapter",
+        parser_id="archive_review",
+        review_bucket="downloaded_payload_transform",
+        reason="The file can be downloaded, but it needs an extraction or transform step before curated import.",
+    ),
+    ContentReviewRule(
+        rule_id="scientific_grid_review",
+        formats=SCIENTIFIC_GRID_FORMATS,
+        content_family="scientific_grid_or_array",
+        import_status="manual_review_required",
+        parser_id="scientific_grid_review",
+        review_bucket="content_parser_required",
+        reason="Scientific grid/array payloads need a dedicated NetCDF/HDF/Zarr parser before curated import.",
+    ),
+    ContentReviewRule(
+        rule_id="geospatial_asset_review",
+        formats=GEOSPATIAL_ASSET_FORMATS,
+        content_family="geospatial_asset",
+        import_status="manual_review_required",
+        parser_id="geospatial_asset_review",
+        review_bucket="content_parser_required",
+        reason="Geospatial raster, vector, and tile payloads should first become manifests or renderer-ready assets.",
+    ),
+    ContentReviewRule(
+        rule_id="columnar_table_review",
+        formats=COLUMNAR_FORMATS,
+        content_family="columnar_table",
+        import_status="manual_review_required",
+        parser_id="columnar_table_review",
+        review_bucket="content_parser_required",
+        reason="Columnar payloads need a Parquet/Arrow parser before curated SQLite or lakehouse import.",
+    ),
+    ContentReviewRule(
+        rule_id="database_snapshot_review",
+        formats=DATABASE_SNAPSHOT_FORMATS,
+        content_family="database_snapshot",
+        import_status="manual_review_required",
+        parser_id="database_snapshot_review",
+        review_bucket="content_parser_required",
+        reason="Database snapshots are downloaded as raw artifacts first; opening or importing them requires ownership, provenance, and schema review.",
+    ),
+    ContentReviewRule(
+        rule_id="document_review",
+        formats=DOCUMENT_FORMATS,
+        content_family="document_or_markup",
+        import_status="manual_review_required",
+        parser_id="document_review",
+        review_bucket="content_parser_required",
+        reason="Document or markup payloads are kept as raw artifacts until a document parser is explicit.",
+    ),
+)
 
 
 def normalize_content_format(value: str) -> str:
@@ -226,60 +317,9 @@ def content_parser_capability(source_format: str) -> ContentParserCapability:
             parser_id=resolver_id,
             reason=reason,
         )
-    if normalized in ARCHIVE_OR_COMPRESSED_FORMATS:
-        return ContentParserCapability(
-            source_format=normalized,
-            content_family="archive_or_compressed",
-            import_status="requires_unpack_or_adapter",
-            parser_id="archive_review",
-            review_bucket="downloaded_payload_transform",
-            reason="The file can be downloaded, but it needs an extraction or transform step before curated import.",
-        )
-    if normalized in SCIENTIFIC_GRID_FORMATS:
-        return ContentParserCapability(
-            source_format=normalized,
-            content_family="scientific_grid_or_array",
-            import_status="manual_review_required",
-            parser_id="scientific_grid_review",
-            review_bucket="content_parser_required",
-            reason="Scientific grid/array payloads need a dedicated NetCDF/HDF/Zarr parser before curated import.",
-        )
-    if normalized in GEOSPATIAL_ASSET_FORMATS:
-        return ContentParserCapability(
-            source_format=normalized,
-            content_family="geospatial_asset",
-            import_status="manual_review_required",
-            parser_id="geospatial_asset_review",
-            review_bucket="content_parser_required",
-            reason="Geospatial raster, vector, and tile payloads should first become manifests or renderer-ready assets.",
-        )
-    if normalized in COLUMNAR_FORMATS:
-        return ContentParserCapability(
-            source_format=normalized,
-            content_family="columnar_table",
-            import_status="manual_review_required",
-            parser_id="columnar_table_review",
-            review_bucket="content_parser_required",
-            reason="Columnar payloads need a Parquet/Arrow parser before curated SQLite or lakehouse import.",
-        )
-    if normalized in DATABASE_SNAPSHOT_FORMATS:
-        return ContentParserCapability(
-            source_format=normalized,
-            content_family="database_snapshot",
-            import_status="manual_review_required",
-            parser_id="database_snapshot_review",
-            review_bucket="content_parser_required",
-            reason="Database snapshots are downloaded as raw artifacts first; opening or importing them requires ownership, provenance, and schema review.",
-        )
-    if normalized in DOCUMENT_FORMATS:
-        return ContentParserCapability(
-            source_format=normalized,
-            content_family="document_or_markup",
-            import_status="manual_review_required",
-            parser_id="document_review",
-            review_bucket="content_parser_required",
-            reason="Document or markup payloads are kept as raw artifacts until a document parser is explicit.",
-        )
+    for rule in CONTENT_REVIEW_RULES:
+        if normalized in rule.formats:
+            return rule.to_capability(normalized)
     return ContentParserCapability(
         source_format=normalized or "unknown",
         content_family="unknown",
@@ -372,13 +412,41 @@ def content_import_profile_from_capability(capability: ContentParserCapability) 
     )
 
 
+def iter_content_review_rules() -> tuple[ContentReviewRule, ...]:
+    """Return declarative review rules in stable order for diagnostics and tests."""
+
+    return CONTENT_REVIEW_RULES
+
+
+def content_registry_report() -> dict[str, object]:
+    """Return a compact report of importable and review-only content routes."""
+
+    review_rules = iter_content_review_rules()
+    return {
+        "supported_sqlite_importers": dict(SUPPORTED_SQLITE_IMPORTERS),
+        "supported_sqlite_format_count": len(SUPPORTED_SQLITE_IMPORTERS),
+        "resolver_backed_formats": sorted(RESOLVABLE_API_RESOURCE_FORMATS),
+        "resolver_backed_format_count": len(RESOLVABLE_API_RESOURCE_FORMATS),
+        "review_rule_count": len(review_rules),
+        "review_format_count_by_family": {
+            rule.content_family: len(rule.formats) for rule in review_rules
+        },
+        "review_rules": [rule.to_dict() for rule in review_rules],
+        "unknown_fallback_parser_id": "unknown_content_review",
+        "unknown_fallback_review_bucket": "unsupported_payload_format",
+    }
+
+
 __all__ = [
     "ContentDetection",
     "ContentImportProfile",
     "ContentParserCapability",
+    "ContentReviewRule",
+    "content_registry_report",
     "content_import_profile",
     "content_import_profile_from_capability",
     "content_parser_capability",
     "detect_content_format",
+    "iter_content_review_rules",
     "normalize_content_format",
 ]

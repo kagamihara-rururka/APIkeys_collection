@@ -3,6 +3,7 @@
 Last updated: 2026-06-02
 
 ## 目前工作焦點 / Active Focus
+- [x] 2026-06-02 Content registry review rules 已宣告式化：`api_launcher/content_registry.py` 新增 `ContentReviewRule` / `CONTENT_REVIEW_RULES` / `content_registry_report()`，把 archive、scientific grid、geospatial asset、columnar table、database snapshot、document/markup 的 review lane 轉成可查 contract；不新增大 parser、不改 CSV/JSON/Socrata bounded sample 匯入行為。
 - [x] 2026-06-02 Tk background job start result contract 已補：`frontends/tk/background_jobs.py` 新增 `TkBackgroundJobStartResult` / `start_single_flight_thread_result()`，讓 single-flight helper 可回報 `started`、`duplicate`、`capacity` 與 active/capacity counts；既有 workflow 仍用 bool wrapper，不改 Tk 行為。`--project-maturity-json` 的 background scheduler metrics 也已暴露這個 contract 與 guard test。
 - [x] 2026-06-02 Visual/Skin registry persistence OpenSpec 已正式歸檔：`openspec/changes/visual-asset-registry-persistence/` 已移到 `openspec/changes/archive/2026-06-02-visual-asset-registry-persistence/`，delta spec 已同步為 `openspec/specs/visual-asset-registry-persistence/spec.md`。這是規格治理，不改 runtime / UI / renderer 邊界。
 - [x] 2026-06-02 CLI JSON stdout regression guard 已補：`tests/test_cli_json.py` 現在會掃描 `api_launcher/**/*.py`，防止未來再次出現直接 `print(json.dumps(...))` 的 stdout JSON 輸出；寫檔 JSON 不受此 guard 影響。

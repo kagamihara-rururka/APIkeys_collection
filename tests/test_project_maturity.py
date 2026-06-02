@@ -193,6 +193,16 @@ class ProjectMaturityTests(unittest.TestCase):
         self.assertEqual("api_launcher.crawlers.registry", crawler_metrics["dispatch_owner"])
         import_metrics = rows["content_parser_and_import"]["metrics"]
         self.assertEqual(("csv_to_sqlite", "json_to_sqlite"), tuple(import_metrics["supported_sqlite_importers"]))
+        self.assertEqual(6, import_metrics["content_review_rule_count"])
+        self.assertEqual(1, import_metrics["resolver_backed_format_count"])
+        self.assertEqual(
+            "unknown_content_review",
+            import_metrics["content_registry_report"]["unknown_fallback_parser_id"],
+        )
+        self.assertEqual(
+            "geospatial_asset",
+            import_metrics["content_registry_report"]["review_rules"][2]["content_family"],
+        )
         self.assertEqual(1, import_metrics["compatibility_shim_count"])
         self.assertEqual("scoped_importer_boundary", import_metrics["compatibility_shim_runtime_scope"])
         self.assertFalse(import_metrics["global_monkeypatch"])
