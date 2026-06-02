@@ -1,4 +1,10 @@
 # Agent 接力卡
+## 2026-06-03 04:48 +08:00 Bounded scheduler OpenSpec archived
+- 本輪完成 `bounded-scheduler-core-contract` OpenSpec 收尾：新增正式 spec `openspec/specs/bounded-scheduler-core-contract/spec.md`，把已完成 change 移到 `openspec/changes/archive/2026-06-03-bounded-scheduler-core-contract/`。
+- Archive 前後已驗證：`npx.cmd -y @fission-ai/openspec@latest validate --all --no-interactive` 通過；archive 後 active OpenSpec validate 顯示 `spec/bounded-scheduler-core-contract`、`spec/development-workflow`、`spec/visual-asset-registry-persistence` 共 3 項通過。
+- 邊界：這是 OpenSpec governance / archive slice，不改產品碼、不實作 scheduler runtime、不新增 durable queue schema、不改 lifecycle schema/status、不啟用 auto lifecycle event、不新增 cross-repo job adapter、不 import 下游 repo。
+- 下一個安全動作：回到 RRKAL Core readiness / registry / lifecycle 的下一個 bounded slice；若要 durable queue migration、automatic lifecycle event、cross-repo job adapter 或 asyncio migration，必須先送 `o_1`。
+
 ## 2026-06-03 04:32 +08:00 Core scheduler `o_1` review gate contract
 - 本輪擴充 `api_launcher/core_scheduler_contracts.py` 與 `api_launcher/core_bounded_scheduler_plan_report.py`：新增 `scheduler_o1_review_gate_contract()` / `core_scheduler_o1_review_gate_contract.v1`，並暴露到 `--core-bounded-scheduler-plan-json` 的 `existing_evidence.scheduler_o1_review_gate_contract`。
 - Gate contract 明確列出四個未來 runtime 工作前必須送 `o_1` 的項目：`durable_queue_schema`、`lifecycle_event_emission_change`、`cross_repo_job_adapter`、`asyncio_runtime_migration`；每個 gate 都有 blocked change、required-before 條件與 rationale，且 `safe_without_review=false`。

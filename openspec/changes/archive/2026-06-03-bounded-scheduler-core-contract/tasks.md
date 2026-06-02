@@ -25,5 +25,5 @@
 ## 5. Documentation And Verification
 
 - [x] 5.1 Update `docs/CORE_INTEGRATION_PLANNING_GATE_READINESS.zh-TW.md`, `docs/PROJECT_GTD.md`, `docs/AGENT_HANDOFF.zh-TW.md`, and `docs/DEVELOPMENT_LOG.zh-TW.md` after each implemented slice.
-- [ ] 5.2 Run OpenSpec validation, focused tests, changed-doc mojibake scan, `git diff --check`, pre-push smoke, and GitHub Actions before marking the change ready to archive.
-- [ ] 5.3 Archive the OpenSpec change only after implementation evidence and CI are complete.
+- [x] 5.2 Run OpenSpec validation, focused tests, changed-doc mojibake scan, `git diff --check`, pre-push smoke, and GitHub Actions before marking the change ready to archive.
+- [x] 5.3 Archive the OpenSpec change only after implementation evidence and CI are complete.

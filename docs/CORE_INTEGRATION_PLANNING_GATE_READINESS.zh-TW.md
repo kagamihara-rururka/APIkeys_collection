@@ -38,6 +38,7 @@
 | Core scheduler explicit-only lifecycle event guard CI | GitHub Actions run `26845690026` PASS |
 | Core scheduler `o_1` review gate contract | `711b016` / `core_scheduler_o1_review_gate_contract.v1` exposed through `--core-bounded-scheduler-plan-json` / OpenSpec task 4.3 evidence |
 | Core scheduler `o_1` review gate contract CI | GitHub Actions run `26846446579` PASS |
+| Bounded scheduler Core contract OpenSpec archive | `pending` / `openspec/specs/bounded-scheduler-core-contract/spec.md` plus archive `openspec/changes/archive/2026-06-03-bounded-scheduler-core-contract/` |
 | Core lifecycle audit diagnostic | `--core-lifecycle-audit-json` / `core_lifecycle_audit_report.v1` |
 | Core manifest-reference diagnostic | `--core-manifest-reference-report-json` / `core_manifest_reference_report.v1` |
 | Core deep-adapter coverage diagnostic | `--core-deep-adapter-coverage-json` / `core_deep_adapter_coverage_report.v1` |
@@ -283,6 +284,8 @@ Update 2026-06-03 03:54 +08:00: Scheduler next-action payload contract is now ex
 Update 2026-06-03 04:12 +08:00: Scheduler explicit-only lifecycle event guard is now exposed through `--core-bounded-scheduler-plan-json` as `core_scheduler_lifecycle_event_emission_guard.v1`, completing OpenSpec task 3.3. Code checkpoint `463de67` passed GitHub Actions run `26845690026`. It proves scheduler job completion does not automatically call visual lifecycle event writers: completed-job policy keeps `auto_emit_lifecycle_event=false` and requires explicit writer `log_visual_asset_ready_registry_entry`. This remains contract-only: no scheduler runtime, no automatic lifecycle event, no queue migration, and no lifecycle schema/status change.
 
 Update 2026-06-03 04:32 +08:00: Scheduler `o_1` review gate contract is now exposed through `--core-bounded-scheduler-plan-json` as `core_scheduler_o1_review_gate_contract.v1`, completing OpenSpec task 4.3. Code checkpoint `711b016` passed GitHub Actions run `26846446579`. It requires `o_1` before durable queue schema/migration, lifecycle emission change, cross-repo job adapter, or asyncio/runtime migration. This remains contract-only: no scheduler runtime, no automatic lifecycle event, no queue migration, no cross-repo job adapter, and no lifecycle schema/status change.
+
+Update 2026-06-03 04:48 +08:00: `bounded-scheduler-core-contract` has been promoted into the main OpenSpec capability at `openspec/specs/bounded-scheduler-core-contract/spec.md`, and the completed change has been moved to `openspec/changes/archive/2026-06-03-bounded-scheduler-core-contract/`. This is an OpenSpec governance/archive checkpoint only and does not change product runtime behavior.
 
 1. **Review Queue Persistence Readiness**
    - 目標：把 content review rules、visual `review_required` lifecycle、unknown/heavy payload fallback 與 missing unified review queue persistence 收成更細的 Core-only evidence。
