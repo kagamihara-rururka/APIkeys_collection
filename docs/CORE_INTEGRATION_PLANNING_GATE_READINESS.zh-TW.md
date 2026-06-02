@@ -34,7 +34,8 @@
 | Core scheduler lane contract coverage CI | GitHub Actions run `26843841155` PASS |
 | Core scheduler next-action payload contract | `e936080` / `core_scheduler_next_action_payload_contract.v1` exposed through `--core-bounded-scheduler-plan-json` / OpenSpec task 3.2 evidence |
 | Core scheduler next-action payload contract CI | GitHub Actions run `26844820055` PASS |
-| Core scheduler explicit-only lifecycle event guard | `pending` / `core_scheduler_lifecycle_event_emission_guard.v1` exposed through `--core-bounded-scheduler-plan-json` / OpenSpec task 3.3 evidence |
+| Core scheduler explicit-only lifecycle event guard | `463de67` / `core_scheduler_lifecycle_event_emission_guard.v1` exposed through `--core-bounded-scheduler-plan-json` / OpenSpec task 3.3 evidence |
+| Core scheduler explicit-only lifecycle event guard CI | GitHub Actions run `26845690026` PASS |
 | Core lifecycle audit diagnostic | `--core-lifecycle-audit-json` / `core_lifecycle_audit_report.v1` |
 | Core manifest-reference diagnostic | `--core-manifest-reference-report-json` / `core_manifest_reference_report.v1` |
 | Core deep-adapter coverage diagnostic | `--core-deep-adapter-coverage-json` / `core_deep_adapter_coverage_report.v1` |
@@ -272,7 +273,7 @@ Update 2026-06-03 03:36 +08:00: Scheduler lane contract coverage is now exposed 
 
 Update 2026-06-03 03:54 +08:00: Scheduler next-action payload contract is now exposed through `--core-bounded-scheduler-plan-json` as `core_scheduler_next_action_payload_contract.v1`, completing OpenSpec task 3.2. Code checkpoint `e936080` passed GitHub Actions run `26844820055`. It covers cancelled, retryable failure, timeout, review-required, and blocked-job scenarios with backend-defined `next_action` payloads. This remains contract-only: no scheduler runtime, no automatic lifecycle event, no queue migration, and no lifecycle schema/status change.
 
-Update 2026-06-03 04:12 +08:00: Scheduler explicit-only lifecycle event guard is now exposed through `--core-bounded-scheduler-plan-json` as `core_scheduler_lifecycle_event_emission_guard.v1`, completing OpenSpec task 3.3 locally. It proves scheduler job completion does not automatically call visual lifecycle event writers: completed-job policy keeps `auto_emit_lifecycle_event=false` and requires explicit writer `log_visual_asset_ready_registry_entry`. This remains contract-only: no scheduler runtime, no automatic lifecycle event, no queue migration, and no lifecycle schema/status change.
+Update 2026-06-03 04:12 +08:00: Scheduler explicit-only lifecycle event guard is now exposed through `--core-bounded-scheduler-plan-json` as `core_scheduler_lifecycle_event_emission_guard.v1`, completing OpenSpec task 3.3. Code checkpoint `463de67` passed GitHub Actions run `26845690026`. It proves scheduler job completion does not automatically call visual lifecycle event writers: completed-job policy keeps `auto_emit_lifecycle_event=false` and requires explicit writer `log_visual_asset_ready_registry_entry`. This remains contract-only: no scheduler runtime, no automatic lifecycle event, no queue migration, and no lifecycle schema/status change.
 
 1. **Review Queue Persistence Readiness**
    - 目標：把 content review rules、visual `review_required` lifecycle、unknown/heavy payload fallback 與 missing unified review queue persistence 收成更細的 Core-only evidence。
