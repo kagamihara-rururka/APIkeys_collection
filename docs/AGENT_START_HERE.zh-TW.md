@@ -42,7 +42,7 @@
 ## 任務閱讀路徑
 
 - 接手任何開發：先讀本文件、`docs/AGENT_HANDOFF.zh-TW.md`、`docs/PROJECT_GTD.md`。
-- 開始新 session / checkpoint 收尾前：快速檢查 `L:\AGENT_EXCHANGE\inbox\*_RRKAL_project.md`。若有相關 `Status: new` entry，必須在同一則 entry 的 `Responses` 區塊回覆 `Decision`、`Response`、`Next`，再把採納後的決策消化進本 repo 的 GTD / handoff / docs / OpenSpec / code slice。
+- 開始新 session / checkpoint 收尾前：若需要跨 agent 協調，檢查 Notion `Agents討論區`。RRKAL status / handoff / relay 走 `04_Agent_Inbox`，`o_1` review request 走 `03_OAI_Review_Requests`，accepted decisions 走 `02_Decision_Log`，`n_1` operations 走 `06_n1_SOP`。Notion 是協調 dashboard，不是產品證據；採納後仍要消化進本 repo 的 GTD / handoff / docs / OpenSpec / code slice。
 - 改 crawler / source pattern / adapter：再讀 `docs/DATASET_DISCOVERY_NOTES.zh-TW.md`。
 - 改 UI/UX：再讀 `docs/UI_UX_DEVELOPMENT_CONTRACT.zh-TW.md`。
 - 改下載、匯入、repair：再讀 `docs/TECHNICAL_OVERVIEW.zh-TW.md` 與 `docs/ARCHITECTURE.md`。
@@ -55,7 +55,7 @@
 這些機制是防止 agent 悶頭推進、誤判狀態或把快速交付變成一次性程式碼的最低成本護欄。
 
 - 開始前先跑 `git status --short --branch`，確認是否有其他 agent 或使用者的未提交改動；若有 dirty worktree，先保護現況，不要改同一批檔案。
-- 開始前與 checkpoint close 前都要看 `L:\AGENT_EXCHANGE\inbox\*_RRKAL_project.md`；交換區不上 GitHub，不是 source of truth，但未回覆的相關 `Status: new` 建議不能默默忽略。
+- 開始前與 checkpoint close 前，若跨 agent 協調可能影響本切片，檢查 Notion `Agents討論區` 的 RRKAL 相關區塊。`L:\AGENT_EXCHANGE` 已降級為歷史封存 / archive，不再作為主要 inbox/outbox；不要往那裡寫新 agent mail，除非使用者明確重新啟用。
 - 中大型跨 crawler、resolver、download plan、import、UI、database 的改動，先用 OpenSpec 或至少寫清 scope、tasks、acceptance criteria、risks；小修不必硬開厚規格。
 - 推進中卡住、工作時間拉長或需要外部 agent 接力時，先跑 `.\scripts\heartbeat_codex.cmd -DryRun`，讀 `state/heartbeat/heartbeat_plan.json` 與 `state/heartbeat/agent_prompt.md`，不要直接啟動自動 runner。
 - 需要 agent-readable 狀態時，優先用 JSON 入口，例如 `--handoff-report-json`、`--run-mvp-demo-smoke-json`、`--adapter-review-json`、`--run-download-plan-json`，不要解析人類文字輸出。

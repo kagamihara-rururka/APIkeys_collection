@@ -1,4 +1,10 @@
 # Agent 接力卡
+## 2026-06-02 19:41 +08:00 Handoff CLI helper consolidation
+- 本輪新增 `api_launcher/cli_handoff.py`，把 `--handoff-report` 與 `--handoff-report-json` 的 argparse、active check、JSON stdout 判斷、Markdown 寫檔與 dispatch 從 `core.py` 抽成專責 helper；`core.py` 只呼叫 `run_handoff_cli()`，`cli_flags.command_requested()` 也改用同一個 `handoff_command_active()`。
+- 邊界：這是 consolidation slice，用來阻止 `core.py` 繼續吸收 handoff report CLI 責任；不改 handoff payload、不改 JSON schema、不改 Web/Tk、crawler、download/import、Visual/Skin lifecycle、RendererSkinAsset / SkinAsset integration，也不跨 repo。
+- 已驗證：不寫 pyc 的 `compile()` 檢查通過；`py -3 -B -m unittest tests.test_handoff tests.test_cli_flags tests.test_cli_json -v` 通過 24 tests；實跑 `--handoff-report-json` 可由下游 Python `json.load(sys.stdin)` 解析，主要 key 包含 `generated_at`、`git_head`、`git_status`、`mvp_readiness`；實跑 `--handoff-report PATH` 會寫出非空 Markdown；完整 smoke `state\logs\pre_push_smoke_20260602_185926.log` 通過 1096 tests / 4 skipped，MVP demo `download_import_completed` / `row_count=3`；GitHub Actions run `26817283123` 通過 Ubuntu、Windows 與 real DB smoke。Code commit：`afbbd36 Split handoff CLI helper`。
+- Docs drift check：已同步 GTD / handoff / development log，並把 `docs/AGENT_START_HERE.zh-TW.md` 的跨 agent 協調入口由已廢止的 `L:\AGENT_EXCHANGE` 改為 Notion `Agents討論區`；本輪不需要 user guide。
+
 ## 2026-06-02 18:40 +08:00 MVP CLI helper consolidation
 - 本輪新增 `api_launcher/cli_mvp.py`，把 `--write-mvp-demo-flow`、`--run-mvp-demo-smoke-json`、`--mvp-readiness-json`、`--write-mvp-readiness-json` 的 argparse、active check、JSON stdout 判斷、MVP flow 寫檔、offline smoke 與 readiness JSON dispatch 從 `core.py` 抽成專責 helper；`core.py` 只呼叫 `run_mvp_cli()`。
 - 邊界：這是 consolidation slice，用來阻止 `core.py` 繼續吸收 MVP diagnostic/smoke CLI 責任；不改 MVP demo flow payload、不改 offline smoke 行為、不改 readiness payload、不改 Web/Tk、crawler、download/import、Visual/Skin 或 CI workflow。抽離時也移除了 `core.py` 原方法中的舊註解；實際檔案以 Python UTF-8 驗證為乾淨文字，PowerShell console 顯示亂碼不可直接當成檔案損壞證據。
