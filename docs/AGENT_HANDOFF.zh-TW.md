@@ -1,4 +1,9 @@
 # Agent 接力卡
+## 2026-06-02 18:24 +08:00 Project maturity CLI helper consolidation
+- 本輪新增 `api_launcher/cli_project_maturity.py`，把 `--project-maturity-json`、`--write-project-maturity-json`、`--project-maturity-markdown` 的 argparse、active check、JSON / Markdown / file output dispatch 從 `core.py` 抽成專責 helper；`core.py` 只呼叫 `run_project_maturity_cli()`，`cli_flags.command_requested()` 也改用同一個 `project_maturity_command_active()`。
+- 邊界：這是 consolidation slice，用來阻止 `core.py` 繼續吸收診斷報表責任；不改 maturity payload、不改 markdown render、不改 Web/Tk、crawler、download/import、Visual/Skin 或 CI workflow。下一輪若繼續做同類工作，可優先看 MVP readiness / handoff / heartbeat 等 CLI JSON path 是否也能安全抽出。
+- 已驗證：不寫 pyc 的 `compile()` 檢查通過；`py -3 -B -m unittest tests.test_project_maturity tests.test_cli_flags tests.test_cli_json -v` 通過 9 tests；實跑 `--project-maturity-json` 可由下游 Python `json.load(sys.stdin)` 解析；實跑 `--write-project-maturity-json` 與 `--project-maturity-markdown` 會寫出 JSON / Markdown 檔；完整 smoke `state\logs\pre_push_smoke_20260602_181653.log` 通過 1096 tests / 4 skipped，MVP demo `download_import_completed` / `row_count=3`；GitHub Actions run `26813587586` 通過 Ubuntu、Windows 與 real DB smoke。Code commit：`f549dc5 Split project maturity CLI helper`。
+
 ## 2026-06-02 18:09 +08:00 Registry report CLI helper consolidation
 - 本輪新增 `api_launcher/cli_registry_reports.py`，把 `--crawler-registry-report-json`、`--content-registry-report-json`、`--dataset-adapter-report-json` 三個 registry report CLI 的 argparse、active check 與 JSON dispatch 從 `core.py` 抽成專責 helper；`core.py` 只負責呼叫 `run_registry_report_cli()`，`cli_flags.command_requested()` 也改用同一個 `registry_report_command_active()`。
 - 邊界：這是 consolidation slice，用來阻止 `core.py` 繼續吸收 registry report 責任；不改三個 report payload、不改 source crawler、content registry、dataset adapter report、download/import、Web/Tk 或 maturity 計算。下一輪若繼續 consolidation，優先找同樣可從 `core.py` 抽走的 CLI helper，而不是重寫主流程。
