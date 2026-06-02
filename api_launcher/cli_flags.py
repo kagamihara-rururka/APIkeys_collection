@@ -11,6 +11,7 @@ def command_requested(args: argparse.Namespace) -> bool:
     cli_flags stays cheap and side-effect-light during startup checks.
     """
     from api_launcher.cli_database_repair import database_repair_command_active
+    from api_launcher.cli_core_readiness import core_readiness_command_active
     from api_launcher.cli_crawler_assets import crawler_asset_command_active
     from api_launcher.cli_crawler_run_records import crawler_run_record_command_active
     from api_launcher.cli_dataset_discovery import dataset_discovery_command_active
@@ -42,6 +43,7 @@ def command_requested(args: argparse.Namespace) -> bool:
         download_plan_command_active(args),
         mvp_command_active(args),
         project_maturity_command_active(args),
+        core_readiness_command_active(args),
         visual_asset_registry_command_active(args),
         registry_report_command_active(args),
         yfinance_command_active(args),

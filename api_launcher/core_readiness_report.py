@@ -1,0 +1,292 @@
+from __future__ import annotations
+
+from collections.abc import Iterable
+from typing import Any
+
+from api_launcher.content_registry import content_registry_report
+from api_launcher.crawler_registry_report import crawler_registry_report
+from api_launcher.dataset_adapters import dataset_adapter_report
+from api_launcher.project_maturity import build_project_maturity_payload
+from api_launcher.visual_asset_contracts import (
+    SKIN_ASSET_LIFECYCLE_STATUSES,
+    skin_asset_status_display_profile,
+    visual_asset_registry_persistence_schema,
+    visual_asset_registry_summary,
+)
+
+
+CORE_READINESS_SCHEMA_VERSION = "core_readiness_report.v1"
+
+
+def build_core_readiness_report(repository: Any | None = None) -> dict[str, Any]:
+    """Aggregate RRKAL Core readiness evidence without integrating downstream projects.
+
+    This report is intentionally conservative. It describes the control-plane
+    contracts RRKAL already has for registries, lifecycle vocabulary, manifest
+    references, review-required lanes, job-status evidence, and lineage. It
+    must not import renderer/compressor projects, read renderer payloads, or
+    mark future integration as ready while evidence is still contract-only.
+    """
+
+    crawler_report = crawler_registry_report()
+    content_report = content_registry_report()
+    adapter_report = dataset_adapter_report()
+    visual_schema = visual_asset_registry_persistence_schema()
+    empty_visual_summary = visual_asset_registry_summary(())
+    maturity_payload = build_project_maturity_payload(repository) if repository is not None else {}
+
+    sections = {
+        "registry_evidence": _registry_evidence(crawler_report, content_report, adapter_report),
+        "lifecycle_evidence": _lifecycle_evidence(visual_schema, empty_visual_summary),
+        "manifest_reference_evidence": _manifest_reference_evidence(visual_schema),
+        "review_required_evidence": _review_required_evidence(content_report, empty_visual_summary),
+        "job_status_evidence": _job_status_evidence(visual_schema, maturity_payload),
+        "asset_lineage_evidence": _asset_lineage_evidence(visual_schema),
+    }
+    gate = _integration_planning_gate(sections)
+    return {
+        "schema_version": CORE_READINESS_SCHEMA_VERSION,
+        **sections,
+        "integration_planning_gate": gate,
+        "safety": {
+            "control_plane_only": True,
+            "imports_renderer_projects": False,
+            "imports_compressor_projects": False,
+            "reads_renderer_payloads": False,
+            "reads_npz": False,
+            "changes_lifecycle_schema": False,
+            "cross_repo_implementation": False,
+        },
+    }
+
+
+def _registry_evidence(
+    crawler_report: dict[str, Any],
+    content_report: dict[str, Any],
+    adapter_report: dict[str, Any],
+) -> dict[str, Any]:
+    evidence = {
+        "crawler_registry": {
+            "source_type_count": int(crawler_report.get("source_type_count") or 0),
+            "matrix_cell_count": int(crawler_report.get("matrix_cell_count") or 0),
+            "capability_group_count": len(crawler_report.get("capability_groups") or ()),
+            "next_action": crawler_report.get("next_action", ""),
+        },
+        "content_registry": {
+            "supported_sqlite_format_count": int(content_report.get("supported_sqlite_format_count") or 0),
+            "review_rule_count": int(content_report.get("review_rule_count") or 0),
+            "resolver_backed_format_count": int(content_report.get("resolver_backed_format_count") or 0),
+            "unknown_fallback_review_bucket": content_report.get("unknown_fallback_review_bucket", ""),
+        },
+        "dataset_adapter_registry": {
+            "dataset_adapter_count": int(adapter_report.get("dataset_adapter_count") or 0),
+            "adapter_ids": list(adapter_report.get("adapter_ids") or ()),
+            "coverage_boundary": adapter_report.get("coverage_boundary", ""),
+        },
+    }
+    missing = []
+    if evidence["dataset_adapter_registry"]["dataset_adapter_count"] < evidence["crawler_registry"]["source_type_count"]:
+        missing.append("deep_adapter_coverage_does_not_match_supported_source_types")
+    return {
+        "existing_evidence": evidence,
+        "missing_evidence": missing,
+        "blocked_surfaces": [],
+        "review_required_surfaces": _review_rule_ids(content_report),
+        "contract_only_surfaces": [],
+        "planned_surfaces": [],
+        "next_safe_actions": (
+            "add_deep_adapters_only_when_they_close_real_download_import_paths",
+            "keep_source_type_dispatch_in_registry_not_scattered_if_else",
+        ),
+    }
+
+
+def _lifecycle_evidence(visual_schema: dict[str, Any], empty_summary: dict[str, Any]) -> dict[str, Any]:
+    statuses = sorted(SKIN_ASSET_LIFECYCLE_STATUSES)
+    display_profiles = {
+        status: skin_asset_status_display_profile(status)
+        for status in statuses
+    }
+    return {
+        "existing_evidence": {
+            "status_count": len(statuses),
+            "statuses": statuses,
+            "status_display_profiles": display_profiles,
+            "empty_registry_status_counts": dict(empty_summary.get("status_counts") or {}),
+            "schema_allowed_lifecycle_statuses": list(visual_schema.get("allowed_lifecycle_statuses") or ()),
+        },
+        "missing_evidence": ("runtime_lifecycle_state_machine_not_unified",),
+        "blocked_surfaces": [],
+        "review_required_surfaces": ("review_required",),
+        "contract_only_surfaces": ("visual_skin_asset_registry_persistence",),
+        "planned_surfaces": ("future_external_skin_builder_lifecycle_updates",),
+        "next_safe_actions": (
+            "keep_lifecycle_vocabulary_fixed_until_o1_review_approves_schema_change",
+            "use_display_profiles_for_ui_instead_of_frontend_status_guessing",
+        ),
+    }
+
+
+def _manifest_reference_evidence(visual_schema: dict[str, Any]) -> dict[str, Any]:
+    columns = _column_names(visual_schema)
+    required_manifest_fields = ("manifest_path", "skin_asset_id", "source_curated_asset_id", "dataset_uid")
+    missing = [field for field in required_manifest_fields if field not in columns]
+    return {
+        "existing_evidence": {
+            "schema_contract": visual_schema.get("table_name"),
+            "persistence_status": visual_schema.get("persistence_status"),
+            "required_manifest_fields": list(required_manifest_fields),
+            "present_manifest_fields": [field for field in required_manifest_fields if field in columns],
+            "payload_columns_allowed": bool(
+                (visual_schema.get("migration_guards") or {}).get("payload_columns_allowed")
+            ),
+            "payload_loading": bool((visual_schema.get("safety") or {}).get("payload_loading")),
+        },
+        "missing_evidence": tuple(missing),
+        "blocked_surfaces": [] if not missing else ("manifest_reference_schema_incomplete",),
+        "review_required_surfaces": (),
+        "contract_only_surfaces": ("visual_skin_asset_registry_table",),
+        "planned_surfaces": ("formal_user_database_visual_registry_persistence",),
+        "next_safe_actions": (
+            "keep_manifest_reference_control_plane_only",
+            "do_not_read_npz_or_renderer_payloads_in_core_readiness",
+        ),
+    }
+
+
+def _review_required_evidence(content_report: dict[str, Any], empty_summary: dict[str, Any]) -> dict[str, Any]:
+    content_review_rules = _review_rule_ids(content_report)
+    return {
+        "existing_evidence": {
+            "content_review_rule_count": int(content_report.get("review_rule_count") or 0),
+            "content_review_rules": content_review_rules,
+            "unknown_fallback_review_bucket": content_report.get("unknown_fallback_review_bucket"),
+            "visual_registry_review_required_count": int(empty_summary.get("review_required_count") or 0),
+            "visual_review_status_available": "review_required" in SKIN_ASSET_LIFECYCLE_STATUSES,
+        },
+        "missing_evidence": ("review_queue_persistence_not_unified",),
+        "blocked_surfaces": ("unsupported_payload_format",),
+        "review_required_surfaces": tuple(content_review_rules) + ("visual_skin_asset_review_required",),
+        "contract_only_surfaces": ("visual_review_required_lifecycle_contract",),
+        "planned_surfaces": ("unified_review_dashboard",),
+        "next_safe_actions": (
+            "surface_review_required_from_backend_payloads",
+            "do_not_promote_unknown_or_heavy_formats_to_ready_without_parser_evidence",
+        ),
+    }
+
+
+def _job_status_evidence(visual_schema: dict[str, Any], maturity_payload: dict[str, Any]) -> dict[str, Any]:
+    rows = maturity_payload.get("rows") if isinstance(maturity_payload.get("rows"), list) else []
+    scheduler_row = _maturity_row_by_id(rows, "background_jobs_and_scheduler")
+    return {
+        "existing_evidence": {
+            "visual_lifecycle_statuses": sorted(SKIN_ASSET_LIFECYCLE_STATUSES),
+            "auto_event_emission": bool(
+                (visual_schema.get("migration_guards") or {}).get("auto_event_emission")
+            ),
+            "event_writer_contract": (visual_schema.get("migration_guards") or {}).get("event_writer", ""),
+            "background_scheduler_maturity": scheduler_row.get("maturity_level", ""),
+            "background_scheduler_metrics": scheduler_row.get("metrics", {}),
+        },
+        "missing_evidence": ("unified_bounded_job_scheduler_not_yet_implemented",),
+        "blocked_surfaces": ("auto_lifecycle_event_emission_disabled",),
+        "review_required_surfaces": ("failed_lifecycle_status", "review_required_lifecycle_status"),
+        "contract_only_surfaces": ("visual_ready_event_writer_contract",),
+        "planned_surfaces": ("external_builder_job_status_adapter",),
+        "next_safe_actions": (
+            "keep_auto_event_emission_disabled_until_migration_and_o1_review_are_clear",
+            "design_bounded_scheduler_before_async_rewrite",
+        ),
+    }
+
+
+def _asset_lineage_evidence(visual_schema: dict[str, Any]) -> dict[str, Any]:
+    columns = _column_names(visual_schema)
+    lineage_fields = ("source_request_id", "source_curated_asset_id", "dataset_uid")
+    missing = [field for field in lineage_fields if field not in columns]
+    return {
+        "existing_evidence": {
+            "lineage_fields": list(lineage_fields),
+            "present_lineage_fields": [field for field in lineage_fields if field in columns],
+            "indexes": list((index.get("name") for index in visual_schema.get("indexes", ())) or ()),
+            "control_plane_only": bool((visual_schema.get("safety") or {}).get("control_plane_only")),
+        },
+        "missing_evidence": tuple(missing),
+        "blocked_surfaces": [] if not missing else ("lineage_schema_incomplete",),
+        "review_required_surfaces": (),
+        "contract_only_surfaces": ("visual_asset_lineage_persistence_schema",),
+        "planned_surfaces": ("cross_project_lineage_consumption",),
+        "next_safe_actions": (
+            "persist_lineage_only_after_explicit_migration_guard",
+            "do_not_copy_notional_or_archive_threads_into_product_lineage",
+        ),
+    }
+
+
+def _integration_planning_gate(sections: dict[str, dict[str, Any]]) -> dict[str, Any]:
+    missing = sorted(_flatten_section_items(sections, "missing_evidence"))
+    blocked = sorted(_flatten_section_items(sections, "blocked_surfaces"))
+    contract_only = sorted(_flatten_section_items(sections, "contract_only_surfaces"))
+    planned = sorted(_flatten_section_items(sections, "planned_surfaces"))
+    if blocked:
+        status = "partial"
+    elif missing or contract_only or planned:
+        status = "partial"
+    else:
+        status = "ready_for_planning"
+    return {
+        "status": status,
+        "blocked_reasons": blocked,
+        "missing_evidence": missing,
+        "contract_only_surfaces": contract_only,
+        "planned_surfaces": planned,
+        "next_safe_actions": (
+            "prepare_integration_planning_gate_evidence_without_downstream_imports",
+            "request_o1_review_before_lifecycle_schema_or_cross_project_contract_changes",
+            "keep_github_ci_and_smoke_as_product_evidence",
+        ),
+    }
+
+
+def _review_rule_ids(content_report: dict[str, Any]) -> tuple[str, ...]:
+    rules = content_report.get("review_rules") if isinstance(content_report.get("review_rules"), list) else []
+    return tuple(
+        str(rule.get("rule_id"))
+        for rule in rules
+        if isinstance(rule, dict) and rule.get("rule_id")
+    )
+
+
+def _column_names(schema: dict[str, Any]) -> set[str]:
+    columns = schema.get("columns") if isinstance(schema.get("columns"), list) else []
+    return {
+        str(column.get("name"))
+        for column in columns
+        if isinstance(column, dict) and column.get("name")
+    }
+
+
+def _maturity_row_by_id(rows: Iterable[Any], area_id: str) -> dict[str, Any]:
+    for row in rows:
+        if isinstance(row, dict) and row.get("area_id") == area_id:
+            return row
+    return {}
+
+
+def _flatten_section_items(sections: dict[str, dict[str, Any]], key: str) -> set[str]:
+    values: set[str] = set()
+    for section in sections.values():
+        raw_items = section.get(key, ())
+        if isinstance(raw_items, str):
+            values.add(raw_items)
+            continue
+        if isinstance(raw_items, Iterable):
+            values.update(str(item) for item in raw_items if item)
+    return values
+
+
+__all__ = [
+    "CORE_READINESS_SCHEMA_VERSION",
+    "build_core_readiness_report",
+]

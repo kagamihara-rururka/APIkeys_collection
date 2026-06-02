@@ -48,6 +48,11 @@ from api_launcher.cli_dataset_discovery import (
     discover_dataset_candidates_cli,
 )
 from api_launcher.cli_flags import command_requested
+from api_launcher.cli_core_readiness import (
+    add_core_readiness_args,
+    core_readiness_command_active,
+    run_core_readiness_cli,
+)
 from api_launcher.cli_portal_intake import add_portal_intake_args, portal_intake_cli
 from api_launcher.cli_database_repair import run_database_repairs
 from api_launcher.cli_crawler_assets import add_crawler_asset_args, run_crawler_asset_cli
@@ -638,6 +643,7 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     parser.add_argument("--download-timeout", type=float, default=30.0, help="HTTP timeout seconds for --run-download-plan")
     add_mvp_args(parser)
     add_project_maturity_args(parser)
+    add_core_readiness_args(parser)
     add_visual_asset_registry_args(parser)
     add_registry_report_args(parser)
     add_yfinance_args(parser)
@@ -801,6 +807,7 @@ class CatalogLauncherCli:
             self.refresh_state()
             run_mvp_cli(self.args, self.repository, log_event)
             run_project_maturity_cli(self.args, self.repository)
+            run_core_readiness_cli(self.args, self.repository)
             run_visual_asset_registry_cli(self.args)
             run_registry_report_cli(self.args)
             run_yfinance_cli(self.args)
@@ -868,6 +875,7 @@ class CatalogLauncherCli:
             or self.args.run_download_plan_json
             or mvp_json_stdout_active(self.args)
             or project_maturity_command_active(self.args)
+            or core_readiness_command_active(self.args)
             or self.args.visual_registry_summary_json
             or self.args.visual_registry_emit_ready_event_json
             or registry_report_command_active(self.args)
