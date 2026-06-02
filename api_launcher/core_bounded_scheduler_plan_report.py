@@ -4,6 +4,7 @@ from typing import Any
 
 from api_launcher.core_job_status_report import build_core_job_status_report
 from api_launcher.core_scheduler_contracts import scheduler_job_contract_draft
+from api_launcher.core_scheduler_persistence_contract import scheduler_queue_sqlite_ddl_preview
 from api_launcher.sqlite_write_gate import sqlite_write_gate_profile
 from frontends.tk.background_job_policies import iter_tk_background_job_policies
 
@@ -33,6 +34,7 @@ def build_core_bounded_scheduler_plan_report(
         "existing_evidence": {
             "job_status_report_bridge": _job_status_report_bridge(job_status_report),
             "scheduler_job_contract_draft": scheduler_job_contract_draft(),
+            "scheduler_queue_ddl_preview": scheduler_queue_sqlite_ddl_preview(),
             "tk_policy_registry": {
                 "policy_count": len(tk_lanes),
                 "lanes": tk_lanes,
@@ -46,7 +48,7 @@ def build_core_bounded_scheduler_plan_report(
         },
         "missing_evidence": (
             "scheduler_contract_not_bound_to_runtime_or_persistence",
-            "durable_job_queue_persistence_not_defined",
+            "durable_job_queue_persistence_not_materialized",
             "cross_process_sqlite_write_coordination_not_defined",
             "cancellation_retry_and_timeout_policy_not_unified",
             "job_event_status_stream_not_unified",

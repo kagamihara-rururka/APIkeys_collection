@@ -18,6 +18,11 @@ from api_launcher.core_scheduler_contracts import (
     SCHEDULER_JOB_STATUS_VALUES,
     scheduler_job_contract_draft,
 )
+from api_launcher.core_scheduler_persistence_contract import (
+    CORE_SCHEDULER_QUEUE_SCHEMA_VERSION,
+    CORE_SCHEDULER_QUEUE_TABLE_NAME,
+    scheduler_queue_sqlite_ddl_preview,
+)
 
 
 class CoreBoundedSchedulerPlanReportTests(unittest.TestCase):
@@ -34,6 +39,10 @@ class CoreBoundedSchedulerPlanReportTests(unittest.TestCase):
         )
         self.assertIn(
             "scheduler_contract_not_bound_to_runtime_or_persistence",
+            report["missing_evidence"],
+        )
+        self.assertIn(
+            "durable_job_queue_persistence_not_materialized",
             report["missing_evidence"],
         )
         self.assertIn(
@@ -147,6 +156,39 @@ class CoreBoundedSchedulerPlanReportTests(unittest.TestCase):
         contract = scheduler_job_contract_draft()
         safety = contract["safety"]
 
+        self.assertFalse(safety["imports_renderer_projects"])
+        self.assertFalse(safety["imports_compressor_projects"])
+        self.assertFalse(safety["reads_renderer_payloads"])
+        self.assertFalse(safety["reads_npz"])
+        self.assertFalse(safety["cross_repo_implementation"])
+
+    def test_scheduler_queue_ddl_preview_is_dry_run_only(self) -> None:
+        report = build_core_bounded_scheduler_plan_report()
+        preview = report["existing_evidence"]["scheduler_queue_ddl_preview"]
+
+        self.assertEqual(CORE_SCHEDULER_QUEUE_SCHEMA_VERSION, preview["schema_version"])
+        self.assertEqual(CORE_SCHEDULER_QUEUE_TABLE_NAME, preview["table_name"])
+        self.assertEqual("sqlite_ddl_dry_run", preview["preview_type"])
+        self.assertEqual("not_materialized", preview["persistence_status"])
+        self.assertTrue(preview["dry_run"])
+        self.assertFalse(preview["creates_database_state"])
+        self.assertFalse(preview["connects_to_database"])
+        self.assertFalse(preview["auto_lifecycle_event_emission"])
+        self.assertGreaterEqual(preview["column_count"], 12)
+        self.assertIn("CREATE TABLE IF NOT EXISTS", preview["table_sql"])
+        self.assertNotIn("payload_bytes", preview["table_sql"])
+        self.assertNotIn("npz_payload", preview["table_sql"])
+
+    def test_scheduler_queue_ddl_preview_has_no_runtime_or_lifecycle_flags(self) -> None:
+        preview = scheduler_queue_sqlite_ddl_preview()
+        safety = preview["safety"]
+
+        self.assertFalse(safety["implements_scheduler_runtime"])
+        self.assertFalse(safety["creates_database_state"])
+        self.assertFalse(safety["user_database_write_allowed"])
+        self.assertFalse(safety["changes_lifecycle_schema"])
+        self.assertFalse(safety["changes_lifecycle_statuses"])
+        self.assertFalse(safety["enables_auto_lifecycle_events"])
         self.assertFalse(safety["imports_renderer_projects"])
         self.assertFalse(safety["imports_compressor_projects"])
         self.assertFalse(safety["reads_renderer_payloads"])

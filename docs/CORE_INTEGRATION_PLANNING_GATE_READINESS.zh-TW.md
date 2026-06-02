@@ -26,6 +26,7 @@
 | Core bounded scheduler plan CI | `5b1b831` / GitHub Actions run `26838847085` PASS |
 | Core scheduler job contract draft | `b1b241d` / `core_scheduler_job_contract_draft.v1` exposed through `--core-bounded-scheduler-plan-json` |
 | Core scheduler job contract CI | GitHub Actions run `26840935942` PASS |
+| Core scheduler queue DDL preview | `core_scheduler_queue_persistence_contract.v1` exposed through `--core-bounded-scheduler-plan-json` |
 | Core lifecycle audit diagnostic | `--core-lifecycle-audit-json` / `core_lifecycle_audit_report.v1` |
 | Core manifest-reference diagnostic | `--core-manifest-reference-report-json` / `core_manifest_reference_report.v1` |
 | Core deep-adapter coverage diagnostic | `--core-deep-adapter-coverage-json` / `core_deep_adapter_coverage_report.v1` |
@@ -134,9 +135,12 @@
 - `existing_evidence.scheduler_job_contract_draft.schema_version = core_scheduler_job_contract_draft.v1`
 - `existing_evidence.scheduler_job_contract_draft.status = contract_only`
 - `existing_evidence.scheduler_job_contract_draft.field_count = 12`
+- `existing_evidence.scheduler_queue_ddl_preview.schema_version = core_scheduler_queue_persistence_contract.v1`
+- `existing_evidence.scheduler_queue_ddl_preview.persistence_status = not_materialized`
+- `existing_evidence.scheduler_queue_ddl_preview.creates_database_state = false`
 - `existing_evidence.tk_policy_registry.policy_count = 11`
 - `existing_evidence.sqlite_write_gate.scope = process_per_sqlite_path`
-- missing evidence 包含 scheduler contract 尚未接 runtime / persistence、durable queue persistence、cross-process SQLite coordination、cancellation/retry/timeout policy、job event status stream。
+- missing evidence 包含 scheduler contract 尚未接 runtime / persistence、durable queue persistence 尚未 materialize、cross-process SQLite coordination、cancellation/retry/timeout policy、job event status stream。
 - blocked surfaces 包含 treating Tk policy registry as full scheduler、treating process-local SQLite gate as cross-process lock、without `o_1` 啟用 auto lifecycle events、未經 OpenSpec 全面 asyncio rewrite。
 - safety flags 明確標示不實作 scheduler runtime、不新增 scheduler schema、不改 lifecycle schema/status、不啟用 auto lifecycle event、不 import downstream repo。
 
