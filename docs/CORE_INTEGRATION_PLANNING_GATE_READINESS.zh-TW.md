@@ -40,6 +40,8 @@
 | Core scheduler `o_1` review gate contract CI | GitHub Actions run `26846446579` PASS |
 | Bounded scheduler Core contract OpenSpec archive | `e49d82b` / `openspec/specs/bounded-scheduler-core-contract/spec.md` plus archive `openspec/changes/archive/2026-06-03-bounded-scheduler-core-contract/` |
 | Bounded scheduler Core contract OpenSpec archive CI | GitHub Actions run `26847210237` PASS |
+| Core readiness scheduler evidence aggregation | `26e7d63` / scheduler contracts exposed inside `--core-readiness-report-json` `job_status_evidence` |
+| Core readiness scheduler evidence aggregation CI | GitHub Actions run `26847859365` PASS |
 | Core lifecycle audit diagnostic | `--core-lifecycle-audit-json` / `core_lifecycle_audit_report.v1` |
 | Core manifest-reference diagnostic | `--core-manifest-reference-report-json` / `core_manifest_reference_report.v1` |
 | Core deep-adapter coverage diagnostic | `--core-deep-adapter-coverage-json` / `core_deep_adapter_coverage_report.v1` |

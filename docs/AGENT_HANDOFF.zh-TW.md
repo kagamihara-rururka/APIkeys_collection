@@ -1,4 +1,10 @@
 # Agent 接力卡
+## 2026-06-03 05:04 +08:00 Core readiness report now surfaces scheduler evidence
+- 本輪擴充 `api_launcher/core_readiness_report.py` 與 `tests/test_core_readiness_report.py`：`--core-readiness-report-json` 的 `job_status_evidence.existing_evidence` 現在會聚合已完成的 scheduler contract evidence，包括 `scheduler_job_contract_draft`、`scheduler_queue_ddl_preview`、`scheduler_owned_test_table_helper`、`scheduler_next_action_payload_contract`、`scheduler_lifecycle_event_emission_guard` 與 `scheduler_o1_review_gate_contract`。
+- 邊界：這是 readiness evidence aggregation，不實作 scheduler runtime、不新增 durable queue schema、不改 lifecycle schema/status、不啟用 auto lifecycle event、不新增 cross-repo job adapter、不 import 下游 repo、不讀 `.npz` / renderer payload；`integration_planning_gate.status` 仍保守維持 `partial`。
+- 已驗證：focused tests `tests.test_core_readiness_report -v` 通過 6 tests；broader related tests `tests.test_core_readiness_report tests.test_core_bounded_scheduler_plan_report tests.test_core_job_status_report tests.test_cli_flags tests.test_cli_json -v` 通過 29 tests；完整 smoke `state\logs\pre_push_smoke_20260603_045758.log` 通過 1141 tests / 4 skipped，MVP demo `download_import_completed` / `row_count=3`；code checkpoint `26e7d63` 已由 GitHub Actions run `26847859365` 驗證通過 Ubuntu、Windows 與 real DB smoke。
+- 下一個安全動作：若繼續 Core readiness，可補 review queue / manifest / lineage 的 persistence migration review evidence；若要 runtime scheduler、durable user DB queue migration、automatic lifecycle event 或 cross-repo job adapter，必須先送 `o_1`。
+
 ## 2026-06-03 04:48 +08:00 Bounded scheduler OpenSpec archived
 - 本輪完成 `bounded-scheduler-core-contract` OpenSpec 收尾：新增正式 spec `openspec/specs/bounded-scheduler-core-contract/spec.md`，把已完成 change 移到 `openspec/changes/archive/2026-06-03-bounded-scheduler-core-contract/`。
 - Archive 前後已驗證：`npx.cmd -y @fission-ai/openspec@latest validate --all --no-interactive` 通過；archive 後 active OpenSpec validate 顯示 `spec/bounded-scheduler-core-contract`、`spec/development-workflow`、`spec/visual-asset-registry-persistence` 共 3 項通過。
