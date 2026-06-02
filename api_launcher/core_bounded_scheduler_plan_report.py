@@ -4,6 +4,7 @@ from typing import Any
 
 from api_launcher.core_job_status_report import build_core_job_status_report
 from api_launcher.core_scheduler_contracts import (
+    scheduler_lifecycle_event_emission_guard_contract,
     scheduler_job_contract_draft,
     scheduler_job_contract_fields,
     scheduler_next_action_payload_contract,
@@ -13,6 +14,7 @@ from api_launcher.core_scheduler_persistence_contract import (
     scheduler_queue_sqlite_ddl_preview,
 )
 from api_launcher.sqlite_write_gate import sqlite_write_gate_profile
+from api_launcher.visual_asset_contracts import visual_asset_registry_persistence_schema
 from frontends.tk.background_job_policies import iter_tk_background_job_policies
 
 
@@ -35,6 +37,10 @@ def build_core_bounded_scheduler_plan_report(
     tk_lanes = _tk_scheduler_lane_candidates()
     sqlite_gate = sqlite_write_gate_profile().to_dict()
     lane_contract_coverage = _scheduler_lane_contract_coverage(tk_lanes)
+    visual_registry_schema = visual_asset_registry_persistence_schema()
+    explicit_event_writer = str(
+        visual_registry_schema.get("migration_guards", {}).get("event_writer") or ""
+    )
 
     return {
         "schema_version": CORE_BOUNDED_SCHEDULER_PLAN_SCHEMA_VERSION,
@@ -43,6 +49,11 @@ def build_core_bounded_scheduler_plan_report(
             "job_status_report_bridge": _job_status_report_bridge(job_status_report),
             "scheduler_job_contract_draft": scheduler_job_contract_draft(),
             "scheduler_next_action_payload_contract": scheduler_next_action_payload_contract(),
+            "scheduler_lifecycle_event_emission_guard": (
+                scheduler_lifecycle_event_emission_guard_contract(
+                    explicit_event_writer=explicit_event_writer,
+                )
+            ),
             "scheduler_queue_ddl_preview": scheduler_queue_sqlite_ddl_preview(),
             "scheduler_owned_test_table_helper": scheduler_queue_owned_test_table_helper_contract(),
             "tk_policy_registry": {

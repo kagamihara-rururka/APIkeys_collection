@@ -222,6 +222,66 @@ def scheduler_next_action_payload_contract() -> dict[str, Any]:
     }
 
 
+def scheduler_lifecycle_event_emission_guard_contract(
+    *,
+    explicit_event_writer: str = "log_visual_asset_ready_registry_entry",
+) -> dict[str, Any]:
+    """Describe the scheduler-to-lifecycle event boundary without emitting events.
+
+    A future scheduler may mark its own jobs completed, failed, or blocked, but
+    those scheduler statuses are not Visual/Skin lifecycle transitions.  This
+    guard keeps lifecycle event emission as a separate explicit workflow until
+    an `o_1` review authorizes any tighter coupling.
+    """
+
+    return {
+        "schema_version": "core_scheduler_lifecycle_event_emission_guard.v1",
+        "status": "contract_only",
+        "scope": "scheduler_completion_does_not_emit_visual_lifecycle_events",
+        "scheduler_status_scope": "scheduler_only_not_lifecycle",
+        "guarded_scheduler_statuses": (
+            "completed",
+            "failed",
+            "blocked",
+            "review_required",
+            "cancelled",
+            "timed_out",
+        ),
+        "completed_job_policy": {
+            "scheduler_status": "completed",
+            "auto_emit_lifecycle_event": False,
+            "requires_explicit_event_writer": True,
+            "explicit_event_writer": explicit_event_writer,
+            "next_action": "call_explicit_visual_ready_event_writer_only_after_review",
+        },
+        "forbidden_implicit_call_sites": (
+            "scheduler_runtime_completion",
+            "queue_status_update",
+            "owned_test_queue_helper",
+            "download_import_completion",
+        ),
+        "o1_review_required_for": (
+            "automatic_lifecycle_event_emission",
+            "scheduler_status_to_visual_lifecycle_transition_binding",
+            "cross_repo_builder_job_adapter",
+        ),
+        "safety": {
+            "implements_scheduler_runtime": False,
+            "changes_scheduler_schema": False,
+            "changes_lifecycle_schema": False,
+            "changes_lifecycle_statuses": False,
+            "emits_lifecycle_events": False,
+            "enables_auto_lifecycle_events": False,
+            "calls_visual_asset_ready_writer": False,
+            "imports_renderer_projects": False,
+            "imports_compressor_projects": False,
+            "reads_renderer_payloads": False,
+            "reads_npz": False,
+            "cross_repo_implementation": False,
+        },
+    }
+
+
 def scheduler_job_contract_draft() -> dict[str, Any]:
     return {
         "schema_version": CORE_SCHEDULER_JOB_CONTRACT_SCHEMA_VERSION,
@@ -254,6 +314,7 @@ __all__ = [
     "SchedulerNextActionPayload",
     "scheduler_job_contract_draft",
     "scheduler_job_contract_fields",
+    "scheduler_lifecycle_event_emission_guard_contract",
     "scheduler_next_action_payload_contract",
     "scheduler_next_action_payloads",
 ]

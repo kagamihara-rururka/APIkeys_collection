@@ -19,6 +19,7 @@ from api_launcher.core_scheduler_contracts import (
     CORE_SCHEDULER_JOB_CONTRACT_SCHEMA_VERSION,
     SCHEDULER_JOB_STATUS_VALUES,
     scheduler_job_contract_draft,
+    scheduler_lifecycle_event_emission_guard_contract,
     scheduler_next_action_payload_contract,
 )
 from api_launcher.core_scheduler_persistence_contract import (
@@ -258,6 +259,57 @@ class CoreBoundedSchedulerPlanReportTests(unittest.TestCase):
         self.assertFalse(safety["changes_lifecycle_schema"])
         self.assertFalse(safety["changes_lifecycle_statuses"])
         self.assertFalse(safety["enables_auto_lifecycle_events"])
+        self.assertFalse(safety["imports_renderer_projects"])
+        self.assertFalse(safety["imports_compressor_projects"])
+        self.assertFalse(safety["reads_renderer_payloads"])
+        self.assertFalse(safety["reads_npz"])
+        self.assertFalse(safety["cross_repo_implementation"])
+
+    def test_scheduler_lifecycle_event_guard_keeps_job_completion_explicit_only(self) -> None:
+        report = build_core_bounded_scheduler_plan_report()
+        guard = report["existing_evidence"]["scheduler_lifecycle_event_emission_guard"]
+
+        self.assertEqual(
+            "core_scheduler_lifecycle_event_emission_guard.v1",
+            guard["schema_version"],
+        )
+        self.assertEqual("contract_only", guard["status"])
+        self.assertEqual(
+            "scheduler_completion_does_not_emit_visual_lifecycle_events",
+            guard["scope"],
+        )
+        self.assertEqual("scheduler_only_not_lifecycle", guard["scheduler_status_scope"])
+        self.assertIn("completed", guard["guarded_scheduler_statuses"])
+        self.assertIn("completed", SCHEDULER_JOB_STATUS_VALUES)
+
+        completed_policy = guard["completed_job_policy"]
+        self.assertEqual("completed", completed_policy["scheduler_status"])
+        self.assertFalse(completed_policy["auto_emit_lifecycle_event"])
+        self.assertTrue(completed_policy["requires_explicit_event_writer"])
+        self.assertEqual(
+            "log_visual_asset_ready_registry_entry",
+            completed_policy["explicit_event_writer"],
+        )
+        self.assertIn("scheduler_runtime_completion", guard["forbidden_implicit_call_sites"])
+        self.assertIn(
+            "automatic_lifecycle_event_emission",
+            guard["o1_review_required_for"],
+        )
+        self.assertFalse(guard["safety"]["calls_visual_asset_ready_writer"])
+        self.assertFalse(guard["safety"]["emits_lifecycle_events"])
+        self.assertFalse(guard["safety"]["enables_auto_lifecycle_events"])
+
+    def test_scheduler_lifecycle_event_guard_has_no_downstream_runtime_flags(self) -> None:
+        guard = scheduler_lifecycle_event_emission_guard_contract()
+        safety = guard["safety"]
+
+        self.assertFalse(safety["implements_scheduler_runtime"])
+        self.assertFalse(safety["changes_scheduler_schema"])
+        self.assertFalse(safety["changes_lifecycle_schema"])
+        self.assertFalse(safety["changes_lifecycle_statuses"])
+        self.assertFalse(safety["emits_lifecycle_events"])
+        self.assertFalse(safety["enables_auto_lifecycle_events"])
+        self.assertFalse(safety["calls_visual_asset_ready_writer"])
         self.assertFalse(safety["imports_renderer_projects"])
         self.assertFalse(safety["imports_compressor_projects"])
         self.assertFalse(safety["reads_renderer_payloads"])

@@ -1,4 +1,11 @@
 # Agent 接力卡
+## 2026-06-03 04:12 +08:00 Core scheduler explicit-only lifecycle event guard
+- 本輪擴充 `api_launcher/core_scheduler_contracts.py` 與 `api_launcher/core_bounded_scheduler_plan_report.py`：新增 `scheduler_lifecycle_event_emission_guard_contract()` / `core_scheduler_lifecycle_event_emission_guard.v1`，並暴露到 `--core-bounded-scheduler-plan-json` 的 `existing_evidence.scheduler_lifecycle_event_emission_guard`。
+- Guard 明確鎖住：scheduler job `completed` 只是 scheduler-only status，不等於 Visual/Skin lifecycle transition；completed-job policy 的 `auto_emit_lifecycle_event=false`，必須走 explicit writer `log_visual_asset_ready_registry_entry`，且 automatic lifecycle event / status-to-lifecycle binding / cross-repo job adapter 都需要 `o_1`。
+- 邊界：這是 contract-only / report/test slice，不實作 scheduler runtime、不新增 queue migration、不改 lifecycle schema/status、不啟用 auto lifecycle event、不 import 下游 repo、不呼叫 visual ready event writer、不讀 `.npz` / renderer payload。
+- 已驗證：`py_compile` OK；focused tests `tests.test_core_bounded_scheduler_plan_report tests.test_core_job_status_report tests.test_cli_flags tests.test_cli_json -v` 通過 21 tests；JSON stdout 可由 downstream `json.load(sys.stdin)` 解析，輸出 `schema_version=core_scheduler_lifecycle_event_emission_guard.v1`、`status=contract_only`、`auto_emit_lifecycle_event=False`、explicit writer `log_visual_asset_ready_registry_entry`。
+- OpenSpec：`bounded-scheduler-core-contract` task 3.3 已完成。下一個安全動作可做 4.3 future `o_1` review gate evidence；若要正式 queue migration、runtime scheduler、automatic lifecycle event、cross-process SQLite lock、或 asyncio migration，先送 `o_1`。
+
 ## 2026-06-03 03:54 +08:00 Core scheduler next-action payload contract
 - 本輪擴充 `api_launcher/core_scheduler_contracts.py` 與 `api_launcher/core_bounded_scheduler_plan_report.py`：新增 `scheduler_next_action_payload_contract()` / `core_scheduler_next_action_payload_contract.v1`，並暴露到 `--core-bounded-scheduler-plan-json` 的 `existing_evidence.scheduler_next_action_payload_contract`。
 - Payload contract 覆蓋五種 scheduler outcome：`cancelled_job`、`retryable_failure`、`timed_out_job`、`review_required_job`、`blocked_job`；每筆都有 scheduler-only status、outcome bucket、backend-defined `next_action`、display tone 與 user-action flag。
