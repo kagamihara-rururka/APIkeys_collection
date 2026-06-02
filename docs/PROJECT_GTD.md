@@ -3,6 +3,7 @@
 Last updated: 2026-06-02
 
 ## 目前工作焦點 / Active Focus
+- [x] 2026-06-02 Core Integration Planning Gate readiness audit 已補：新增 `docs/CORE_INTEGRATION_PLANNING_GATE_READINESS.zh-TW.md`，把 `--core-readiness-report-json` 的 `registry_evidence`、`lifecycle_evidence`、`manifest_reference_evidence`、`review_required_evidence`、`job_status_evidence`、`asset_lineage_evidence` 與 `integration_planning_gate` 整理成 gap table、`o_1` review triggers 與下一批 Core-only slices；這是 planning/evidence note，不授權 cross-repo integration。
 - [x] 2026-06-02 Core readiness report JSON diagnostic 已補：新增 `--core-readiness-report-json`，以 `core_readiness_report.v1` 聚合 RRKAL Core 的 registry、lifecycle、manifest reference、review_required、job status 與 asset lineage evidence；`integration_planning_gate.status` 保守維持 `partial`，明確列出 missing / blocked / contract_only / planned surfaces。這是 Integration Planning Gate 前的 evidence aggregation，不是 renderer/compressor/SkinAsset integration，也不改 lifecycle schema。
 - [x] 2026-06-02 Handoff CLI helper consolidation 已補：新增 `api_launcher/cli_handoff.py`，把 handoff report Markdown / JSON 的 flags、active check、JSON stdout 判斷與 dispatch 從 `core.py` 抽出；`core.py` 只保留 orchestration，`cli_flags.command_requested()` 也改用同一個 helper。這是防止主入口大檔膨脹的 consolidation slice，不改 handoff payload、Web/Tk 或產品流程。
 - [x] 2026-06-02 MVP CLI helper consolidation 已補：新增 `api_launcher/cli_mvp.py`，把 MVP demo flow、offline smoke、readiness JSON 的 flags / active check / dispatch 從 `core.py` 抽出；`core.py` 只保留 orchestration。這是防止主入口大檔膨脹的 consolidation slice，不改 MVP payload、smoke 行為、Web/Tk 或產品流程。

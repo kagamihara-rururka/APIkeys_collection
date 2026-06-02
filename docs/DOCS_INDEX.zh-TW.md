@@ -57,6 +57,7 @@ RRKAL 本身是資料資產治理專案，專案文件也可以用資料治理�
 | 參考其他 GitHub 專案進度 | `EXTERNAL_PROJECT_CONTEXT.zh-TW.md` -> `AGENT_HANDOFF.zh-TW.md` -> 對應 repo 的 read-only GitHub commit / CI | 只抽取 workflow、display contract、governance 或 UIUX 概念，不把其他 repo 當成 RRKAL 產品碼來源。 |
 | 要看版本變更 | `DEVELOPMENT_LOG.zh-TW.md` -> `PROJECT_GTD.md` -> `AGENT_HANDOFF.zh-TW.md` | 先看每個已推送 checkpoint 屬於哪個開發階段、改了什麼、如何驗證、還有什麼風險。 |
 | 要回答整體進度 / 成熟度 | `PROJECT_MATURITY_MATRIX.zh-TW.md` -> `PROJECT_GTD.md` -> `AGENT_HANDOFF.zh-TW.md` | 不再用單一百分比；用成熟度矩陣區分可交付小閉環、bounded、partial、contract-only 與 planned。 |
+| 要準備 Integration Planning Gate | `CORE_INTEGRATION_PLANNING_GATE_READINESS.zh-TW.md` -> `VISUAL_SKIN_ASSET_CONTRACT.zh-TW.md` -> `PROJECT_MATURITY_MATRIX.zh-TW.md` | 先看 Core 目前能提供的 registry/lifecycle/manifest/review/job-status/lineage evidence 與缺口；不得把 `partial` gate 解讀成可整合。 |
 | 想理解產品 | `PRODUCT_POSITIONING.zh-TW.md` -> `TECHNICAL_OVERVIEW.zh-TW.md` -> `ARCHITECTURE.zh-TW.md` | 先理解「資料工程版 Steam」和整體資料管線。 |
 | 想理解中長期資料資產平台概念 | `DATA_ASSET_PLATFORM_CONCEPTS.zh-TW.md` -> `PRODUCT_POSITIONING.zh-TW.md` -> `PROJECT_GTD.md` | 先看資料資產、Discovery Tool、爬蟲資產 / Crawler Asset、湖倉/K8S、Render Studio、ML 與 connector 的總體概念，再回到 MVP 收束。 |
 | 要改 crawler / adapter | `DATASET_DISCOVERY_NOTES.zh-TW.md` -> `MVP_FLOW_AUDIT.zh-TW.md` -> `PROJECT_GTD.md` | 避免把資料集硬寫死，維持 crawler-first，並確認候選、resolver、下載與匯入是否真的閉環。 |
@@ -77,6 +78,7 @@ RRKAL 本身是資料資產治理專案，專案文件也可以用資料治理�
 | `AGENT_START_HERE.zh-TW.md` | Agent 最短入口地圖，定義權威順序、目前主線、不要做什麼、L/K 工作區邊界。 | 文檔分層、工作流或主線方向改變時更新；平常保持短。 |
 | `PROJECT_GTD.md` | 進度主索引，列出每個產品區塊目前狀態與下一步。 | 每完成或改變一個功能閉環後更新。 |
 | `PROJECT_MATURITY_MATRIX.zh-TW.md` | 整體進度與成熟度口徑，定義 `deliverable_100`、`implemented_bounded`、`partial_bounded`、`contract_only`、`planned_not_started`、`hardening_needed`。 | 問「整體進度多少」、新增可交付 closure、或 source/adapter/renderer/UI 成熟度改變時更新。 |
+| `CORE_INTEGRATION_PLANNING_GATE_READINESS.zh-TW.md` | RRKAL Core Integration Planning Gate readiness note，整理 Core 可提供的 registry、lifecycle、manifest reference、review_required、job-status、asset-lineage evidence 與缺口。 | Core readiness JSON、Integration Planning Gate、Visual/Skin control-plane boundary 或 gap-closure plan 改變時更新；不得寫成 integration authorization。 |
 | `DEVELOPMENT_LOG.zh-TW.md` | 開發日誌，從 2026-05-21 起用流水帳記錄 push / CI run；最近日期與同日內最新時間放最上方，成功 run 用 `**CHECKPOINT**` 標醒目，失敗 run 保留為 `**CI 失敗**`，每筆都要有 `開發階段` 與中文說明。 | 每次完成並推送一個版本 checkpoint 後追加，不重寫舊紀錄；需要回補時可用 GitHub Actions run list 反推。 |
 | `HEARTBEAT_AUTOMATION.zh-TW.md` | heartbeat automation 的安全規則、CLI/script 入口、外部排程與 agent runner 邊界。 | 更改 heartbeat CLI、scheduler、停止條件或自動推進規則時更新。 |
 | `DOCS_INDEX.zh-TW.md` | 文件地圖與整理規則。 | 新增、移動、合併文件時更新。 |

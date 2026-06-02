@@ -1,4 +1,11 @@
 # Agent 接力卡
+## 2026-06-02 23:40 +08:00 Core Integration Planning Gate readiness audit
+- 本輪新增 `docs/CORE_INTEGRATION_PLANNING_GATE_READINESS.zh-TW.md`，把 `--core-readiness-report-json` 的 evidence sections 整理成 Integration Planning Gate input：current checkpoints、CI evidence、gate status、Core-owned evidence、missing evidence、not-Core-owned blockers、`o_1` review triggers 與下一批 Core-only slices。
+- 目前 gate 狀態仍是 `partial`。主要缺口：deep adapter coverage 不等於 14 個 source crawler type、review queue persistence 未統一、runtime lifecycle state machine 未統一、unified bounded job scheduler 尚未實作。Manifest reference 與 asset lineage 欄位目前沒有欄位缺口，但仍是 contract/control-plane evidence，不等於正式 user DB integration。
+- 邊界：docs-only / planning note。沒有 code change、沒有 lifecycle schema/status change、沒有 cross-repo work、沒有 RendererSkinAsset / SkinAsset implementation、沒有 `.npz` / renderer payload read、沒有 compression integration，也沒有把 `partial` 改成 `ready_for_planning`。
+- JSON quality check：`core_readiness_report.v1` 能清楚分離 `existing_evidence`、`missing_evidence`、`blocked_surfaces`、`review_required_surfaces`、`contract_only_surfaces`、`planned_surfaces` 與 `next_safe_actions`；Windows PowerShell `>` redirection 會產生 UTF-16 檔案，不能拿來當 stdout JSON encoding 失敗證據，驗證時使用 pipe 或 Python subprocess bytes。
+- 下一個安全動作：優先做 Core-only `review_required` evidence report、job status evidence report、lifecycle transition audit draft、manifest reference persistence readiness 或 deep adapter coverage plan；任何 lifecycle schema/status、cross-project contract、RendererSkinAsset / SkinAsset wording 或 readiness status 升級都先送 `o_1`。
+
 ## 2026-06-02 22:40 +08:00 Core readiness report JSON checkpoint
 - 本輪新增 `--core-readiness-report-json`，由 `api_launcher/core_readiness_report.py` 聚合 RRKAL Core 的 registry、lifecycle、manifest reference、review_required、job status 與 asset lineage evidence；CLI helper 放在 `api_launcher/cli_core_readiness.py`，`core.py` 只做小型路由，`cli_flags.command_requested()` 可偵測此 JSON mode。
 - 邊界：這是 evidence aggregation / diagnostic slice，不是 integration。它不新增 lifecycle status、不改 lifecycle schema、不 import displaytools / visual-compressor、不讀 `.npz` 或 renderer payload、不實作 RendererSkinAsset / SkinAsset、不做 compression 或跨 repo code。`integration_planning_gate.status` 保守維持 `partial`，不宣稱 `ready_for_planning`。
