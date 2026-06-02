@@ -1,4 +1,9 @@
 # Agent 接力卡
+## 2026-06-02 18:40 +08:00 MVP CLI helper consolidation
+- 本輪新增 `api_launcher/cli_mvp.py`，把 `--write-mvp-demo-flow`、`--run-mvp-demo-smoke-json`、`--mvp-readiness-json`、`--write-mvp-readiness-json` 的 argparse、active check、JSON stdout 判斷、MVP flow 寫檔、offline smoke 與 readiness JSON dispatch 從 `core.py` 抽成專責 helper；`core.py` 只呼叫 `run_mvp_cli()`。
+- 邊界：這是 consolidation slice，用來阻止 `core.py` 繼續吸收 MVP diagnostic/smoke CLI 責任；不改 MVP demo flow payload、不改 offline smoke 行為、不改 readiness payload、不改 Web/Tk、crawler、download/import、Visual/Skin 或 CI workflow。抽離時也移除了 `core.py` 原方法中的舊註解；實際檔案以 Python UTF-8 驗證為乾淨文字，PowerShell console 顯示亂碼不可直接當成檔案損壞證據。
+- 已驗證：不寫 pyc 的 `compile()` 檢查通過；`py -3 -B -m unittest tests.test_handoff tests.test_mvp_demo_flow tests.test_ingestion_pipeline tests.test_cli_flags tests.test_cli_json -v` 通過 32 tests；實跑 `--mvp-readiness-json` 可由下游 Python `json.load(sys.stdin)` 解析；實跑 `--write-mvp-demo-flow` 與 `--write-mvp-readiness-json` 會寫出 flow / readiness 檔；完整 smoke `state\logs\pre_push_smoke_20260602_183340.log` 通過 1096 tests / 4 skipped，MVP demo `download_import_completed` / `row_count=3`；GitHub Actions run `26814370211` 通過 Ubuntu、Windows 與 real DB smoke。Code commit：`d5dc92c Split MVP CLI helper`。
+
 ## 2026-06-02 18:24 +08:00 Project maturity CLI helper consolidation
 - 本輪新增 `api_launcher/cli_project_maturity.py`，把 `--project-maturity-json`、`--write-project-maturity-json`、`--project-maturity-markdown` 的 argparse、active check、JSON / Markdown / file output dispatch 從 `core.py` 抽成專責 helper；`core.py` 只呼叫 `run_project_maturity_cli()`，`cli_flags.command_requested()` 也改用同一個 `project_maturity_command_active()`。
 - 邊界：這是 consolidation slice，用來阻止 `core.py` 繼續吸收診斷報表責任；不改 maturity payload、不改 markdown render、不改 Web/Tk、crawler、download/import、Visual/Skin 或 CI workflow。下一輪若繼續做同類工作，可優先看 MVP readiness / handoff / heartbeat 等 CLI JSON path 是否也能安全抽出。

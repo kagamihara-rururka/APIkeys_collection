@@ -3,6 +3,7 @@
 Last updated: 2026-06-02
 
 ## 目前工作焦點 / Active Focus
+- [x] 2026-06-02 MVP CLI helper consolidation 已補：新增 `api_launcher/cli_mvp.py`，把 MVP demo flow、offline smoke、readiness JSON 的 flags / active check / dispatch 從 `core.py` 抽出；`core.py` 只保留 orchestration。這是防止主入口大檔膨脹的 consolidation slice，不改 MVP payload、smoke 行為、Web/Tk 或產品流程。
 - [x] 2026-06-02 Project maturity CLI helper consolidation 已補：新增 `api_launcher/cli_project_maturity.py`，把 project maturity JSON / Markdown / file output flags 與 dispatch 從 `core.py` 抽出；`core.py` 只保留 orchestration，`cli_flags.command_requested()` 也改用同一個 helper。這是防止主入口大檔膨脹的 consolidation slice，不改 maturity payload、Web/Tk 或產品流程。
 - [x] 2026-06-02 Registry report CLI helper consolidation 已補：新增 `api_launcher/cli_registry_reports.py`，把 crawler/content/dataset-adapter 三個 registry report JSON 旗標、active check 與 dispatch 從 `core.py` 抽出；`core.py` 保留 orchestration，`cli_flags.command_requested()` 也改用同一個 helper。這是防止大檔繼續吸收責任的 consolidation slice，不改三個 report payload 或產品流程。
 - [x] 2026-06-02 Dataset adapter report CLI JSON 已補：新增 `--dataset-adapter-report-json`，可直接輸出 `dataset_adapter_report()` 的 agent-readable JSON，讓主寫 / automation 不必從完整 maturity matrix 裡拆 `provider_specific_deep_adapters` row；這是診斷入口，不改 adapter / crawler / download / import / UI 行為。
