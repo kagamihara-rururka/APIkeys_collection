@@ -2,7 +2,7 @@
 ## 2026-06-02 16:24 +08:00 Tk background job start result contract
 - 本輪補強 `frontends/tk/background_jobs.py`：新增 `TkBackgroundJobStartResult` 與 `start_single_flight_thread_result()`，讓 single-flight helper 可結構化回報 `started` / `duplicate` / `capacity`、active job count 與 capacity limit；既有 `start_single_flight_thread()` 仍維持 bool 相容回傳。
 - 邊界：這是 scheduler hardening / diagnostics contract，不是統一 bounded job scheduler，不改 Tk workflow 行為、不改 UI 文案、不改 crawler/download/import/credential/OAuth/SQLite write gate，也不做 asyncio 重寫。
-- 已驗證：`py -3 -B -m py_compile frontends\tk\background_jobs.py api_launcher\project_maturity.py tests\test_tk_background_jobs.py tests\test_project_maturity.py` OK；`py -3 -B -m unittest tests.test_tk_background_jobs tests.test_project_maturity -v` 通過 16 tests；`git diff --check` OK。CI 尚待 push 後確認。
+- 已驗證：`py -3 -B -m py_compile frontends\tk\background_jobs.py api_launcher\project_maturity.py tests\test_tk_background_jobs.py tests\test_project_maturity.py` OK；`py -3 -B -m unittest tests.test_tk_background_jobs tests.test_project_maturity -v` 通過 16 tests；完整 smoke `state\logs\pre_push_smoke_20260602_162611.log` 通過 1090 tests / 4 skipped，MVP demo `download_import_completed` / `row_count=3`；GitHub Actions run `26808107355` 通過 Ubuntu、Windows 與 real DB smoke。Code commit：`c640092 Add Tk background job start result contract`。
 
 ## 2026-06-02 16:07 +08:00 Visual/Skin registry persistence OpenSpec archived
 - 本輪將已完成的 `openspec/changes/visual-asset-registry-persistence/` 歸檔到 `openspec/changes/archive/2026-06-02-visual-asset-registry-persistence/`，並把 delta spec 同步成正式主規格 `openspec/specs/visual-asset-registry-persistence/spec.md`。
