@@ -3,6 +3,7 @@
 Last updated: 2026-06-02
 
 ## 目前工作焦點 / Active Focus
+- [x] 2026-06-02 CLI JSON stdout encoding helper 已補：新增 `api_launcher.cli_json.print_cli_json()` / `cli_json_dumps()`，並將 `core.py` 主要 agent-readable JSON stdout mode 收斂到同一個 ASCII-escaped stdout helper；寫檔 JSON 仍保留 UTF-8 中文。這是 Windows pipeline / agent parser hardening，不改 payload 語意、Web/Tk 顯示或 crawler/download/import 行為。
 - [x] 2026-06-02 Project maturity JSON stdout pipeline guard 已補：`--project-maturity-json` stdout 改用 ASCII-escaped JSON，避免 Windows PowerShell legacy pipeline / redirection 把成熟度矩陣中文與 emoji label 轉成 `????`；寫檔仍保留 UTF-8 中文，JSON parse 後仍還原原本文案。這是 agent-readable progress入口的 encoding hardening，不改成熟度語意。
 - [x] 2026-06-02 Visual/Skin registry explicit ready-event CLI JSON 已補：新增 `log_visual_asset_ready_from_owned_test_database()` 與 `--visual-registry-emit-ready-event-json`，只從明確 acknowledged 的 RRKAL owned test DB 讀取指定 `ready` registry entry 後顯式寫入 `visual_asset_ready` event；預設 duplicate policy 會拒絕同一 registry entry / skin asset 的重複 ready event，ordinary write/upsert 仍不會自動發 event。
 - [x] 2026-06-02 Visual/Skin registry read-side summary CLI JSON 已補：新增 `--visual-registry-summary-json` / `--visual-registry-summary-db` / `--visual-registry-owned-test-db`，只輸出 RRKAL owned test DB 的 summary JSON，讓 agent/debug flow 可讀取 lifecycle counts 與 safety flags；仍不接 UI、不接正式 user DB repository、不讀 renderer payload。

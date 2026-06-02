@@ -6,6 +6,7 @@ import tempfile
 import unittest
 from contextlib import redirect_stdout
 from pathlib import Path
+from unittest.mock import patch
 
 from api_launcher.core import main
 from api_launcher.developer_diagnostics import (
@@ -54,7 +55,14 @@ class DeveloperDiagnosticsTests(unittest.TestCase):
     def test_cli_emits_crawler_registry_report_json_without_setup_lines(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             stdout = io.StringIO()
-            with redirect_stdout(stdout):
+            unicode_report = {
+                "schema_version": 1,
+                "source_type_count": len(SUPPORTED_DATASET_SOURCE_TYPES),
+                "dimensions": {"source_family": {"catalog_search": 1}},
+                "display_label": "可展示小閉環",
+                "status_icon": "🚧",
+            }
+            with patch("api_launcher.core.crawler_registry_report", return_value=unicode_report), redirect_stdout(stdout):
                 rc = main(
                     [
                         "--db",
@@ -71,8 +79,11 @@ class DeveloperDiagnosticsTests(unittest.TestCase):
         self.assertEqual(1, payload["schema_version"])
         self.assertEqual(len(SUPPORTED_DATASET_SOURCE_TYPES), payload["source_type_count"])
         self.assertIn("catalog_search", payload["dimensions"]["source_family"])
+        self.assertEqual("可展示小閉環", payload["display_label"])
+        self.assertEqual("🚧", payload["status_icon"])
         self.assertNotIn("[db]", stdout.getvalue())
         self.assertNotIn("[seed]", stdout.getvalue())
+        self.assertTrue(stdout.getvalue().isascii())
 
 
 if __name__ == "__main__":

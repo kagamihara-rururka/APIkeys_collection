@@ -53,6 +53,7 @@ from api_launcher.cli_database_repair import run_database_repairs
 from api_launcher.cli_crawler_assets import add_crawler_asset_args, run_crawler_asset_cli
 from api_launcher.cli_crawler_run_records import add_crawler_run_record_args, run_crawler_run_record_cli
 from api_launcher.cli_download_plan import run_download_plan_cli
+from api_launcher.cli_json import print_cli_json
 from api_launcher.cli_manifest_import import (
     import_csv_manifest_cli,
     import_json_manifest_cli,
@@ -975,7 +976,7 @@ class CatalogLauncherCli:
                     self.repository.register_downloaded_manifest_asset(manifest, result.manifest_path)
             self.log_download_manifest_verification_completed(agent_payload)
             if self.args.verify_downloads_json:
-                print(json.dumps(agent_payload, ensure_ascii=False, indent=2))
+                print_cli_json(agent_payload)
                 return
             print(f"[verify-downloads] checked {len(results)} manifests: {summary}")
             for result in results:
@@ -1025,7 +1026,7 @@ class CatalogLauncherCli:
                 "download_import": result.run.to_dict(),
             },
         )
-        print(json.dumps(result.to_dict(), ensure_ascii=False, indent=2))
+        print_cli_json(result.to_dict())
         if not result.succeeded:
             raise RuntimeError("MVP demo offline smoke did not complete successfully.")
 
@@ -1040,7 +1041,7 @@ class CatalogLauncherCli:
             if not self.args.mvp_readiness_json:
                 print(f"[mvp-readiness] wrote {output_path}")
         if self.args.mvp_readiness_json:
-            print(json.dumps(payload, ensure_ascii=False, indent=2))
+            print_cli_json(payload)
 
     def show_project_maturity(self) -> None:
         if not (
@@ -1062,14 +1063,11 @@ class CatalogLauncherCli:
             if not self.args.project_maturity_json:
                 print(f"[project-maturity] wrote {output_path}")
         if self.args.project_maturity_json:
-            # Stdout JSON is read by agents and may be piped through Windows
-            # PowerShell. ASCII escaping keeps the stream parseable even when
-            # the shell decodes external-process output with a legacy codepage.
-            print(json.dumps(payload, ensure_ascii=True, indent=2))
+            print_cli_json(payload)
 
     def show_crawler_registry_report(self) -> None:
         if self.args.crawler_registry_report_json:
-            print(json.dumps(crawler_registry_report(), ensure_ascii=False, indent=2))
+            print_cli_json(crawler_registry_report())
 
     def show_adapter_review_plan(self) -> None:
         if not self.args.adapter_review_plan:
@@ -1101,7 +1099,7 @@ class CatalogLauncherCli:
                 },
             )
         if self.args.adapter_review_json:
-            print(json.dumps(review_payload, ensure_ascii=False, indent=2))
+            print_cli_json(review_payload)
             return
         if self.args.write_adapter_review_json:
             return
@@ -1149,7 +1147,8 @@ class CatalogLauncherCli:
                 "warning_count": len(result.warnings),
             },
         )
-        # JSON summary 是給 heartbeat/agent 接力用；resolved plan 本體仍寫在 output_path。
+        # JSON summary is for heartbeat/agent handoff; the resolved plan stays
+        # in output_path so stdout remains small and parseable.
         resolution_summary = {
             "input_plan": str(input_path),
             "output_path": str(output_path),
@@ -1163,7 +1162,7 @@ class CatalogLauncherCli:
             "plan_summary": resolved_payload.get("summary", {}) if isinstance(resolved_payload.get("summary"), dict) else {},
         }
         if self.args.resolve_adapter_plan_json:
-            print(json.dumps(resolution_summary, ensure_ascii=False, indent=2))
+            print_cli_json(resolution_summary)
             return
         print(
             "[adapter-resolve] "
@@ -1218,7 +1217,7 @@ class CatalogLauncherCli:
                     print(f"[handoff] wrote {output_path}")
             if self.args.handoff_report_json:
                 # JSON mode 直接輸出同一份 snapshot；避免混入 `[handoff] wrote ...` 破壞 parser。
-                print(json.dumps(handoff_snapshot_to_dict(snapshot), ensure_ascii=False, indent=2))
+                print_cli_json(handoff_snapshot_to_dict(snapshot))
 
     def run_heartbeat_report(self) -> None:
         if not (
@@ -1239,7 +1238,7 @@ class CatalogLauncherCli:
             output_path = write_heartbeat_agent_prompt(payload, self.args.heartbeat_agent_prompt)
             print(f"[heartbeat] wrote {output_path}")
         if self.args.heartbeat_plan_json:
-            print(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True))
+            print_cli_json(payload, sort_keys=True)
 
     def show_workspace_inventory(self) -> None:
         if not (self.args.workspace_inventory or self.args.write_workspace_inventory_json):
@@ -1338,7 +1337,7 @@ class CatalogLauncherCli:
             has_render_assets=self.args.library_render_assets,
         )
         if self.args.library_actions_json:
-            print(json.dumps(library_action_agent_payload(context), ensure_ascii=False, indent=2))
+            print_cli_json(library_action_agent_payload(context))
             return
         for action in build_library_actions(context):
             status = "enabled" if action.enabled else "disabled"
@@ -1362,7 +1361,7 @@ class CatalogLauncherCli:
         selected = self.selected_data_store_profiles(requested)
         results = tuple(test_data_store_connection(profile) for profile in selected)
         if self.args.test_data_store_json:
-            print(json.dumps(data_store_connection_agent_payload(results), ensure_ascii=False, indent=2, sort_keys=True))
+            print_cli_json(data_store_connection_agent_payload(results), sort_keys=True)
             return
         for profile, result in zip(selected, results, strict=True):
             details = json.dumps(result.details, ensure_ascii=False, sort_keys=True)
@@ -1416,7 +1415,7 @@ class CatalogLauncherCli:
             print(f"[database-self-check] {summary}")
         issues = database_self_check_issues(self.conn, self.args.provider or None)
         if self.args.self_check_databases_json:
-            print(json.dumps(database_self_check_agent_payload(summary, issues), ensure_ascii=False, indent=2))
+            print_cli_json(database_self_check_agent_payload(summary, issues))
             return
         for issue in issues:
             suggestion = issue.repair_suggestion()
