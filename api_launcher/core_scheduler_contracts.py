@@ -43,6 +43,34 @@ class SchedulerContractField:
         }
 
 
+@dataclass(frozen=True)
+class SchedulerNextActionPayload:
+    """One UI-neutral next-action payload for a scheduler outcome.
+
+    These examples define the report vocabulary only.  They are not runtime
+    transitions and do not enqueue, cancel, retry, or complete jobs.
+    """
+
+    scenario: str
+    scheduler_status: str
+    outcome_bucket: str
+    next_action: str
+    display_tone: str
+    user_action_required: bool
+    description: str
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "scenario": self.scenario,
+            "scheduler_status": self.scheduler_status,
+            "outcome_bucket": self.outcome_bucket,
+            "next_action": self.next_action,
+            "display_tone": self.display_tone,
+            "user_action_required": self.user_action_required,
+            "description": self.description,
+        }
+
+
 def scheduler_job_contract_fields() -> tuple[SchedulerContractField, ...]:
     return (
         SchedulerContractField(
@@ -121,6 +149,79 @@ def scheduler_job_contract_fields() -> tuple[SchedulerContractField, ...]:
     )
 
 
+def scheduler_next_action_payloads() -> tuple[SchedulerNextActionPayload, ...]:
+    return (
+        SchedulerNextActionPayload(
+            scenario="cancelled_job",
+            scheduler_status="cancelled",
+            outcome_bucket="cancelled",
+            next_action="inspect_cancellation_reason_or_requeue",
+            display_tone="muted",
+            user_action_required=False,
+            description="Job was cancelled explicitly; keep reason visible before any requeue.",
+        ),
+        SchedulerNextActionPayload(
+            scenario="retryable_failure",
+            scheduler_status="failed",
+            outcome_bucket="retryable",
+            next_action="retry_when_policy_allows",
+            display_tone="warning",
+            user_action_required=False,
+            description="Failure is retryable only when the retry policy still allows another attempt.",
+        ),
+        SchedulerNextActionPayload(
+            scenario="timed_out_job",
+            scheduler_status="timed_out",
+            outcome_bucket="timeout",
+            next_action="review_timeout_policy_or_retry",
+            display_tone="warning",
+            user_action_required=True,
+            description="Timeout requires policy review before requeueing or widening the timeout.",
+        ),
+        SchedulerNextActionPayload(
+            scenario="review_required_job",
+            scheduler_status="review_required",
+            outcome_bucket="review_required",
+            next_action="open_review_queue_before_continuing",
+            display_tone="review",
+            user_action_required=True,
+            description="Review-required jobs must stay reviewable and cannot be promoted to ready implicitly.",
+        ),
+        SchedulerNextActionPayload(
+            scenario="blocked_job",
+            scheduler_status="blocked",
+            outcome_bucket="blocked",
+            next_action="review_blocked_job_reason_before_retry",
+            display_tone="blocked",
+            user_action_required=True,
+            description="Blocked jobs need an explicit reason and user/agent decision before retry.",
+        ),
+    )
+
+
+def scheduler_next_action_payload_contract() -> dict[str, Any]:
+    payloads = scheduler_next_action_payloads()
+    return {
+        "schema_version": "core_scheduler_next_action_payload_contract.v1",
+        "status": "contract_only",
+        "payload_count": len(payloads),
+        "payloads": [payload.to_dict() for payload in payloads],
+        "required_scenarios": [payload.scenario for payload in payloads],
+        "safety": {
+            "implements_scheduler_runtime": False,
+            "changes_scheduler_schema": False,
+            "changes_lifecycle_schema": False,
+            "changes_lifecycle_statuses": False,
+            "enables_auto_lifecycle_events": False,
+            "imports_renderer_projects": False,
+            "imports_compressor_projects": False,
+            "reads_renderer_payloads": False,
+            "reads_npz": False,
+            "cross_repo_implementation": False,
+        },
+    }
+
+
 def scheduler_job_contract_draft() -> dict[str, Any]:
     return {
         "schema_version": CORE_SCHEDULER_JOB_CONTRACT_SCHEMA_VERSION,
@@ -150,6 +251,9 @@ __all__ = [
     "CORE_SCHEDULER_JOB_CONTRACT_SCHEMA_VERSION",
     "SCHEDULER_JOB_STATUS_VALUES",
     "SchedulerContractField",
+    "SchedulerNextActionPayload",
     "scheduler_job_contract_draft",
     "scheduler_job_contract_fields",
+    "scheduler_next_action_payload_contract",
+    "scheduler_next_action_payloads",
 ]

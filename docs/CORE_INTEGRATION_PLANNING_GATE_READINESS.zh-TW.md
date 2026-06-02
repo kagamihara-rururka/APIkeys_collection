@@ -32,6 +32,7 @@
 | Core scheduler owned-test queue helper CI | GitHub Actions run `26842825576` PASS |
 | Core scheduler lane contract coverage | `75923c0` / `scheduler_lane_contract_coverage.v1` exposed through `--core-bounded-scheduler-plan-json` / OpenSpec task 3.1 evidence |
 | Core scheduler lane contract coverage CI | GitHub Actions run `26843841155` PASS |
+| Core scheduler next-action payload contract | `pending` / `core_scheduler_next_action_payload_contract.v1` exposed through `--core-bounded-scheduler-plan-json` / OpenSpec task 3.2 evidence |
 | Core lifecycle audit diagnostic | `--core-lifecycle-audit-json` / `core_lifecycle_audit_report.v1` |
 | Core manifest-reference diagnostic | `--core-manifest-reference-report-json` / `core_manifest_reference_report.v1` |
 | Core deep-adapter coverage diagnostic | `--core-deep-adapter-coverage-json` / `core_deep_adapter_coverage_report.v1` |
@@ -151,6 +152,11 @@
 - `existing_evidence.scheduler_lane_contract_coverage.covered_policy_facets` 包含 `concurrency_policy` 與 `write_policy`
 - `existing_evidence.scheduler_lane_contract_coverage.missing_policy_facets` 包含 `timeout_policy`、`retry_policy`、`cancellation_policy`、`review_policy`
 - `existing_evidence.scheduler_lane_contract_coverage.safety.treats_tk_policy_registry_as_full_scheduler = false`
+- `existing_evidence.scheduler_next_action_payload_contract.schema_version = core_scheduler_next_action_payload_contract.v1`
+- `existing_evidence.scheduler_next_action_payload_contract.status = contract_only`
+- `existing_evidence.scheduler_next_action_payload_contract.required_scenarios` 包含 `cancelled_job`、`retryable_failure`、`timed_out_job`、`review_required_job`、`blocked_job`
+- `existing_evidence.scheduler_next_action_payload_contract.safety.implements_scheduler_runtime = false`
+- `existing_evidence.scheduler_next_action_payload_contract.safety.emits_lifecycle_events = false`
 - `existing_evidence.tk_policy_registry.policy_count = 11`
 - `existing_evidence.sqlite_write_gate.scope = process_per_sqlite_path`
 - missing evidence 包含 scheduler contract 尚未接 runtime / persistence、durable queue persistence 尚未超出 owned-test helper、cross-process SQLite coordination、cancellation/retry/timeout policy、job event status stream。
@@ -257,6 +263,8 @@ Update 2026-06-03 02:21 +08:00: Bounded Scheduler Core Contract is now proposed 
 
 Update 2026-06-03 03:36 +08:00: Scheduler lane contract coverage is now exposed through `--core-bounded-scheduler-plan-json` as `scheduler_lane_contract_coverage.v1`, completing OpenSpec task 3.1 locally. It compares current Tk policy lanes against scheduler policy facets and keeps readiness partial: timeout, retry, cancellation, and review policy facets remain missing.
 
+Update 2026-06-03 03:54 +08:00: Scheduler next-action payload contract is now exposed through `--core-bounded-scheduler-plan-json` as `core_scheduler_next_action_payload_contract.v1`, completing OpenSpec task 3.2 locally. It covers cancelled, retryable failure, timeout, review-required, and blocked-job scenarios with backend-defined `next_action` payloads. This remains contract-only: no scheduler runtime, no automatic lifecycle event, no queue migration, and no lifecycle schema/status change.
+
 1. **Review Queue Persistence Readiness**
    - 目標：把 content review rules、visual `review_required` lifecycle、unknown/heavy payload fallback 與 missing unified review queue persistence 收成更細的 Core-only evidence。
    - 邊界：不建立正式 review queue schema，不把 review-required promoted 成 ready。
@@ -264,9 +272,9 @@ Update 2026-06-03 03:36 +08:00: Scheduler lane contract coverage is now exposed 
    - 目標：把 Tk single-flight policies、SQLite write gate、missing unified scheduler 與 job status evidence 整理成不改 schema 的 planning input。
    - 狀態：已由 `--core-bounded-scheduler-plan-json` 覆蓋 scheduler job contract draft、queue DDL dry-run preview、owned-test queue helper 與 scheduler lane contract coverage。
    - 邊界：不全面改 asyncio，不新增 scheduler persistence，不啟用 automatic lifecycle events。
-3. **Scheduler Next-Action Payload Tests**
-   - 目標：補 OpenSpec task 3.2，鎖住 cancellation、retry、timeout、review-required、blocked-job 的 next-action payload vocabulary。
-   - 邊界：只補 report / tests，不新增 runtime scheduler、不新增 queue schema、不改 lifecycle status。
+3. **Scheduler Explicit-Only Lifecycle Event Guard**
+   - 目標：補 OpenSpec task 3.3，證明 scheduler job completion 不會自動呼叫 visual lifecycle event writers，所有 lifecycle event emission 都維持 explicit-only。
+   - 邊界：只補 guard/report/tests，不啟用 automatic lifecycle events、不新增 runtime scheduler、不改 lifecycle status/schema。
 
 ## Repo Consistency Audit
 

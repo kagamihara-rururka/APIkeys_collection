@@ -19,6 +19,7 @@ from api_launcher.core_scheduler_contracts import (
     CORE_SCHEDULER_JOB_CONTRACT_SCHEMA_VERSION,
     SCHEDULER_JOB_STATUS_VALUES,
     scheduler_job_contract_draft,
+    scheduler_next_action_payload_contract,
 )
 from api_launcher.core_scheduler_persistence_contract import (
     CORE_SCHEDULER_QUEUE_SCHEMA_VERSION,
@@ -191,6 +192,72 @@ class CoreBoundedSchedulerPlanReportTests(unittest.TestCase):
         contract = scheduler_job_contract_draft()
         safety = contract["safety"]
 
+        self.assertFalse(safety["imports_renderer_projects"])
+        self.assertFalse(safety["imports_compressor_projects"])
+        self.assertFalse(safety["reads_renderer_payloads"])
+        self.assertFalse(safety["reads_npz"])
+        self.assertFalse(safety["cross_repo_implementation"])
+
+    def test_scheduler_next_action_payload_contract_covers_blocked_review_timeout_retry_cancel(self) -> None:
+        report = build_core_bounded_scheduler_plan_report()
+        contract = report["existing_evidence"]["scheduler_next_action_payload_contract"]
+
+        self.assertEqual(
+            "core_scheduler_next_action_payload_contract.v1",
+            contract["schema_version"],
+        )
+        self.assertEqual("contract_only", contract["status"])
+        self.assertFalse(contract["safety"]["implements_scheduler_runtime"])
+        self.assertFalse(contract["safety"]["changes_lifecycle_schema"])
+        self.assertFalse(contract["safety"]["enables_auto_lifecycle_events"])
+
+        payload_by_scenario = {
+            payload["scenario"]: payload for payload in contract["payloads"]
+        }
+        self.assertEqual(
+            {
+                "cancelled_job",
+                "retryable_failure",
+                "timed_out_job",
+                "review_required_job",
+                "blocked_job",
+            },
+            set(payload_by_scenario),
+        )
+        self.assertEqual(
+            "inspect_cancellation_reason_or_requeue",
+            payload_by_scenario["cancelled_job"]["next_action"],
+        )
+        self.assertEqual(
+            "retry_when_policy_allows",
+            payload_by_scenario["retryable_failure"]["next_action"],
+        )
+        self.assertEqual(
+            "review_timeout_policy_or_retry",
+            payload_by_scenario["timed_out_job"]["next_action"],
+        )
+        self.assertEqual(
+            "open_review_queue_before_continuing",
+            payload_by_scenario["review_required_job"]["next_action"],
+        )
+        self.assertEqual(
+            "review_blocked_job_reason_before_retry",
+            payload_by_scenario["blocked_job"]["next_action"],
+        )
+        for payload in payload_by_scenario.values():
+            self.assertIn(payload["scheduler_status"], SCHEDULER_JOB_STATUS_VALUES)
+            self.assertTrue(payload["next_action"])
+            self.assertTrue(payload["outcome_bucket"])
+
+    def test_scheduler_next_action_payload_contract_has_no_downstream_runtime_flags(self) -> None:
+        contract = scheduler_next_action_payload_contract()
+        safety = contract["safety"]
+
+        self.assertFalse(safety["implements_scheduler_runtime"])
+        self.assertFalse(safety["changes_scheduler_schema"])
+        self.assertFalse(safety["changes_lifecycle_schema"])
+        self.assertFalse(safety["changes_lifecycle_statuses"])
+        self.assertFalse(safety["enables_auto_lifecycle_events"])
         self.assertFalse(safety["imports_renderer_projects"])
         self.assertFalse(safety["imports_compressor_projects"])
         self.assertFalse(safety["reads_renderer_payloads"])

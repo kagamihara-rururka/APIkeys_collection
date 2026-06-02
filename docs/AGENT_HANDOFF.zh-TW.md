@@ -1,4 +1,11 @@
 # Agent 接力卡
+## 2026-06-03 03:54 +08:00 Core scheduler next-action payload contract
+- 本輪擴充 `api_launcher/core_scheduler_contracts.py` 與 `api_launcher/core_bounded_scheduler_plan_report.py`：新增 `scheduler_next_action_payload_contract()` / `core_scheduler_next_action_payload_contract.v1`，並暴露到 `--core-bounded-scheduler-plan-json` 的 `existing_evidence.scheduler_next_action_payload_contract`。
+- Payload contract 覆蓋五種 scheduler outcome：`cancelled_job`、`retryable_failure`、`timed_out_job`、`review_required_job`、`blocked_job`；每筆都有 scheduler-only status、outcome bucket、backend-defined `next_action`、display tone 與 user-action flag。
+- 邊界：這是 contract-only / report/test slice，不實作 scheduler runtime、不新增 queue migration、不改 lifecycle schema/status、不啟用 auto lifecycle event、不 import 下游 repo、不讀 `.npz` / renderer payload。
+- 已驗證：`py_compile` OK；focused tests `tests.test_core_bounded_scheduler_plan_report tests.test_core_job_status_report tests.test_cli_flags tests.test_cli_json -v` 通過 19 tests；broader related tests `tests.test_core_bounded_scheduler_plan_report tests.test_core_job_status_report tests.test_core_readiness_report tests.test_project_maturity tests.test_tk_background_jobs tests.test_visual_asset_contracts tests.test_cli_flags tests.test_cli_json -v` 通過 60 tests；JSON stdout 可由 downstream `json.load(sys.stdin)` 解析，輸出 `schema_version=core_scheduler_next_action_payload_contract.v1`、`status=contract_only`、required scenarios `cancelled_job,retryable_failure,timed_out_job,review_required_job,blocked_job`。
+- OpenSpec：`bounded-scheduler-core-contract` task 3.2 已完成。下一個安全動作可做 3.3 explicit-only lifecycle event emission guard；若要正式 queue migration、runtime scheduler、automatic lifecycle event、cross-process SQLite lock、或 asyncio migration，先送 `o_1`。
+
 ## 2026-06-03 03:36 +08:00 Core scheduler lane contract coverage report
 - 本輪擴充 `api_launcher/core_bounded_scheduler_plan_report.py`：`--core-bounded-scheduler-plan-json` 現在在 `existing_evidence.scheduler_lane_contract_coverage` 暴露 `scheduler_lane_contract_coverage.v1`，逐一比對 Tk background policy registry lane 與未來 scheduler policy facets。
 - 報表保持保守：Tk lane 目前只證明 UI instance 內的 `concurrency_policy`；`sqlite_import` 另外因 process-local SQLite write gate evidence 取得 `write_policy` partial coverage。`timeout_policy`、`retry_policy`、`cancellation_policy`、`review_policy` 仍列為 missing，不把 Tk policy registry 宣稱為完整 scheduler。

@@ -13,7 +13,7 @@
 ## 3. Status And Policy Bridge
 
 - [x] 3.1 Add a report that compares existing Tk background policy registry entries against scheduler contract entries.
-- [ ] 3.2 Add tests for cancellation, retry, timeout, review-required, and blocked-job next-action payloads.
+- [x] 3.2 Add tests for cancellation, retry, timeout, review-required, and blocked-job next-action payloads.
 - [ ] 3.3 Keep lifecycle event emission explicit-only; add tests proving job completion does not automatically call visual lifecycle event writers.
 
 ## 4. Integration Planning Evidence
