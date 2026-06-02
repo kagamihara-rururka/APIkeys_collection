@@ -58,6 +58,7 @@ RRKAL 本身是資料資產治理專案，專案文件也可以用資料治理�
 | 要看版本變更 | `DEVELOPMENT_LOG.zh-TW.md` -> `PROJECT_GTD.md` -> `AGENT_HANDOFF.zh-TW.md` | 先看每個已推送 checkpoint 屬於哪個開發階段、改了什麼、如何驗證、還有什麼風險。 |
 | 要回答整體進度 / 成熟度 | `PROJECT_MATURITY_MATRIX.zh-TW.md` -> `PROJECT_GTD.md` -> `AGENT_HANDOFF.zh-TW.md` | 不再用單一百分比；用成熟度矩陣區分可交付小閉環、bounded、partial、contract-only 與 planned。 |
 | 要準備 Integration Planning Gate | `CORE_INTEGRATION_PLANNING_GATE_READINESS.zh-TW.md` -> `VISUAL_SKIN_ASSET_CONTRACT.zh-TW.md` -> `PROJECT_MATURITY_MATRIX.zh-TW.md` | 先看 Core 目前能提供的 registry/lifecycle/manifest/review/job-status/lineage evidence 與缺口；不得把 `partial` gate 解讀成可整合。 |
+| 要檢查 lifecycle vocabulary / transition audit | `CORE_INTEGRATION_PLANNING_GATE_READINESS.zh-TW.md` -> `--core-lifecycle-audit-json` -> `VISUAL_SKIN_ASSET_CONTRACT.zh-TW.md` | 先看 Core-only lifecycle audit；它描述 vocabulary/display profiles/ready-event guard，不代表 runtime state machine 已完成。 |
 | 要檢查 job-status / scheduler evidence | `CORE_INTEGRATION_PLANNING_GATE_READINESS.zh-TW.md` -> `--core-job-status-report-json` -> `PROJECT_MATURITY_MATRIX.zh-TW.md` | 先看 Core-only job-status diagnostic；Tk 單飛與 SQLite write gate 是 hardening evidence，不是 unified scheduler 已完成。 |
 | 要檢查 review-required / unknown payload evidence | `CORE_INTEGRATION_PLANNING_GATE_READINESS.zh-TW.md` -> `CONTENT_REGISTRY` 相關測試 / `--core-review-required-report-json` | 先看 Core 目前如何把 heavy/unknown content 留在 review lane；不要把 review-required promoted 成 ready。 |
 | 想理解產品 | `PRODUCT_POSITIONING.zh-TW.md` -> `TECHNICAL_OVERVIEW.zh-TW.md` -> `ARCHITECTURE.zh-TW.md` | 先理解「資料工程版 Steam」和整體資料管線。 |
