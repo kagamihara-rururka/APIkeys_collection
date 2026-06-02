@@ -8,6 +8,7 @@ from api_launcher.core_scheduler_contracts import (
     scheduler_job_contract_draft,
     scheduler_job_contract_fields,
     scheduler_next_action_payload_contract,
+    scheduler_o1_review_gate_contract,
 )
 from api_launcher.core_scheduler_persistence_contract import (
     scheduler_queue_owned_test_table_helper_contract,
@@ -54,6 +55,7 @@ def build_core_bounded_scheduler_plan_report(
                     explicit_event_writer=explicit_event_writer,
                 )
             ),
+            "scheduler_o1_review_gate_contract": scheduler_o1_review_gate_contract(),
             "scheduler_queue_ddl_preview": scheduler_queue_sqlite_ddl_preview(),
             "scheduler_owned_test_table_helper": scheduler_queue_owned_test_table_helper_contract(),
             "tk_policy_registry": {

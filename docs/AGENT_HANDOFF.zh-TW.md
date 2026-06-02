@@ -1,4 +1,11 @@
 # Agent 接力卡
+## 2026-06-03 04:32 +08:00 Core scheduler `o_1` review gate contract
+- 本輪擴充 `api_launcher/core_scheduler_contracts.py` 與 `api_launcher/core_bounded_scheduler_plan_report.py`：新增 `scheduler_o1_review_gate_contract()` / `core_scheduler_o1_review_gate_contract.v1`，並暴露到 `--core-bounded-scheduler-plan-json` 的 `existing_evidence.scheduler_o1_review_gate_contract`。
+- Gate contract 明確列出四個未來 runtime 工作前必須送 `o_1` 的項目：`durable_queue_schema`、`lifecycle_event_emission_change`、`cross_repo_job_adapter`、`asyncio_runtime_migration`；每個 gate 都有 blocked change、required-before 條件與 rationale，且 `safe_without_review=false`。
+- 邊界：這是 contract-only / report/test slice，不實作 scheduler runtime、不新增 queue migration、不改 lifecycle schema/status、不啟用 auto lifecycle event、不新增 cross-repo job adapter、不開始 asyncio/runtime migration、不 import 下游 repo、不讀 `.npz` / renderer payload。
+- 已驗證：`py_compile` OK；focused tests `tests.test_core_bounded_scheduler_plan_report tests.test_core_job_status_report tests.test_cli_flags tests.test_cli_json -v` 通過 23 tests；JSON stdout 可由 downstream `json.load(sys.stdin)` 解析，輸出 `schema_version=core_scheduler_o1_review_gate_contract.v1`、`status=contract_only`、required gates `durable_queue_schema,lifecycle_event_emission_change,cross_repo_job_adapter,asyncio_runtime_migration`。
+- OpenSpec：`bounded-scheduler-core-contract` task 4.3 已完成。下一個安全動作是 5.2 完整 validation / CI；通過後再判斷 5.3 archive。
+
 ## 2026-06-03 04:12 +08:00 Core scheduler explicit-only lifecycle event guard
 - 本輪擴充 `api_launcher/core_scheduler_contracts.py` 與 `api_launcher/core_bounded_scheduler_plan_report.py`：新增 `scheduler_lifecycle_event_emission_guard_contract()` / `core_scheduler_lifecycle_event_emission_guard.v1`，並暴露到 `--core-bounded-scheduler-plan-json` 的 `existing_evidence.scheduler_lifecycle_event_emission_guard`。
 - Guard 明確鎖住：scheduler job `completed` 只是 scheduler-only status，不等於 Visual/Skin lifecycle transition；completed-job policy 的 `auto_emit_lifecycle_event=false`，必須走 explicit writer `log_visual_asset_ready_registry_entry`，且 automatic lifecycle event / status-to-lifecycle binding / cross-repo job adapter 都需要 `o_1`。

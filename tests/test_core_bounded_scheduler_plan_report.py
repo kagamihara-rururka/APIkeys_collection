@@ -21,6 +21,7 @@ from api_launcher.core_scheduler_contracts import (
     scheduler_job_contract_draft,
     scheduler_lifecycle_event_emission_guard_contract,
     scheduler_next_action_payload_contract,
+    scheduler_o1_review_gate_contract,
 )
 from api_launcher.core_scheduler_persistence_contract import (
     CORE_SCHEDULER_QUEUE_SCHEMA_VERSION,
@@ -310,6 +311,66 @@ class CoreBoundedSchedulerPlanReportTests(unittest.TestCase):
         self.assertFalse(safety["emits_lifecycle_events"])
         self.assertFalse(safety["enables_auto_lifecycle_events"])
         self.assertFalse(safety["calls_visual_asset_ready_writer"])
+        self.assertFalse(safety["imports_renderer_projects"])
+        self.assertFalse(safety["imports_compressor_projects"])
+        self.assertFalse(safety["reads_renderer_payloads"])
+        self.assertFalse(safety["reads_npz"])
+        self.assertFalse(safety["cross_repo_implementation"])
+
+    def test_scheduler_o1_review_gate_contract_blocks_future_runtime_work(self) -> None:
+        report = build_core_bounded_scheduler_plan_report()
+        gate_contract = report["existing_evidence"]["scheduler_o1_review_gate_contract"]
+
+        self.assertEqual(
+            "core_scheduler_o1_review_gate_contract.v1",
+            gate_contract["schema_version"],
+        )
+        self.assertEqual("contract_only", gate_contract["status"])
+        self.assertEqual(
+            "required_before_future_runtime_work",
+            gate_contract["gate_status"],
+        )
+        self.assertEqual(
+            {
+                "durable_queue_schema",
+                "lifecycle_event_emission_change",
+                "cross_repo_job_adapter",
+                "asyncio_runtime_migration",
+            },
+            set(gate_contract["required_gate_ids"]),
+        )
+
+        gates = {gate["gate_id"]: gate for gate in gate_contract["gates"]}
+        self.assertEqual(
+            "any_durable_queue_schema_or_migration",
+            gates["durable_queue_schema"]["required_before"],
+        )
+        self.assertEqual(
+            "any_scheduler_to_visual_lifecycle_event_binding",
+            gates["lifecycle_event_emission_change"]["required_before"],
+        )
+        self.assertEqual(
+            "any_cross_repo_scheduler_or_builder_job_adapter",
+            gates["cross_repo_job_adapter"]["required_before"],
+        )
+        self.assertEqual(
+            "any_asyncio_runtime_migration_or_worker_pool_replacement",
+            gates["asyncio_runtime_migration"]["required_before"],
+        )
+        self.assertFalse(any(gate["safe_without_review"] for gate in gates.values()))
+
+    def test_scheduler_o1_review_gate_contract_has_no_runtime_or_integration_flags(self) -> None:
+        gate_contract = scheduler_o1_review_gate_contract()
+        safety = gate_contract["safety"]
+
+        self.assertFalse(safety["implements_scheduler_runtime"])
+        self.assertFalse(safety["changes_scheduler_schema"])
+        self.assertFalse(safety["changes_lifecycle_schema"])
+        self.assertFalse(safety["changes_lifecycle_statuses"])
+        self.assertFalse(safety["emits_lifecycle_events"])
+        self.assertFalse(safety["enables_auto_lifecycle_events"])
+        self.assertFalse(safety["adds_cross_repo_job_adapter"])
+        self.assertFalse(safety["starts_asyncio_runtime_migration"])
         self.assertFalse(safety["imports_renderer_projects"])
         self.assertFalse(safety["imports_compressor_projects"])
         self.assertFalse(safety["reads_renderer_payloads"])

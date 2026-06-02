@@ -20,7 +20,7 @@
 
 - [x] 4.1 Update `--core-bounded-scheduler-plan-json` or a successor report to include contract coverage and remaining missing evidence.
 - [x] 4.2 Keep readiness conservative: do not report scheduler runtime readiness until runtime, persistence, cancellation/retry, status stream, and cross-process write evidence exists.
-- [ ] 4.3 Add a future `o_1` review gate before any durable queue schema, lifecycle emission change, cross-repo job adapter, or asyncio/runtime migration.
+- [x] 4.3 Add a future `o_1` review gate before any durable queue schema, lifecycle emission change, cross-repo job adapter, or asyncio/runtime migration.
 
 ## 5. Documentation And Verification
 

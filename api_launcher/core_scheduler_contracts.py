@@ -71,6 +71,26 @@ class SchedulerNextActionPayload:
         }
 
 
+@dataclass(frozen=True)
+class SchedulerO1ReviewGate:
+    """One future scheduler change that requires explicit `o_1` review."""
+
+    gate_id: str
+    blocked_change: str
+    required_before: str
+    rationale: str
+    safe_without_review: bool = False
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "gate_id": self.gate_id,
+            "blocked_change": self.blocked_change,
+            "required_before": self.required_before,
+            "rationale": self.rationale,
+            "safe_without_review": self.safe_without_review,
+        }
+
+
 def scheduler_job_contract_fields() -> tuple[SchedulerContractField, ...]:
     return (
         SchedulerContractField(
@@ -147,6 +167,62 @@ def scheduler_job_contract_fields() -> tuple[SchedulerContractField, ...]:
             "Backend-provided next safe action for Tk/Web/future Qt rendering.",
         ),
     )
+
+
+def scheduler_o1_review_gates() -> tuple[SchedulerO1ReviewGate, ...]:
+    return (
+        SchedulerO1ReviewGate(
+            gate_id="durable_queue_schema",
+            blocked_change="creating_or_migrating_core_scheduler_job_queue_in_user_databases",
+            required_before="any_durable_queue_schema_or_migration",
+            rationale="Queue persistence can affect user data and rollback guarantees.",
+        ),
+        SchedulerO1ReviewGate(
+            gate_id="lifecycle_event_emission_change",
+            blocked_change="automatic_visual_lifecycle_event_emission_from_scheduler_jobs",
+            required_before="any_scheduler_to_visual_lifecycle_event_binding",
+            rationale="Scheduler status is not a Visual/Skin lifecycle transition.",
+        ),
+        SchedulerO1ReviewGate(
+            gate_id="cross_repo_job_adapter",
+            blocked_change="renderer_or_compressor_job_adapter_contract",
+            required_before="any_cross_repo_scheduler_or_builder_job_adapter",
+            rationale="Core must not absorb displaytools or compressor runtime responsibilities.",
+        ),
+        SchedulerO1ReviewGate(
+            gate_id="asyncio_runtime_migration",
+            blocked_change="asyncio_or_runtime_scheduler_rewrite",
+            required_before="any_asyncio_runtime_migration_or_worker_pool_replacement",
+            rationale="Runtime scheduler changes can affect Tk/Web behavior, SQLite locks, and cancellation semantics.",
+        ),
+    )
+
+
+def scheduler_o1_review_gate_contract() -> dict[str, Any]:
+    gates = scheduler_o1_review_gates()
+    return {
+        "schema_version": "core_scheduler_o1_review_gate_contract.v1",
+        "status": "contract_only",
+        "gate_status": "required_before_future_runtime_work",
+        "gate_count": len(gates),
+        "required_gate_ids": [gate.gate_id for gate in gates],
+        "gates": [gate.to_dict() for gate in gates],
+        "safety": {
+            "implements_scheduler_runtime": False,
+            "changes_scheduler_schema": False,
+            "changes_lifecycle_schema": False,
+            "changes_lifecycle_statuses": False,
+            "emits_lifecycle_events": False,
+            "enables_auto_lifecycle_events": False,
+            "adds_cross_repo_job_adapter": False,
+            "starts_asyncio_runtime_migration": False,
+            "imports_renderer_projects": False,
+            "imports_compressor_projects": False,
+            "reads_renderer_payloads": False,
+            "reads_npz": False,
+            "cross_repo_implementation": False,
+        },
+    }
 
 
 def scheduler_next_action_payloads() -> tuple[SchedulerNextActionPayload, ...]:
@@ -312,9 +388,12 @@ __all__ = [
     "SCHEDULER_JOB_STATUS_VALUES",
     "SchedulerContractField",
     "SchedulerNextActionPayload",
+    "SchedulerO1ReviewGate",
     "scheduler_job_contract_draft",
     "scheduler_job_contract_fields",
     "scheduler_lifecycle_event_emission_guard_contract",
     "scheduler_next_action_payload_contract",
     "scheduler_next_action_payloads",
+    "scheduler_o1_review_gate_contract",
+    "scheduler_o1_review_gates",
 ]
