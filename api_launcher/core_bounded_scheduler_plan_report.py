@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Any
 
 from api_launcher.core_job_status_report import build_core_job_status_report
+from api_launcher.core_scheduler_contracts import scheduler_job_contract_draft
 from api_launcher.sqlite_write_gate import sqlite_write_gate_profile
 from frontends.tk.background_job_policies import iter_tk_background_job_policies
 
@@ -31,6 +32,7 @@ def build_core_bounded_scheduler_plan_report(
         "status": "partial",
         "existing_evidence": {
             "job_status_report_bridge": _job_status_report_bridge(job_status_report),
+            "scheduler_job_contract_draft": scheduler_job_contract_draft(),
             "tk_policy_registry": {
                 "policy_count": len(tk_lanes),
                 "lanes": tk_lanes,
@@ -43,7 +45,7 @@ def build_core_bounded_scheduler_plan_report(
             "sqlite_write_gate": sqlite_gate,
         },
         "missing_evidence": (
-            "unified_scheduler_contract_schema_not_defined",
+            "scheduler_contract_not_bound_to_runtime_or_persistence",
             "durable_job_queue_persistence_not_defined",
             "cross_process_sqlite_write_coordination_not_defined",
             "cancellation_retry_and_timeout_policy_not_unified",

@@ -13,6 +13,11 @@ from api_launcher.core_bounded_scheduler_plan_report import (
     CORE_BOUNDED_SCHEDULER_PLAN_SCHEMA_VERSION,
     build_core_bounded_scheduler_plan_report,
 )
+from api_launcher.core_scheduler_contracts import (
+    CORE_SCHEDULER_JOB_CONTRACT_SCHEMA_VERSION,
+    SCHEDULER_JOB_STATUS_VALUES,
+    scheduler_job_contract_draft,
+)
 
 
 class CoreBoundedSchedulerPlanReportTests(unittest.TestCase):
@@ -28,7 +33,7 @@ class CoreBoundedSchedulerPlanReportTests(unittest.TestCase):
             report["integration_planning_gate"]["ready_for_scheduler_runtime_poc"]
         )
         self.assertIn(
-            "unified_scheduler_contract_schema_not_defined",
+            "scheduler_contract_not_bound_to_runtime_or_persistence",
             report["missing_evidence"],
         )
         self.assertIn(
@@ -97,6 +102,56 @@ class CoreBoundedSchedulerPlanReportTests(unittest.TestCase):
         self.assertEqual("partial", payload["status"])
         self.assertEqual("", completed.stderr)
         self.assertFalse(payload["safety"]["implements_scheduler_runtime"])
+
+    def test_scheduler_contract_draft_is_reported_without_runtime_claims(self) -> None:
+        report = build_core_bounded_scheduler_plan_report()
+        contract = report["existing_evidence"]["scheduler_job_contract_draft"]
+
+        self.assertEqual(
+            CORE_SCHEDULER_JOB_CONTRACT_SCHEMA_VERSION,
+            contract["schema_version"],
+        )
+        self.assertEqual("contract_only", contract["status"])
+        self.assertEqual("not_implemented", contract["runtime_status"])
+        self.assertEqual("not_implemented", contract["persistence_status"])
+        self.assertEqual("scheduler_only_not_lifecycle", contract["status_scope"])
+        self.assertFalse(contract["safety"]["implements_scheduler_runtime"])
+        self.assertFalse(contract["safety"]["defines_durable_queue_schema"])
+        self.assertFalse(contract["safety"]["changes_lifecycle_schema"])
+        self.assertFalse(contract["safety"]["enables_auto_lifecycle_events"])
+
+        fields = {field["field_id"]: field for field in contract["fields"]}
+        for required_field in (
+            "job_id",
+            "owner",
+            "stage",
+            "status",
+            "concurrency_policy",
+            "timeout_policy",
+            "retry_policy",
+            "cancellation_policy",
+            "write_policy",
+            "review_policy",
+            "evidence_source",
+            "next_action",
+        ):
+            self.assertIn(required_field, fields)
+            self.assertTrue(fields[required_field]["required"])
+
+        self.assertEqual(
+            tuple(SCHEDULER_JOB_STATUS_VALUES),
+            tuple(fields["status"]["allowed_values"]),
+        )
+
+    def test_scheduler_contract_draft_has_no_downstream_runtime_flags(self) -> None:
+        contract = scheduler_job_contract_draft()
+        safety = contract["safety"]
+
+        self.assertFalse(safety["imports_renderer_projects"])
+        self.assertFalse(safety["imports_compressor_projects"])
+        self.assertFalse(safety["reads_renderer_payloads"])
+        self.assertFalse(safety["reads_npz"])
+        self.assertFalse(safety["cross_repo_implementation"])
 
 
 if __name__ == "__main__":
