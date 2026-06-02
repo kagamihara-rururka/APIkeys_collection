@@ -32,7 +32,8 @@
 | Core scheduler owned-test queue helper CI | GitHub Actions run `26842825576` PASS |
 | Core scheduler lane contract coverage | `75923c0` / `scheduler_lane_contract_coverage.v1` exposed through `--core-bounded-scheduler-plan-json` / OpenSpec task 3.1 evidence |
 | Core scheduler lane contract coverage CI | GitHub Actions run `26843841155` PASS |
-| Core scheduler next-action payload contract | `pending` / `core_scheduler_next_action_payload_contract.v1` exposed through `--core-bounded-scheduler-plan-json` / OpenSpec task 3.2 evidence |
+| Core scheduler next-action payload contract | `e936080` / `core_scheduler_next_action_payload_contract.v1` exposed through `--core-bounded-scheduler-plan-json` / OpenSpec task 3.2 evidence |
+| Core scheduler next-action payload contract CI | GitHub Actions run `26844820055` PASS |
 | Core lifecycle audit diagnostic | `--core-lifecycle-audit-json` / `core_lifecycle_audit_report.v1` |
 | Core manifest-reference diagnostic | `--core-manifest-reference-report-json` / `core_manifest_reference_report.v1` |
 | Core deep-adapter coverage diagnostic | `--core-deep-adapter-coverage-json` / `core_deep_adapter_coverage_report.v1` |
@@ -263,7 +264,7 @@ Update 2026-06-03 02:21 +08:00: Bounded Scheduler Core Contract is now proposed 
 
 Update 2026-06-03 03:36 +08:00: Scheduler lane contract coverage is now exposed through `--core-bounded-scheduler-plan-json` as `scheduler_lane_contract_coverage.v1`, completing OpenSpec task 3.1 locally. It compares current Tk policy lanes against scheduler policy facets and keeps readiness partial: timeout, retry, cancellation, and review policy facets remain missing.
 
-Update 2026-06-03 03:54 +08:00: Scheduler next-action payload contract is now exposed through `--core-bounded-scheduler-plan-json` as `core_scheduler_next_action_payload_contract.v1`, completing OpenSpec task 3.2 locally. It covers cancelled, retryable failure, timeout, review-required, and blocked-job scenarios with backend-defined `next_action` payloads. This remains contract-only: no scheduler runtime, no automatic lifecycle event, no queue migration, and no lifecycle schema/status change.
+Update 2026-06-03 03:54 +08:00: Scheduler next-action payload contract is now exposed through `--core-bounded-scheduler-plan-json` as `core_scheduler_next_action_payload_contract.v1`, completing OpenSpec task 3.2. Code checkpoint `e936080` passed GitHub Actions run `26844820055`. It covers cancelled, retryable failure, timeout, review-required, and blocked-job scenarios with backend-defined `next_action` payloads. This remains contract-only: no scheduler runtime, no automatic lifecycle event, no queue migration, and no lifecycle schema/status change.
 
 1. **Review Queue Persistence Readiness**
    - 目標：把 content review rules、visual `review_required` lifecycle、unknown/heavy payload fallback 與 missing unified review queue persistence 收成更細的 Core-only evidence。
