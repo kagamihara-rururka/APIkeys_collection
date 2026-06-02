@@ -7,6 +7,16 @@ from api_launcher.content_registry import content_registry_report
 from api_launcher.crawler_registry_report import crawler_registry_report
 from api_launcher.dataset_adapters import dataset_adapter_report
 from api_launcher.project_maturity import build_project_maturity_payload
+from api_launcher.core_scheduler_contracts import (
+    scheduler_job_contract_draft,
+    scheduler_lifecycle_event_emission_guard_contract,
+    scheduler_next_action_payload_contract,
+    scheduler_o1_review_gate_contract,
+)
+from api_launcher.core_scheduler_persistence_contract import (
+    scheduler_queue_owned_test_table_helper_contract,
+    scheduler_queue_sqlite_ddl_preview,
+)
 from api_launcher.visual_asset_contracts import (
     SKIN_ASSET_LIFECYCLE_STATUSES,
     skin_asset_status_display_profile,
@@ -188,15 +198,47 @@ def _job_status_evidence(visual_schema: dict[str, Any], maturity_payload: dict[s
             "event_writer_contract": (visual_schema.get("migration_guards") or {}).get("event_writer", ""),
             "background_scheduler_maturity": scheduler_row.get("maturity_level", ""),
             "background_scheduler_metrics": scheduler_row.get("metrics", {}),
+            "scheduler_job_contract_draft": scheduler_job_contract_draft(),
+            "scheduler_queue_ddl_preview": scheduler_queue_sqlite_ddl_preview(),
+            "scheduler_owned_test_table_helper": scheduler_queue_owned_test_table_helper_contract(),
+            "scheduler_next_action_payload_contract": scheduler_next_action_payload_contract(),
+            "scheduler_lifecycle_event_emission_guard": (
+                scheduler_lifecycle_event_emission_guard_contract(
+                    explicit_event_writer=str(
+                        (visual_schema.get("migration_guards") or {}).get("event_writer") or ""
+                    ),
+                )
+            ),
+            "scheduler_o1_review_gate_contract": scheduler_o1_review_gate_contract(),
         },
-        "missing_evidence": ("unified_bounded_job_scheduler_not_yet_implemented",),
-        "blocked_surfaces": ("auto_lifecycle_event_emission_disabled",),
+        "missing_evidence": (
+            "unified_bounded_job_scheduler_not_yet_implemented",
+            "scheduler_contract_not_bound_to_runtime_or_persistence",
+            "durable_job_queue_persistence_not_promoted_beyond_owned_test",
+            "job_event_status_stream_not_unified",
+        ),
+        "blocked_surfaces": (
+            "auto_lifecycle_event_emission_disabled",
+            "future_scheduler_runtime_changes_require_o1_review",
+        ),
         "review_required_surfaces": ("failed_lifecycle_status", "review_required_lifecycle_status"),
-        "contract_only_surfaces": ("visual_ready_event_writer_contract",),
-        "planned_surfaces": ("external_builder_job_status_adapter",),
+        "contract_only_surfaces": (
+            "visual_ready_event_writer_contract",
+            "core_scheduler_job_contract_draft",
+            "core_scheduler_queue_persistence_contract",
+            "core_scheduler_next_action_payload_contract",
+            "core_scheduler_lifecycle_event_emission_guard",
+            "core_scheduler_o1_review_gate_contract",
+        ),
+        "planned_surfaces": (
+            "external_builder_job_status_adapter",
+            "owned_test_scheduler_poc",
+            "bounded_scheduler_runtime_after_o1_review",
+        ),
         "next_safe_actions": (
             "keep_auto_event_emission_disabled_until_migration_and_o1_review_are_clear",
             "design_bounded_scheduler_before_async_rewrite",
+            "use_scheduler_o1_review_gates_before_runtime_or_persistence_work",
         ),
     }
 

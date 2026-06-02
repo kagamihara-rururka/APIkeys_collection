@@ -80,6 +80,52 @@ class CoreReadinessReportTests(unittest.TestCase):
         self.assertIn("unsupported_payload_format", review["blocked_surfaces"])
         self.assertTrue(review["existing_evidence"]["visual_review_status_available"])
 
+    def test_job_status_evidence_includes_scheduler_contract_surfaces(self) -> None:
+        report = build_core_readiness_report()
+        job_status = report["job_status_evidence"]
+        evidence = job_status["existing_evidence"]
+
+        self.assertEqual(
+            "core_scheduler_job_contract_draft.v1",
+            evidence["scheduler_job_contract_draft"]["schema_version"],
+        )
+        self.assertEqual(
+            "core_scheduler_queue_persistence_contract.v1",
+            evidence["scheduler_queue_ddl_preview"]["schema_version"],
+        )
+        self.assertEqual(
+            "owned_test_database_only",
+            evidence["scheduler_owned_test_table_helper"]["scope"],
+        )
+        self.assertEqual(
+            "core_scheduler_next_action_payload_contract.v1",
+            evidence["scheduler_next_action_payload_contract"]["schema_version"],
+        )
+        self.assertEqual(
+            "core_scheduler_lifecycle_event_emission_guard.v1",
+            evidence["scheduler_lifecycle_event_emission_guard"]["schema_version"],
+        )
+        self.assertEqual(
+            "core_scheduler_o1_review_gate_contract.v1",
+            evidence["scheduler_o1_review_gate_contract"]["schema_version"],
+        )
+        self.assertIn(
+            "durable_queue_schema",
+            evidence["scheduler_o1_review_gate_contract"]["required_gate_ids"],
+        )
+        self.assertIn(
+            "durable_job_queue_persistence_not_promoted_beyond_owned_test",
+            job_status["missing_evidence"],
+        )
+        self.assertIn(
+            "future_scheduler_runtime_changes_require_o1_review",
+            job_status["blocked_surfaces"],
+        )
+        self.assertIn(
+            "core_scheduler_o1_review_gate_contract",
+            job_status["contract_only_surfaces"],
+        )
+
     def test_cli_json_stdout_is_parseable_and_command_requested(self) -> None:
         args = parse_args(["--core-readiness-report-json"])
         self.assertTrue(command_requested(args))
