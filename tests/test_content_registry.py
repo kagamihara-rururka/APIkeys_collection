@@ -1,6 +1,12 @@
 from __future__ import annotations
 
+import io
+import json
+import tempfile
 import unittest
+from contextlib import redirect_stdout
+from pathlib import Path
+from unittest.mock import patch
 
 from api_launcher.content_registry import (
     content_import_profile,
@@ -10,6 +16,7 @@ from api_launcher.content_registry import (
     iter_content_review_rules,
     normalize_content_format,
 )
+from api_launcher.core import main
 from api_launcher.dataset_versions import DatasetVersionOption
 from api_launcher.downloads.eligibility import DownloadEligibility
 from api_launcher.models import Dataset
@@ -29,6 +36,35 @@ class ContentRegistryTest(unittest.TestCase):
         self.assertEqual("unknown_content_review", report["unknown_fallback_parser_id"])
         self.assertGreater(report["supported_sqlite_format_count"], 0)
         self.assertEqual(1, report["resolver_backed_format_count"])
+
+    def test_cli_emits_content_registry_report_json_without_setup_lines(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            stdout = io.StringIO()
+            unicode_report = {
+                "review_rule_count": 6,
+                "display_label": "內容 Parser 待辦",
+                "status_icon": "🚧",
+            }
+            with patch("api_launcher.core.content_registry_report", return_value=unicode_report), redirect_stdout(stdout):
+                rc = main(
+                    [
+                        "--db",
+                        str(Path(tmpdir) / "launcher.sqlite"),
+                        "--init-db",
+                        "--seed",
+                        "--content-registry-report-json",
+                    ]
+                )
+
+            payload = json.loads(stdout.getvalue())
+
+        self.assertEqual(0, rc)
+        self.assertEqual(6, payload["review_rule_count"])
+        self.assertEqual("內容 Parser 待辦", payload["display_label"])
+        self.assertEqual("🚧", payload["status_icon"])
+        self.assertNotIn("[db]", stdout.getvalue())
+        self.assertNotIn("[seed]", stdout.getvalue())
+        self.assertTrue(stdout.getvalue().isascii())
 
     def test_detector_uses_hints_and_url_suffix_for_netcdf(self) -> None:
         detection = detect_content_format(
