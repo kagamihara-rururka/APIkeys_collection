@@ -19,6 +19,7 @@
 | Current readiness schema | `core_readiness_report.v1` |
 | Current gate status | `partial` |
 | Core review-required diagnostic | `--core-review-required-report-json` / `core_review_required_report.v1` |
+| Core review queue readiness diagnostic | `--core-review-queue-readiness-json` / `core_review_queue_readiness_report.v1` |
 | Core job-status diagnostic | `--core-job-status-report-json` / `core_job_status_report.v1` |
 | Core lifecycle audit diagnostic | `--core-lifecycle-audit-json` / `core_lifecycle_audit_report.v1` |
 | Core manifest-reference diagnostic | `--core-manifest-reference-report-json` / `core_manifest_reference_report.v1` |
@@ -82,6 +83,19 @@
 
 它不新增 review queue schema，不改 lifecycle vocabulary，不把 unknown/heavy payload promoted 成 ready，也不碰下游 repo。
 
+## Review Queue Readiness Report
+
+`--core-review-queue-readiness-json` 是 Core-only diagnostic，用來判斷現有 review-required surfaces 是否足以進入 unified review queue persistence 設計。它把 content review rules、visual `review_required` lifecycle、plan/display review payload、adapter/content review buckets 與 volatile review counters 分開，避免把 UI counter 或 event context 誤當作 durable queue。
+
+目前輸出：
+- `schema_version = core_review_queue_readiness_report.v1`
+- `status = partial`
+- missing evidence 包含 review queue persistence schema、stable review item identity、resolution state、migration/rollback guard、repository read/write。
+- blocked surfaces 包含 treating display counts as persisted queue、promotion from review_required to ready without resolution、cross-repo review contract without `o_1`。
+- planned surfaces 包含 review queue OpenSpec、owned test database PoC、review queue summary CLI JSON。
+- safety flags 明確標示不新增 schema、不寫 queue record、不改 lifecycle schema、不 promoted ready、不 import downstream repo。
+
+它不新增 review queue schema，不寫 DB，不改 lifecycle vocabulary，不把 review-required promoted 成 ready，也不碰下游 repo。
 ## Job Status Evidence Report
 
 `--core-job-status-report-json` 是 Core-only diagnostic，用來把 job-status / scheduler hardening evidence 從完整 readiness report 中獨立拉出，避免後續 agent 把 Tk 單飛政策誤解成完整 unified scheduler。
@@ -195,6 +209,8 @@ Core 尚不能提供：
 
 ## Proposed Next Core-Only Slices
 
+Update 2026-06-03 01:34 +08:00: Review Queue Persistence Readiness is now covered by `--core-review-queue-readiness-json` / `core_review_queue_readiness_report.v1`. The next safe Core-only work should be either Bounded Scheduler Contract Plan or a Review Queue OpenSpec draft. Do not create queue schema or DB writes without `o_1`.
+
 1. **Review Queue Persistence Readiness**
    - 目標：把 content review rules、visual `review_required` lifecycle、unknown/heavy payload fallback 與 missing unified review queue persistence 收成更細的 Core-only evidence。
    - 邊界：不建立正式 review queue schema，不把 review-required promoted 成 ready。
@@ -214,6 +230,7 @@ Core 尚不能提供：
 - Product evidence source: GitHub commits, tests, smoke, CLI JSON, actual UI behavior, git diff, GitHub Actions。
 - Current readiness JSON: `core_readiness_report.v1`, gate `partial`。
 - Current review-required JSON: `core_review_required_report.v1`, status `partial`。
+- Current review queue readiness JSON: `core_review_queue_readiness_report.v1`, status `partial`。
 - Current job-status JSON: `core_job_status_report.v1`, status `partial`。
 - Current lifecycle audit JSON: `core_lifecycle_audit_report.v1`, status `partial`。
 - Current manifest-reference JSON: `core_manifest_reference_report.v1`, status `partial`。

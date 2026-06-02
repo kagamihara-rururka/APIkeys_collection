@@ -58,6 +58,11 @@ from api_launcher.cli_core_review_required import (
     core_review_required_command_active,
     run_core_review_required_cli,
 )
+from api_launcher.cli_core_review_queue_readiness import (
+    add_core_review_queue_readiness_args,
+    core_review_queue_readiness_command_active,
+    run_core_review_queue_readiness_cli,
+)
 from api_launcher.cli_core_job_status import (
     add_core_job_status_args,
     core_job_status_command_active,
@@ -670,6 +675,7 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     add_project_maturity_args(parser)
     add_core_readiness_args(parser)
     add_core_review_required_args(parser)
+    add_core_review_queue_readiness_args(parser)
     add_core_job_status_args(parser)
     add_core_lifecycle_audit_args(parser)
     add_core_manifest_reference_args(parser)
@@ -839,6 +845,7 @@ class CatalogLauncherCli:
             run_project_maturity_cli(self.args, self.repository)
             run_core_readiness_cli(self.args, self.repository)
             run_core_review_required_cli(self.args, self.repository)
+            run_core_review_queue_readiness_cli(self.args, self.repository)
             run_core_job_status_cli(self.args, self.repository)
             run_core_lifecycle_audit_cli(self.args, self.repository)
             run_core_manifest_reference_cli(self.args, self.repository)
@@ -912,6 +919,7 @@ class CatalogLauncherCli:
             or project_maturity_command_active(self.args)
             or core_readiness_command_active(self.args)
             or core_review_required_command_active(self.args)
+            or core_review_queue_readiness_command_active(self.args)
             or core_job_status_command_active(self.args)
             or core_lifecycle_audit_command_active(self.args)
             or core_manifest_reference_command_active(self.args)

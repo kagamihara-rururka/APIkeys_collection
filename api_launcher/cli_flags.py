@@ -13,6 +13,9 @@ def command_requested(args: argparse.Namespace) -> bool:
     from api_launcher.cli_database_repair import database_repair_command_active
     from api_launcher.cli_core_readiness import core_readiness_command_active
     from api_launcher.cli_core_review_required import core_review_required_command_active
+    from api_launcher.cli_core_review_queue_readiness import (
+        core_review_queue_readiness_command_active,
+    )
     from api_launcher.cli_core_job_status import core_job_status_command_active
     from api_launcher.cli_core_lifecycle_audit import core_lifecycle_audit_command_active
     from api_launcher.cli_core_manifest_reference import core_manifest_reference_command_active
@@ -50,6 +53,7 @@ def command_requested(args: argparse.Namespace) -> bool:
         project_maturity_command_active(args),
         core_readiness_command_active(args),
         core_review_required_command_active(args),
+        core_review_queue_readiness_command_active(args),
         core_job_status_command_active(args),
         core_lifecycle_audit_command_active(args),
         core_manifest_reference_command_active(args),
