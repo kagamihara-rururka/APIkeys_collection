@@ -263,7 +263,7 @@ class HandoffTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmpdir:
             stdout = io.StringIO()
             with patch(
-                "api_launcher.core.build_mvp_readiness_payload",
+                "api_launcher.cli_mvp.build_mvp_readiness_payload",
                 return_value={
                     "closure_id": "canonical_mvp_demo_closure",
                     "status": "ready_for_mvp_demo",

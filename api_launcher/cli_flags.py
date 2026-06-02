@@ -18,6 +18,7 @@ def command_requested(args: argparse.Namespace) -> bool:
     from api_launcher.cli_download_plan import download_plan_command_active
     from api_launcher.cli_manifest_import import manifest_import_command_active
     from api_launcher.cli_manual_import import manual_import_command_active
+    from api_launcher.cli_mvp import mvp_command_active
     from api_launcher.cli_portal_intake import portal_intake_command_active
     from api_launcher.cli_project_maturity import project_maturity_command_active
     from api_launcher.cli_registry_reports import registry_report_command_active
@@ -38,10 +39,7 @@ def command_requested(args: argparse.Namespace) -> bool:
         args.verify_downloads,
         args.verify_downloads_json,
         download_plan_command_active(args),
-        bool(args.write_mvp_demo_flow),
-        bool(args.run_mvp_demo_smoke_json),
-        args.mvp_readiness_json,
-        bool(args.write_mvp_readiness_json),
+        mvp_command_active(args),
         project_maturity_command_active(args),
         visual_asset_registry_command_active(args),
         registry_report_command_active(args),
