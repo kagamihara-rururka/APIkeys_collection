@@ -207,7 +207,7 @@ Core 尚不能提供：
 `#repo_consistency_audit` result for this slice:
 
 - Active repo / branch: `L:\RRKAL_project`, `rrkal-32e215c-recovery`。
-- Latest accepted code checkpoint: `1c04c45` / GitHub Actions run `26835143426`.
+- Latest accepted code checkpoint: `56a1158` / GitHub Actions run `26836263789`.
 - Latest accepted docs checkpoint before this note: `75d0d54`; this note has since been extended by the review-required, job-status, and lifecycle audit diagnostics.
 - Active coordination route: Notion `Agents討論區`。
 - Deprecated coordination route: `L:\AGENT_EXCHANGE` archive / historical reference only。
@@ -217,7 +217,7 @@ Core 尚不能提供：
 - Current job-status JSON: `core_job_status_report.v1`, status `partial`。
 - Current lifecycle audit JSON: `core_lifecycle_audit_report.v1`, status `partial`。
 - Current manifest-reference JSON: `core_manifest_reference_report.v1`, status `partial`。
-- Current deep-adapter coverage JSON: `core_deep_adapter_coverage_report.v1`, status `partial`。
+- Current deep-adapter coverage JSON: `core_deep_adapter_coverage_report.v1`, status `partial`; code checkpoint `56a1158`, GitHub Actions run `26836263789` passed。
 - Cross-repo touch: none.
 - Renderer/compressor/SkinAsset implementation: none.
 - Lifecycle schema/status change: none.
