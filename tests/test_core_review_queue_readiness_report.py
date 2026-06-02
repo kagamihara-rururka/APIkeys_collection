@@ -12,6 +12,7 @@ from api_launcher.core import parse_args
 from api_launcher.core_review_queue_readiness_report import (
     CORE_REVIEW_QUEUE_READINESS_REPORT_SCHEMA_VERSION,
     build_core_review_queue_readiness_report,
+    review_item_identity_contract_draft,
 )
 
 
@@ -26,6 +27,14 @@ class CoreReviewQueueReadinessReportTests(unittest.TestCase):
         self.assertEqual("partial", report["status"])
         self.assertIn(
             "review_queue_persistence_schema_not_defined",
+            report["missing_evidence"],
+        )
+        self.assertIn(
+            "stable_review_item_identity_not_persisted",
+            report["missing_evidence"],
+        )
+        self.assertNotIn(
+            "stable_review_item_identity_not_defined",
             report["missing_evidence"],
         )
         self.assertIn(
@@ -59,6 +68,49 @@ class CoreReviewQueueReadinessReportTests(unittest.TestCase):
         self.assertEqual("partial", review_required["status"])
         self.assertGreaterEqual(review_required["review_required_surface_count"], 1)
         self.assertIn("visual_skin_asset_review_required", report["review_required_surfaces"])
+
+    def test_review_item_identity_contract_is_contract_only(self) -> None:
+        report = build_core_review_queue_readiness_report()
+        contract = report["existing_evidence"]["review_item_identity_contract_draft"]
+
+        self.assertEqual(
+            "core_review_item_identity_contract_draft.v1",
+            contract["schema_version"],
+        )
+        self.assertEqual("contract_only", contract["status"])
+        self.assertEqual("stable_identity_shape_only", contract["scope"])
+        self.assertEqual(
+            ["review_item_id", "source_surface", "source_reference"],
+            contract["identity_fields"],
+        )
+
+        fields = {field["field_id"]: field for field in contract["fields"]}
+        for required_field in (
+            "review_item_id",
+            "source_surface",
+            "source_reference",
+            "review_bucket",
+            "next_action",
+        ):
+            self.assertIn(required_field, fields)
+            self.assertTrue(fields[required_field]["required"])
+
+        safety = contract["safety"]
+        self.assertFalse(safety["adds_review_queue_schema"])
+        self.assertFalse(safety["writes_review_queue_records"])
+        self.assertFalse(safety["defines_review_resolution_statuses"])
+        self.assertFalse(safety["changes_lifecycle_schema"])
+        self.assertFalse(safety["promotes_review_required_to_ready"])
+        self.assertFalse(safety["cross_repo_implementation"])
+
+    def test_review_item_identity_contract_function_has_no_runtime_side_effect_flags(self) -> None:
+        contract = review_item_identity_contract_draft()
+        safety = contract["safety"]
+
+        self.assertFalse(safety["imports_renderer_projects"])
+        self.assertFalse(safety["imports_compressor_projects"])
+        self.assertFalse(safety["reads_renderer_payloads"])
+        self.assertFalse(safety["reads_npz"])
 
     def test_cli_json_stdout_is_parseable_and_command_requested(self) -> None:
         args = parse_args(["--core-review-queue-readiness-json"])
