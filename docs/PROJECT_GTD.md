@@ -3,6 +3,7 @@
 Last updated: 2026-06-02
 
 ## 目前工作焦點 / Active Focus
+- [x] 2026-06-02 Registry report CLI helper consolidation 已補：新增 `api_launcher/cli_registry_reports.py`，把 crawler/content/dataset-adapter 三個 registry report JSON 旗標、active check 與 dispatch 從 `core.py` 抽出；`core.py` 保留 orchestration，`cli_flags.command_requested()` 也改用同一個 helper。這是防止大檔繼續吸收責任的 consolidation slice，不改三個 report payload 或產品流程。
 - [x] 2026-06-02 Dataset adapter report CLI JSON 已補：新增 `--dataset-adapter-report-json`，可直接輸出 `dataset_adapter_report()` 的 agent-readable JSON，讓主寫 / automation 不必從完整 maturity matrix 裡拆 `provider_specific_deep_adapters` row；這是診斷入口，不改 adapter / crawler / download / import / UI 行為。
 - [x] 2026-06-02 provider-specific deep adapter maturity evidence 已補：`api_launcher.dataset_adapters.dataset_adapter_report()` 現在會列出三個現有 deep adapter 的 adapter id、provider id、class/module、delivery boundary、supported formats 與 coverage boundary；`--project-maturity-json` 的 `provider_specific_deep_adapters` row 也會明確標示 deep adapter coverage 不等於 source crawler type coverage。
 - [x] 2026-06-02 `crawler_asset_download_import` maturity metrics 已補：`--project-maturity-json` 現在會列出 formal asset/seed download-import service、recommended seed closure、shared display payload、CLI JSON surfaces、Web/Tk surfaces、credential blocking 與 partial 原因；這是進度證據 surface，不改產品流程、不把全部 provider 視為已閉環。

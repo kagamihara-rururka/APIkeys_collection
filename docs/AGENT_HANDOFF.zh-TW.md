@@ -1,4 +1,9 @@
 # Agent 接力卡
+## 2026-06-02 18:09 +08:00 Registry report CLI helper consolidation
+- 本輪新增 `api_launcher/cli_registry_reports.py`，把 `--crawler-registry-report-json`、`--content-registry-report-json`、`--dataset-adapter-report-json` 三個 registry report CLI 的 argparse、active check 與 JSON dispatch 從 `core.py` 抽成專責 helper；`core.py` 只負責呼叫 `run_registry_report_cli()`，`cli_flags.command_requested()` 也改用同一個 `registry_report_command_active()`。
+- 邊界：這是 consolidation slice，用來阻止 `core.py` 繼續吸收 registry report 責任；不改三個 report payload、不改 source crawler、content registry、dataset adapter report、download/import、Web/Tk 或 maturity 計算。下一輪若繼續 consolidation，優先找同樣可從 `core.py` 抽走的 CLI helper，而不是重寫主流程。
+- 已驗證：不寫 pyc 的 `compile()` 檢查通過；`py -3 -B -m unittest tests.test_developer_diagnostics tests.test_content_registry tests.test_dataset_adapters tests.test_cli_flags tests.test_cli_json -v` 通過 26 tests；實跑三個 report JSON CLI 都可由下游 Python `json.load(sys.stdin)` 解析；完整 smoke `state\logs\pre_push_smoke_20260602_180235.log` 通過 1096 tests / 4 skipped，MVP demo `download_import_completed` / `row_count=3`；GitHub Actions run `26812924715` 通過 Ubuntu、Windows 與 real DB smoke。Code commit：`8efdd9a Split registry report CLI helpers`。
+
 ## 2026-06-02 17:54 +08:00 Dataset adapter report CLI JSON
 - 本輪新增 `--dataset-adapter-report-json`，讓 `dataset_adapter_report()` 可直接由 CLI 輸出 agent-readable JSON；它列出現有 provider-specific deep adapter inventory、adapter ids、provider ids、registered adapter metadata 與 coverage boundary。
 - 邊界：這是 developer/agent 診斷入口，不新增 adapter、不改 adapter discovery、不改 source crawler、download/import、Web/Tk 或 maturity 計算邏輯；一般使用者流程不受影響。
