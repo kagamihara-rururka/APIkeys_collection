@@ -3,7 +3,10 @@ from __future__ import annotations
 from typing import Any
 
 from api_launcher.core_job_status_report import build_core_job_status_report
-from api_launcher.core_scheduler_contracts import scheduler_job_contract_draft
+from api_launcher.core_scheduler_contracts import (
+    scheduler_job_contract_draft,
+    scheduler_job_contract_fields,
+)
 from api_launcher.core_scheduler_persistence_contract import (
     scheduler_queue_owned_test_table_helper_contract,
     scheduler_queue_sqlite_ddl_preview,
@@ -30,6 +33,7 @@ def build_core_bounded_scheduler_plan_report(
     job_status_report = build_core_job_status_report(repository)
     tk_lanes = _tk_scheduler_lane_candidates()
     sqlite_gate = sqlite_write_gate_profile().to_dict()
+    lane_contract_coverage = _scheduler_lane_contract_coverage(tk_lanes)
 
     return {
         "schema_version": CORE_BOUNDED_SCHEDULER_PLAN_SCHEMA_VERSION,
@@ -43,6 +47,7 @@ def build_core_bounded_scheduler_plan_report(
                 "policy_count": len(tk_lanes),
                 "lanes": tk_lanes,
             },
+            "scheduler_lane_contract_coverage": lane_contract_coverage,
             "single_flight_contract": {
                 "contract": "TkBackgroundJobStartResult",
                 "outcomes": ("started", "duplicate", "capacity"),
@@ -159,6 +164,73 @@ def _job_status_report_bridge(report: dict[str, Any]) -> dict[str, Any]:
         "blocked_surfaces": list(report.get("blocked_surfaces") or ()),
         "safety": dict(report.get("safety") or {}),
     }
+
+
+def _scheduler_lane_contract_coverage(tk_lanes: tuple[dict[str, Any], ...]) -> dict[str, Any]:
+    """Compare current Tk worker caps with the future scheduler policy contract.
+
+    This is intentionally conservative.  The Tk policy registry only proves a
+    UI-instance concurrency cap today; it does not prove timeout, retry,
+    cancellation, or review-required handling.  The SQLite import lane gets a
+    narrow write-policy credit because RRKAL also exposes the process-local
+    SQLite write gate in this same report.
+    """
+
+    required_facets = tuple(
+        field.field_id
+        for field in scheduler_job_contract_fields()
+        if field.category == "policy"
+    )
+    lane_reports: list[dict[str, Any]] = []
+    covered_anywhere: set[str] = set()
+
+    for lane in tk_lanes:
+        covered = _covered_scheduler_contract_facets_for_tk_lane(lane)
+        covered_anywhere.update(covered)
+        missing = tuple(facet for facet in required_facets if facet not in covered)
+        lane_reports.append(
+            {
+                "policy_id": lane["policy_id"],
+                "current_scope": lane["current_scope"],
+                "max_active_jobs": lane["max_active_jobs"],
+                "covered_contract_facets": covered,
+                "missing_contract_facets": missing,
+                "coverage_status": "partial",
+                "evidence_source": (
+                    "frontends.tk.background_job_policies plus "
+                    "api_launcher.sqlite_write_gate"
+                ),
+                "next_action": "define_scheduler_lane_contract_before_runtime_scheduler",
+            }
+        )
+
+    return {
+        "schema_version": "scheduler_lane_contract_coverage.v1",
+        "status": "partial",
+        "policy_count": len(tk_lanes),
+        "required_policy_facets": required_facets,
+        "covered_policy_facets": tuple(
+            facet for facet in required_facets if facet in covered_anywhere
+        ),
+        "missing_policy_facets": tuple(
+            facet for facet in required_facets if facet not in covered_anywhere
+        ),
+        "lanes": tuple(lane_reports),
+        "safety": {
+            "treats_tk_policy_registry_as_full_scheduler": False,
+            "implements_scheduler_runtime": False,
+            "changes_scheduler_schema": False,
+            "changes_lifecycle_schema": False,
+            "enables_auto_lifecycle_events": False,
+        },
+    }
+
+
+def _covered_scheduler_contract_facets_for_tk_lane(lane: dict[str, Any]) -> tuple[str, ...]:
+    covered = ["concurrency_policy"]
+    if lane["policy_id"] == "sqlite_import":
+        covered.append("write_policy")
+    return tuple(covered)
 
 
 __all__ = [

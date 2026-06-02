@@ -30,6 +30,7 @@
 | Core scheduler queue DDL preview CI | GitHub Actions run `26841895028` PASS |
 | Core scheduler owned-test queue helper | `cf62c31` / `create_scheduler_queue_table_for_owned_test_database()` / `scheduler_queue_owned_test_table_helper_contract()` exposed through `--core-bounded-scheduler-plan-json` |
 | Core scheduler owned-test queue helper CI | GitHub Actions run `26842825576` PASS |
+| Core scheduler lane contract coverage | `scheduler_lane_contract_coverage.v1` exposed through `--core-bounded-scheduler-plan-json` / OpenSpec task 3.1 evidence |
 | Core lifecycle audit diagnostic | `--core-lifecycle-audit-json` / `core_lifecycle_audit_report.v1` |
 | Core manifest-reference diagnostic | `--core-manifest-reference-report-json` / `core_manifest_reference_report.v1` |
 | Core deep-adapter coverage diagnostic | `--core-deep-adapter-coverage-json` / `core_deep_adapter_coverage_report.v1` |
@@ -144,6 +145,11 @@
 - `existing_evidence.scheduler_owned_test_table_helper.scope = owned_test_database_only`
 - `existing_evidence.scheduler_owned_test_table_helper.user_database_write_allowed = false`
 - `existing_evidence.scheduler_owned_test_table_helper.writes_job_rows = false`
+- `existing_evidence.scheduler_lane_contract_coverage.schema_version = scheduler_lane_contract_coverage.v1`
+- `existing_evidence.scheduler_lane_contract_coverage.status = partial`
+- `existing_evidence.scheduler_lane_contract_coverage.covered_policy_facets` 包含 `concurrency_policy` 與 `write_policy`
+- `existing_evidence.scheduler_lane_contract_coverage.missing_policy_facets` 包含 `timeout_policy`、`retry_policy`、`cancellation_policy`、`review_policy`
+- `existing_evidence.scheduler_lane_contract_coverage.safety.treats_tk_policy_registry_as_full_scheduler = false`
 - `existing_evidence.tk_policy_registry.policy_count = 11`
 - `existing_evidence.sqlite_write_gate.scope = process_per_sqlite_path`
 - missing evidence 包含 scheduler contract 尚未接 runtime / persistence、durable queue persistence 尚未超出 owned-test helper、cross-process SQLite coordination、cancellation/retry/timeout policy、job event status stream。
@@ -248,13 +254,18 @@ Update 2026-06-03 01:58 +08:00: Bounded Scheduler Contract Plan is now covered b
 
 Update 2026-06-03 02:21 +08:00: Bounded Scheduler Core Contract is now proposed in `openspec/changes/bounded-scheduler-core-contract/`; OpenSpec commit `66e28b9` passed GitHub Actions run `26839650428`. This is planning/spec only: no scheduler runtime, no durable queue schema, no lifecycle status/schema change, no automatic lifecycle events, no downstream repo imports, and no renderer/compressor payload reads.
 
+Update 2026-06-03 03:36 +08:00: Scheduler lane contract coverage is now exposed through `--core-bounded-scheduler-plan-json` as `scheduler_lane_contract_coverage.v1`, completing OpenSpec task 3.1 locally. It compares current Tk policy lanes against scheduler policy facets and keeps readiness partial: timeout, retry, cancellation, and review policy facets remain missing.
+
 1. **Review Queue Persistence Readiness**
    - 目標：把 content review rules、visual `review_required` lifecycle、unknown/heavy payload fallback 與 missing unified review queue persistence 收成更細的 Core-only evidence。
    - 邊界：不建立正式 review queue schema，不把 review-required promoted 成 ready。
 2. **Bounded Scheduler Contract Plan**
    - 目標：把 Tk single-flight policies、SQLite write gate、missing unified scheduler 與 job status evidence 整理成不改 schema 的 planning input。
-   - 狀態：已由 `--core-bounded-scheduler-plan-json` 覆蓋。
+   - 狀態：已由 `--core-bounded-scheduler-plan-json` 覆蓋 scheduler job contract draft、queue DDL dry-run preview、owned-test queue helper 與 scheduler lane contract coverage。
    - 邊界：不全面改 asyncio，不新增 scheduler persistence，不啟用 automatic lifecycle events。
+3. **Scheduler Next-Action Payload Tests**
+   - 目標：補 OpenSpec task 3.2，鎖住 cancellation、retry、timeout、review-required、blocked-job 的 next-action payload vocabulary。
+   - 邊界：只補 report / tests，不新增 runtime scheduler、不新增 queue schema、不改 lifecycle status。
 
 ## Repo Consistency Audit
 

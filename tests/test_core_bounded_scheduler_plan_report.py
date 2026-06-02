@@ -85,6 +85,37 @@ class CoreBoundedSchedulerPlanReportTests(unittest.TestCase):
             tuple(single_flight["outcomes"]),
         )
 
+    def test_scheduler_lane_contract_coverage_is_partial_and_conservative(self) -> None:
+        report = build_core_bounded_scheduler_plan_report()
+        coverage = report["existing_evidence"]["scheduler_lane_contract_coverage"]
+
+        self.assertEqual("scheduler_lane_contract_coverage.v1", coverage["schema_version"])
+        self.assertEqual("partial", coverage["status"])
+        self.assertFalse(coverage["safety"]["treats_tk_policy_registry_as_full_scheduler"])
+        self.assertFalse(coverage["safety"]["implements_scheduler_runtime"])
+        self.assertIn("concurrency_policy", coverage["covered_policy_facets"])
+        self.assertIn("write_policy", coverage["covered_policy_facets"])
+        self.assertIn("timeout_policy", coverage["missing_policy_facets"])
+        self.assertIn("retry_policy", coverage["missing_policy_facets"])
+        self.assertIn("cancellation_policy", coverage["missing_policy_facets"])
+        self.assertIn("review_policy", coverage["missing_policy_facets"])
+
+        lanes = {lane["policy_id"]: lane for lane in coverage["lanes"]}
+        self.assertEqual(
+            ("concurrency_policy",),
+            tuple(lanes["crawler_asset"]["covered_contract_facets"]),
+        )
+        self.assertIn("write_policy", lanes["crawler_asset"]["missing_contract_facets"])
+        self.assertEqual(
+            ("concurrency_policy", "write_policy"),
+            tuple(lanes["sqlite_import"]["covered_contract_facets"]),
+        )
+        self.assertNotIn("write_policy", lanes["sqlite_import"]["missing_contract_facets"])
+        self.assertEqual(
+            "define_scheduler_lane_contract_before_runtime_scheduler",
+            lanes["sqlite_import"]["next_action"],
+        )
+
     def test_cli_json_stdout_is_parseable_and_command_requested(self) -> None:
         args = parse_args(["--core-bounded-scheduler-plan-json"])
         self.assertTrue(command_requested(args))
