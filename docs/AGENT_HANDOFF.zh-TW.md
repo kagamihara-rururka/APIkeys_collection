@@ -3,6 +3,7 @@
 - 本輪建立 `openspec/changes/bounded-scheduler-core-contract/`，把 bounded scheduler 的下一步先收成 OpenSpec proposal / design / spec / tasks。重點是定義 Core-owned job identity、status、concurrency、timeout、retry、cancel、SQLite write policy、review policy、evidence source 與 next-action contract。
 - 邊界：這是 planning/spec slice，不實作 scheduler runtime、不新增 durable queue schema、不改 lifecycle schema/status、不啟用 auto lifecycle event、不 import 下游 repo、不讀 `.npz` / renderer payload；Tk background policy registry 與 process-local SQLite write gate 只能作 evidence，不可宣稱為 unified scheduler。
 - 已驗證：`npx.cmd -y @fission-ai/openspec@latest status --change bounded-scheduler-core-contract` 顯示 4/4 artifacts complete；`npx.cmd -y @fission-ai/openspec@latest validate --all --no-interactive` 通過；OpenSpec mojibake scan OK；`git diff --check` OK。
+- CI evidence：OpenSpec commit `66e28b9 docs: propose bounded scheduler core contract` 已 push；GitHub Actions manual run `26839650428` 通過 Ubuntu、Windows 與 real DB smoke。
 - 下一個安全動作：如果繼續此 change，先做 dry-run 或 owned-test scheduler contract/report PoC；若要新增 durable queue schema、user DB migration、automatic lifecycle event、cross-repo job adapter、或 asyncio runtime migration，先送 `o_1`。
 
 ## 2026-06-03 01:58 +08:00 Core bounded scheduler plan report JSON
