@@ -30,7 +30,8 @@
 | Core scheduler queue DDL preview CI | GitHub Actions run `26841895028` PASS |
 | Core scheduler owned-test queue helper | `cf62c31` / `create_scheduler_queue_table_for_owned_test_database()` / `scheduler_queue_owned_test_table_helper_contract()` exposed through `--core-bounded-scheduler-plan-json` |
 | Core scheduler owned-test queue helper CI | GitHub Actions run `26842825576` PASS |
-| Core scheduler lane contract coverage | `scheduler_lane_contract_coverage.v1` exposed through `--core-bounded-scheduler-plan-json` / OpenSpec task 3.1 evidence |
+| Core scheduler lane contract coverage | `75923c0` / `scheduler_lane_contract_coverage.v1` exposed through `--core-bounded-scheduler-plan-json` / OpenSpec task 3.1 evidence |
+| Core scheduler lane contract coverage CI | GitHub Actions run `26843841155` PASS |
 | Core lifecycle audit diagnostic | `--core-lifecycle-audit-json` / `core_lifecycle_audit_report.v1` |
 | Core manifest-reference diagnostic | `--core-manifest-reference-report-json` / `core_manifest_reference_report.v1` |
 | Core deep-adapter coverage diagnostic | `--core-deep-adapter-coverage-json` / `core_deep_adapter_coverage_report.v1` |
