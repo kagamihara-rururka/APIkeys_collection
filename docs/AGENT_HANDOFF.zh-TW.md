@@ -1,4 +1,8 @@
 # Agent 接力卡
+## 2026-06-03 05:39 +08:00 Core JSON diagnostics sweep note
+- 本輪額外做 Core diagnostic JSON parse sweep。直接使用預設 DB path 時，L 槽雲端 SQLite 發生 `sqlite3.OperationalError: disk I/O error`；改用本機 temp DB (`--db %TEMP%\...sqlite`) 後，以下 8 個 JSON diagnostics 全部可由 downstream `json.load(sys.stdin)` 解析：`--core-readiness-report-json`、`--core-review-required-report-json`、`--core-review-queue-readiness-json`、`--core-job-status-report-json`、`--core-manifest-reference-report-json`、`--core-lifecycle-audit-json`、`--core-deep-adapter-coverage-json`、`--core-bounded-scheduler-plan-json`。
+- 操作規則：automation / smoke / agent-readable JSON sweep 應明確傳入本機 temp `--db`，不要依賴 L 槽雲端預設 SQLite。這是操作邊界紀錄，不是產品碼變更。
+
 ## 2026-06-03 05:30 +08:00 Core readiness report surfaces review item identity evidence
 - 本輪新增 `api_launcher/core_review_item_contracts.py`，並調整 `api_launcher/core_readiness_report.py` / `api_launcher/core_review_queue_readiness_report.py`：review item identity contract 從 review queue report 抽成獨立小模組，避免 `core_readiness_report -> core_review_queue_readiness_report -> core_review_required_report -> core_readiness_report` 的循環匯入。
 - `--core-readiness-report-json` 的 `review_required_evidence.existing_evidence.review_item_identity_contract_draft` 現在會暴露 `core_review_item_identity_contract_draft.v1`；missing evidence 仍保守列出 `review_queue_persistence_not_unified`、`stable_review_item_identity_not_persisted`、`review_item_resolution_state_not_defined`。
