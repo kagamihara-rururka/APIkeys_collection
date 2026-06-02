@@ -1,4 +1,9 @@
 # Agent 接力卡
+## 2026-06-02 16:24 +08:00 Tk background job start result contract
+- 本輪補強 `frontends/tk/background_jobs.py`：新增 `TkBackgroundJobStartResult` 與 `start_single_flight_thread_result()`，讓 single-flight helper 可結構化回報 `started` / `duplicate` / `capacity`、active job count 與 capacity limit；既有 `start_single_flight_thread()` 仍維持 bool 相容回傳。
+- 邊界：這是 scheduler hardening / diagnostics contract，不是統一 bounded job scheduler，不改 Tk workflow 行為、不改 UI 文案、不改 crawler/download/import/credential/OAuth/SQLite write gate，也不做 asyncio 重寫。
+- 已驗證：`py -3 -B -m py_compile frontends\tk\background_jobs.py api_launcher\project_maturity.py tests\test_tk_background_jobs.py tests\test_project_maturity.py` OK；`py -3 -B -m unittest tests.test_tk_background_jobs tests.test_project_maturity -v` 通過 16 tests；`git diff --check` OK。CI 尚待 push 後確認。
+
 ## 2026-06-02 16:07 +08:00 Visual/Skin registry persistence OpenSpec archived
 - 本輪將已完成的 `openspec/changes/visual-asset-registry-persistence/` 歸檔到 `openspec/changes/archive/2026-06-02-visual-asset-registry-persistence/`，並把 delta spec 同步成正式主規格 `openspec/specs/visual-asset-registry-persistence/spec.md`。
 - 邊界：這是 OpenSpec governance / spec archival slice，不改產品碼、不改 Visual/Skin registry runtime、不改 DB helper、不改 event writer、不接 UI、不讀 renderer payload，也不 import displaytools / visual-compressor / vis_2_dis。

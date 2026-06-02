@@ -3,6 +3,7 @@
 Last updated: 2026-06-02
 
 ## 目前工作焦點 / Active Focus
+- [x] 2026-06-02 Tk background job start result contract 已補：`frontends/tk/background_jobs.py` 新增 `TkBackgroundJobStartResult` / `start_single_flight_thread_result()`，讓 single-flight helper 可回報 `started`、`duplicate`、`capacity` 與 active/capacity counts；既有 workflow 仍用 bool wrapper，不改 Tk 行為。`--project-maturity-json` 的 background scheduler metrics 也已暴露這個 contract 與 guard test。
 - [x] 2026-06-02 Visual/Skin registry persistence OpenSpec 已正式歸檔：`openspec/changes/visual-asset-registry-persistence/` 已移到 `openspec/changes/archive/2026-06-02-visual-asset-registry-persistence/`，delta spec 已同步為 `openspec/specs/visual-asset-registry-persistence/spec.md`。這是規格治理，不改 runtime / UI / renderer 邊界。
 - [x] 2026-06-02 CLI JSON stdout regression guard 已補：`tests/test_cli_json.py` 現在會掃描 `api_launcher/**/*.py`，防止未來再次出現直接 `print(json.dumps(...))` 的 stdout JSON 輸出；寫檔 JSON 不受此 guard 影響。
 - [x] 2026-06-02 Sub-CLI JSON stdout helper 已補：`cli_dataset_discovery.py`、`cli_crawler_assets.py`、`cli_visual_asset_registry.py`、`cli_manual_import.py`、`cli_download_plan.py`、`cli_database_repair.py`、`cli_crawler_run_records.py` 皆改用 `api_launcher.cli_json.print_cli_json()`；`api_launcher` 內不再有直接 `print(json.dumps(...))` stdout JSON。這是子命令 agent-readable JSON pipeline hardening，不改 payload 語意、Web/Tk 顯示或產品流程。

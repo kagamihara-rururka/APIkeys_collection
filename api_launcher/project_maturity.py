@@ -251,6 +251,8 @@ def _tk_background_job_policy_metrics() -> dict[str, Any]:
         "policy_registry_available": True,
         "bounded_tk_policy_count": len(policies),
         "max_active_jobs_by_policy": {policy.policy_id: policy.max_active_jobs for policy in policies},
+        "single_flight_start_result_contract": "TkBackgroundJobStartResult",
+        "single_flight_start_outcomes": ("started", "duplicate", "capacity"),
         "sqlite_write_gate_available": True,
         "sqlite_write_gate": write_gate,
         "capacity_policy_call_site_guarded": True,
@@ -264,6 +266,10 @@ def _tk_background_job_policy_metrics() -> dict[str, Any]:
             "direct_thread_spawn_owner": (
                 "tests.test_tk_background_jobs::"
                 "test_tk_modules_do_not_spawn_threads_directly"
+            ),
+            "start_result_contract": (
+                "tests.test_tk_background_jobs::"
+                "test_start_single_flight_thread_result_reports_started_duplicate_and_capacity"
             ),
         },
     }

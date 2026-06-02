@@ -154,6 +154,11 @@ class ProjectMaturityTests(unittest.TestCase):
         self.assertTrue(scheduler_metrics["policy_registry_available"])
         self.assertGreaterEqual(scheduler_metrics["bounded_tk_policy_count"], 8)
         self.assertEqual(1, scheduler_metrics["max_active_jobs_by_policy"]["sqlite_import"])
+        self.assertEqual("TkBackgroundJobStartResult", scheduler_metrics["single_flight_start_result_contract"])
+        self.assertEqual(
+            ("started", "duplicate", "capacity"),
+            tuple(scheduler_metrics["single_flight_start_outcomes"]),
+        )
         self.assertTrue(scheduler_metrics["sqlite_write_gate_available"])
         self.assertEqual(
             "process_per_sqlite_path",
@@ -170,6 +175,10 @@ class ProjectMaturityTests(unittest.TestCase):
         self.assertIn(
             "test_tk_modules_do_not_spawn_threads_directly",
             scheduler_metrics["guard_tests"]["direct_thread_spawn_owner"],
+        )
+        self.assertIn(
+            "test_start_single_flight_thread_result_reports_started_duplicate_and_capacity",
+            scheduler_metrics["guard_tests"]["start_result_contract"],
         )
         crawler_metrics = rows["source_pattern_and_crawler_handlers"]["metrics"]
         self.assertGreater(crawler_metrics["supported_source_type_count"], 0)

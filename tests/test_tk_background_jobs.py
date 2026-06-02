@@ -26,6 +26,7 @@ from frontends.tk.background_jobs import (
     release_single_flight_job,
     single_flight_job_is_active,
     start_single_flight_thread,
+    start_single_flight_thread_result,
 )
 
 
@@ -58,6 +59,74 @@ class TkBackgroundJobTests(unittest.TestCase):
         self.assertTrue(started)
         self.assertEqual(["ran"], calls)
         self.assertEqual(set(), owner.active_jobs)
+
+    def test_start_single_flight_thread_result_reports_started_duplicate_and_capacity(self) -> None:
+        owner = SimpleNamespace()
+        calls: list[str] = []
+        job_key = ("asset_listing", "demo_asset", "")
+
+        class HoldingThread:
+            def __init__(self, target, args, daemon):
+                self.target = target
+                self.args = args
+                self.daemon = daemon
+
+            def start(self):
+                calls.append("thread-started")
+
+        with patch("frontends.tk.background_jobs.threading.Thread", HoldingThread):
+            started = start_single_flight_thread_result(
+                owner,
+                job_key,
+                lambda: calls.append("ran"),
+                (),
+                active_jobs_attr="active_jobs",
+                active_jobs_lock_attr="active_jobs_lock",
+                on_duplicate=lambda: calls.append("duplicate"),
+                max_active_jobs=1,
+                on_capacity=lambda: calls.append("capacity"),
+            )
+            duplicate = start_single_flight_thread_result(
+                owner,
+                job_key,
+                lambda: calls.append("ran"),
+                (),
+                active_jobs_attr="active_jobs",
+                active_jobs_lock_attr="active_jobs_lock",
+                on_duplicate=lambda: calls.append("duplicate"),
+                max_active_jobs=1,
+                on_capacity=lambda: calls.append("capacity"),
+            )
+            capacity = start_single_flight_thread_result(
+                owner,
+                ("asset_listing", "other_asset", ""),
+                lambda: calls.append("ran"),
+                (),
+                active_jobs_attr="active_jobs",
+                active_jobs_lock_attr="active_jobs_lock",
+                on_duplicate=lambda: calls.append("duplicate"),
+                max_active_jobs=1,
+                on_capacity=lambda: calls.append("capacity"),
+            )
+
+        self.assertTrue(started.started)
+        self.assertEqual("started", started.reason)
+        self.assertEqual(1, started.active_job_count)
+        self.assertFalse(duplicate.started)
+        self.assertEqual("duplicate", duplicate.reason)
+        self.assertFalse(capacity.started)
+        self.assertEqual("capacity", capacity.reason)
+        self.assertEqual(
+            {
+                "job_key": ["asset_listing", "other_asset", ""],
+                "started": False,
+                "reason": "capacity",
+                "active_job_count": 1,
+                "max_active_jobs": 1,
+            },
+            capacity.to_dict(),
+        )
+        self.assertEqual(["thread-started", "duplicate", "capacity"], calls)
 
     def test_start_single_flight_thread_rejects_duplicate_before_spawning_thread(self) -> None:
         job_key = ("asset_listing", "demo_asset", "")
