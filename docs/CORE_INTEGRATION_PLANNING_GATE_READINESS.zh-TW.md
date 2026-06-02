@@ -231,6 +231,8 @@ Core 尚不能提供：
 
 Update 2026-06-03 01:58 +08:00: Bounded Scheduler Contract Plan is now covered by `--core-bounded-scheduler-plan-json` / `core_bounded_scheduler_plan_report.v1`. The next safe Core-only work should be either a bounded scheduler OpenSpec draft or an owned-test scheduler status JSON PoC. Do not create scheduler schema, durable queue writes, automatic lifecycle events, or async runtime migration without `o_1`.
 
+Update 2026-06-03 02:21 +08:00: Bounded Scheduler Core Contract is now proposed in `openspec/changes/bounded-scheduler-core-contract/`. This is planning/spec only: no scheduler runtime, no durable queue schema, no lifecycle status/schema change, no automatic lifecycle events, no downstream repo imports, and no renderer/compressor payload reads.
+
 1. **Review Queue Persistence Readiness**
    - 目標：把 content review rules、visual `review_required` lifecycle、unknown/heavy payload fallback 與 missing unified review queue persistence 收成更細的 Core-only evidence。
    - 邊界：不建立正式 review queue schema，不把 review-required promoted 成 ready。

@@ -1,4 +1,10 @@
 # Agent 接力卡
+## 2026-06-03 02:21 +08:00 Bounded scheduler Core contract OpenSpec proposal
+- 本輪建立 `openspec/changes/bounded-scheduler-core-contract/`，把 bounded scheduler 的下一步先收成 OpenSpec proposal / design / spec / tasks。重點是定義 Core-owned job identity、status、concurrency、timeout、retry、cancel、SQLite write policy、review policy、evidence source 與 next-action contract。
+- 邊界：這是 planning/spec slice，不實作 scheduler runtime、不新增 durable queue schema、不改 lifecycle schema/status、不啟用 auto lifecycle event、不 import 下游 repo、不讀 `.npz` / renderer payload；Tk background policy registry 與 process-local SQLite write gate 只能作 evidence，不可宣稱為 unified scheduler。
+- 已驗證：`npx.cmd -y @fission-ai/openspec@latest status --change bounded-scheduler-core-contract` 顯示 4/4 artifacts complete；`npx.cmd -y @fission-ai/openspec@latest validate --all --no-interactive` 通過；OpenSpec mojibake scan OK；`git diff --check` OK。
+- 下一個安全動作：如果繼續此 change，先做 dry-run 或 owned-test scheduler contract/report PoC；若要新增 durable queue schema、user DB migration、automatic lifecycle event、cross-repo job adapter、或 asyncio runtime migration，先送 `o_1`。
+
 ## 2026-06-03 01:58 +08:00 Core bounded scheduler plan report JSON
 - 本輪新增 `--core-bounded-scheduler-plan-json`，由 `api_launcher/core_bounded_scheduler_plan_report.py` / `api_launcher/cli_core_bounded_scheduler_plan.py` 輸出 `core_bounded_scheduler_plan_report.v1`；它把 Tk background policy registry、`TkBackgroundJobStartResult`、process-local SQLite write gate 與 job-status report bridge 收成「下一步 bounded scheduler 設計」的 planning diagnostic。
 - 邊界：這是 Core-only planning evidence，不實作 scheduler runtime、不新增 scheduler schema/persistence、不改 lifecycle schema/status、不啟用 auto lifecycle events、不 import 下游 repo、不讀 `.npz` / renderer payload。
