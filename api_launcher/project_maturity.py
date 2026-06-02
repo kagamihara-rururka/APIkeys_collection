@@ -13,6 +13,12 @@ from api_launcher.crawlers.dataset_sources import (
 )
 from api_launcher.crawlers.registry import CAPABILITY_CODE_WIDTH
 from api_launcher.content_registry import content_registry_report
+from api_launcher.crawler_asset_closure import run_recommended_seed_closure
+from api_launcher.crawler_asset_display import crawler_asset_download_import_display_payload
+from api_launcher.crawler_asset_download import (
+    run_crawler_asset_download_import,
+    run_crawler_seed_download_import,
+)
 from api_launcher.dataset_adapters import DATASET_ADAPTERS
 from api_launcher.importers.compatibility_shims import importer_compatibility_shim_report
 from api_launcher.mvp_readiness import build_mvp_readiness_payload
@@ -312,6 +318,39 @@ def _content_parser_import_metrics() -> dict[str, Any]:
     }
 
 
+def _crawler_asset_download_import_metrics() -> dict[str, Any]:
+    """Expose bounded closure evidence for crawler asset download/import.
+
+    This row intentionally reports what is wired, not a claim that every live
+    source is one-click importable.  Keep the evidence at service/CLI/display
+    contract level so progress reports stay truthful while provider coverage
+    remains partial.
+    """
+
+    return {
+        "formal_asset_download_import_service": run_crawler_asset_download_import.__name__,
+        "formal_seed_download_import_service": run_crawler_seed_download_import.__name__,
+        "recommended_seed_closure_service": run_recommended_seed_closure.__name__,
+        "shared_display_payload_contract": crawler_asset_download_import_display_payload.__name__,
+        "agent_readable_cli_surfaces": (
+            "--crawler-asset-listing-json",
+            "--crawler-asset-seeds-json",
+            "--crawler-seed-download-import-json",
+            "--crawler-asset-closure-json",
+        ),
+        "ui_surfaces": ("web_preview", "tk_seed_dialog"),
+        "supports_recommended_seed_closure": True,
+        "formal_seed_download_import_path": True,
+        "formal_asset_download_import_path": True,
+        "credential_blocking_before_service": True,
+        "still_partial_because": (
+            "live source credentials vary",
+            "adapter review can still block direct plans",
+            "heavy content formats remain parser-review lanes",
+        ),
+    }
+
+
 def _renderer_bridge_metrics() -> dict[str, Any]:
     """Expose control-plane renderer/skin contract evidence without implying real renderer I/O."""
 
@@ -392,6 +431,7 @@ def _matrix_rows(mvp_readiness: dict[str, Any]) -> tuple[MaturityMatrixRow, ...]
             verified_behavior_source=("tests.test_crawler_asset_download", "tests.test_web_preview", "mvp_demo_smoke"),
             current_limitations=("Many live sources still require credentials, adapter review, or content parser work before they are one-click importable.",),
             next_actions=("Prioritize provider-by-provider live closure only after profile, credential, bounds, and parser lanes are explicit.",),
+            metrics=_crawler_asset_download_import_metrics(),
         ),
         MaturityMatrixRow(
             area_id="content_parser_and_import",

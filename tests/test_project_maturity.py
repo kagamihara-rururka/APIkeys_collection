@@ -191,6 +191,29 @@ class ProjectMaturityTests(unittest.TestCase):
             + crawler_metrics["seed_scope_counts"]["paginated_catalog"],
         )
         self.assertEqual("api_launcher.crawlers.registry", crawler_metrics["dispatch_owner"])
+        download_metrics = rows["crawler_asset_download_import"]["metrics"]
+        self.assertEqual(
+            "run_crawler_asset_download_import",
+            download_metrics["formal_asset_download_import_service"],
+        )
+        self.assertEqual(
+            "run_crawler_seed_download_import",
+            download_metrics["formal_seed_download_import_service"],
+        )
+        self.assertEqual(
+            "run_recommended_seed_closure",
+            download_metrics["recommended_seed_closure_service"],
+        )
+        self.assertEqual(
+            "crawler_asset_download_import_display_payload",
+            download_metrics["shared_display_payload_contract"],
+        )
+        self.assertIn("--crawler-asset-closure-json", download_metrics["agent_readable_cli_surfaces"])
+        self.assertIn("web_preview", download_metrics["ui_surfaces"])
+        self.assertIn("tk_seed_dialog", download_metrics["ui_surfaces"])
+        self.assertTrue(download_metrics["credential_blocking_before_service"])
+        self.assertTrue(download_metrics["formal_seed_download_import_path"])
+        self.assertIn("adapter review can still block direct plans", download_metrics["still_partial_because"])
         import_metrics = rows["content_parser_and_import"]["metrics"]
         self.assertEqual(("csv_to_sqlite", "json_to_sqlite"), tuple(import_metrics["supported_sqlite_importers"]))
         self.assertEqual(6, import_metrics["content_review_rule_count"])
