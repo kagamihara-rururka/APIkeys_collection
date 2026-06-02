@@ -22,6 +22,7 @@
 | Core job-status diagnostic | `--core-job-status-report-json` / `core_job_status_report.v1` |
 | Core lifecycle audit diagnostic | `--core-lifecycle-audit-json` / `core_lifecycle_audit_report.v1` |
 | Core manifest-reference diagnostic | `--core-manifest-reference-report-json` / `core_manifest_reference_report.v1` |
+| Core deep-adapter coverage diagnostic | `--core-deep-adapter-coverage-json` / `core_deep_adapter_coverage_report.v1` |
 
 `partial` 是刻意保守的狀態。它表示 Core 已有 registry / lifecycle / manifest / review / lineage 的 evidence surface，但仍缺 runtime state machine、unified scheduler、review queue persistence、deep adapter coverage 等證據。不得把此狀態解讀為 integration 已可開工。
 
@@ -136,6 +137,19 @@
 - blocked surface 明確包含 renderer payload loading disabled、`.npz` reading disabled、automatic manifest ready-event emission disabled。
 - `o_1` triggers 包含 cross-project manifest consumer contract、payload health check、formal manifest reference migration、automatic ready event emission，以及任何 Core 讀 `.npz` / renderer payload 的需求。
 
+## Deep Adapter Coverage Report
+
+`--core-deep-adapter-coverage-json` 是 Core-only diagnostic，用來把 14 個 source crawler type、declarative crawler matrix、3 個 provider-specific deep adapters 與 coverage gap table 獨立拉出。它不是 adapter implementation，也不是 download/import 行為改動。
+
+目前輸出重點：
+
+- `schema_version = core_deep_adapter_coverage_report.v1`
+- `status = partial`
+- existing evidence 包含 crawler registry source type count、matrix/capability group evidence、dataset adapter inventory、source type gap table、implemented adapter paths。
+- missing evidence 包含 source-type to deep-adapter mapping、deep adapter coverage mismatch、download/import closure matrix ranking。
+- blocked surface 明確包含 claiming metadata crawler as deep adapter 與 cross-repo renderer/compressor adapter scope。
+- `o_1` triggers 包含 cross-project adapter contract、renderer/compressor adapter scope、adapter output lifecycle/lineage schema，以及任何把 adapter coverage 解讀成 integration readiness 的提案。
+
 ## Integration Planning Gate Input Summary
 
 Core 可以提供：
@@ -181,9 +195,12 @@ Core 尚不能提供：
 
 ## Proposed Next Core-Only Slices
 
-1. **Deep Adapter Coverage Plan**
-   - 目標：列出 14 個 source crawler type 與 3 個 deep adapter 的差距，標示哪些只需要 metadata crawler、哪些需要真正 download/import adapter。
-   - 邊界：不新增 adapter，避免 class explosion。
+1. **Review Queue Persistence Readiness**
+   - 目標：把 content review rules、visual `review_required` lifecycle、unknown/heavy payload fallback 與 missing unified review queue persistence 收成更細的 Core-only evidence。
+   - 邊界：不建立正式 review queue schema，不把 review-required promoted 成 ready。
+2. **Bounded Scheduler Contract Plan**
+   - 目標：把 Tk single-flight policies、SQLite write gate、missing unified scheduler 與 job status evidence 整理成不改 schema 的 planning input。
+   - 邊界：不全面改 asyncio，不新增 scheduler persistence，不啟用 automatic lifecycle events。
 
 ## Repo Consistency Audit
 
@@ -200,6 +217,7 @@ Core 尚不能提供：
 - Current job-status JSON: `core_job_status_report.v1`, status `partial`。
 - Current lifecycle audit JSON: `core_lifecycle_audit_report.v1`, status `partial`。
 - Current manifest-reference JSON: `core_manifest_reference_report.v1`, status `partial`。
+- Current deep-adapter coverage JSON: `core_deep_adapter_coverage_report.v1`, status `partial`。
 - Cross-repo touch: none.
 - Renderer/compressor/SkinAsset implementation: none.
 - Lifecycle schema/status change: none.

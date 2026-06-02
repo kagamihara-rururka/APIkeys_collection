@@ -73,6 +73,11 @@ from api_launcher.cli_core_manifest_reference import (
     core_manifest_reference_command_active,
     run_core_manifest_reference_cli,
 )
+from api_launcher.cli_core_deep_adapter_coverage import (
+    add_core_deep_adapter_coverage_args,
+    core_deep_adapter_coverage_command_active,
+    run_core_deep_adapter_coverage_cli,
+)
 from api_launcher.cli_portal_intake import add_portal_intake_args, portal_intake_cli
 from api_launcher.cli_database_repair import run_database_repairs
 from api_launcher.cli_crawler_assets import add_crawler_asset_args, run_crawler_asset_cli
@@ -668,6 +673,7 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     add_core_job_status_args(parser)
     add_core_lifecycle_audit_args(parser)
     add_core_manifest_reference_args(parser)
+    add_core_deep_adapter_coverage_args(parser)
     add_visual_asset_registry_args(parser)
     add_registry_report_args(parser)
     add_yfinance_args(parser)
@@ -836,6 +842,7 @@ class CatalogLauncherCli:
             run_core_job_status_cli(self.args, self.repository)
             run_core_lifecycle_audit_cli(self.args, self.repository)
             run_core_manifest_reference_cli(self.args, self.repository)
+            run_core_deep_adapter_coverage_cli(self.args)
             run_visual_asset_registry_cli(self.args)
             run_registry_report_cli(self.args)
             run_yfinance_cli(self.args)
@@ -908,6 +915,7 @@ class CatalogLauncherCli:
             or core_job_status_command_active(self.args)
             or core_lifecycle_audit_command_active(self.args)
             or core_manifest_reference_command_active(self.args)
+            or core_deep_adapter_coverage_command_active(self.args)
             or self.args.visual_registry_summary_json
             or self.args.visual_registry_emit_ready_event_json
             or registry_report_command_active(self.args)
