@@ -1,4 +1,10 @@
 # Agent 接力卡
+## 2026-06-02 23:51 +08:00 Core review-required report JSON
+- 本輪新增 `--core-review-required-report-json`，由 `api_launcher/core_review_required_report.py` / `api_launcher/cli_core_review_required.py` 輸出 `core_review_required_report.v1`；它把 content review rules、unknown fallback、visual `review_required` lifecycle surface、readiness report bridge、missing review queue persistence 與 blocked unsupported payload format 收成獨立 diagnostic。
+- 邊界：這是 Core-only report，不新增 review queue schema、不改 lifecycle schema/status、不改 review workflow、不 import 下游 repo、不讀 `.npz` / renderer payload、不做 SkinAsset/RendererSkinAsset 或 compression integration。`status` 保守維持 `partial`。
+- 已驗證：focused `py_compile` OK；`py -3 -B -m unittest tests.test_core_review_required_report tests.test_core_readiness_report tests.test_cli_flags tests.test_cli_json -v` 通過 11 tests；broader related tests `tests.test_core_review_required_report tests.test_core_readiness_report tests.test_content_registry tests.test_visual_asset_contracts tests.test_project_maturity tests.test_cli_flags tests.test_cli_json -v` 通過 52 tests；實跑 `--core-review-required-report-json` 可由 downstream `json.load(sys.stdin)` 解析，輸出 `schema_version=core_review_required_report.v1`、`status=partial`、`missing_evidence=["review_queue_persistence_not_unified"]`。
+- 下一個安全動作：若繼續 Core readiness，優先做 job status evidence report 或 lifecycle transition audit draft；若要持久化 review queue、改 lifecycle status/schema、或把 review-required promoted 成 ready，先送 `o_1`。
+
 ## 2026-06-02 23:40 +08:00 Core Integration Planning Gate readiness audit
 - 本輪新增 `docs/CORE_INTEGRATION_PLANNING_GATE_READINESS.zh-TW.md`，把 `--core-readiness-report-json` 的 evidence sections 整理成 Integration Planning Gate input：current checkpoints、CI evidence、gate status、Core-owned evidence、missing evidence、not-Core-owned blockers、`o_1` review triggers 與下一批 Core-only slices。
 - 目前 gate 狀態仍是 `partial`。主要缺口：deep adapter coverage 不等於 14 個 source crawler type、review queue persistence 未統一、runtime lifecycle state machine 未統一、unified bounded job scheduler 尚未實作。Manifest reference 與 asset lineage 欄位目前沒有欄位缺口，但仍是 contract/control-plane evidence，不等於正式 user DB integration。

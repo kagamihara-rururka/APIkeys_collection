@@ -18,6 +18,7 @@
 | Docs checkpoint CI | GitHub Actions run `26827560343` PASS |
 | Current readiness schema | `core_readiness_report.v1` |
 | Current gate status | `partial` |
+| Core review-required diagnostic | `--core-review-required-report-json` / `core_review_required_report.v1` |
 
 `partial` 是刻意保守的狀態。它表示 Core 已有 registry / lifecycle / manifest / review / lineage 的 evidence surface，但仍缺 runtime state machine、unified scheduler、review queue persistence、deep adapter coverage 等證據。不得把此狀態解讀為 integration 已可開工。
 
@@ -59,6 +60,23 @@
   - `cross_repo_implementation=false`
 
 注意：Windows PowerShell 的 `>` 重導可能把 JSON 檔寫成 UTF-16。驗證 JSON stdout 時，優先使用 pipe 或 Python `subprocess.check_output()` 直接讀 bytes；不要把 PowerShell redirection 產生的檔案當成 CLI encoding 失敗證據。
+
+## Review Required Evidence Report
+
+`--core-review-required-report-json` 是 Core-only diagnostic，用來把 review-required surface 從完整 readiness report 中獨立拉出，方便下一輪設計 review queue 或 UI 顯示時先讀一份小報表。
+
+目前輸出：
+
+- `schema_version = core_review_required_report.v1`
+- `status = partial`
+- `missing_evidence = ["review_queue_persistence_not_unified"]`
+- `blocked_surfaces = ["unsupported_payload_format"]`
+- `review_required_surfaces` 會列出 content review rules 與 `visual_skin_asset_review_required`
+- `safety.changes_review_queue_schema = false`
+- `safety.changes_lifecycle_schema = false`
+- `safety.cross_repo_implementation = false`
+
+它不新增 review queue schema，不改 lifecycle vocabulary，不把 unknown/heavy payload promoted 成 ready，也不碰下游 repo。
 
 ## Integration Planning Gate Input Summary
 
@@ -105,23 +123,19 @@ Core 尚不能提供：
 
 ## Proposed Next Core-Only Slices
 
-1. **Review Required Evidence Report**
-   - 目標：讓 Core 以 JSON 列出 content review rules、unknown fallback、visual review_required surface、目前是否有 unified queue。
-   - 邊界：只報表，不改 queue schema。
-
-2. **Job Status Evidence Report**
+1. **Job Status Evidence Report**
    - 目標：聚合 Tk background job policy、single-flight result contract、download/import job status 與 visual lifecycle event boundary。
    - 邊界：不做 asyncio 重寫，不新增 scheduler schema。
 
-3. **Lifecycle Transition Audit Draft**
+2. **Lifecycle Transition Audit Draft**
    - 目標：只讀整理目前 lifecycle vocabulary、allowed transitions candidate、blocked transitions 與 review triggers。
    - 邊界：不新增 status，不改 transition runtime。
 
-4. **Manifest Reference Persistence Readiness**
+3. **Manifest Reference Persistence Readiness**
    - 目標：把 visual registry schema contract、DDL preview、owned-test persistence helper、formal DB gap 整理成 readiness report。
    - 邊界：不建立正式 user DB table，不跑 migration。
 
-5. **Deep Adapter Coverage Plan**
+4. **Deep Adapter Coverage Plan**
    - 目標：列出 14 個 source crawler type 與 3 個 deep adapter 的差距，標示哪些只需要 metadata crawler、哪些需要真正 download/import adapter。
    - 邊界：不新增 adapter，避免 class explosion。
 
@@ -136,7 +150,7 @@ Core 尚不能提供：
 - Deprecated coordination route: `L:\AGENT_EXCHANGE` archive / historical reference only。
 - Product evidence source: GitHub commits, tests, smoke, CLI JSON, actual UI behavior, git diff, GitHub Actions。
 - Current readiness JSON: `core_readiness_report.v1`, gate `partial`。
+- Current review-required JSON: `core_review_required_report.v1`, status `partial`。
 - Cross-repo touch: none.
 - Renderer/compressor/SkinAsset implementation: none.
 - Lifecycle schema/status change: none.
-

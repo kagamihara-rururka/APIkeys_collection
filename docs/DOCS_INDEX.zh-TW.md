@@ -58,6 +58,7 @@ RRKAL 本身是資料資產治理專案，專案文件也可以用資料治理�
 | 要看版本變更 | `DEVELOPMENT_LOG.zh-TW.md` -> `PROJECT_GTD.md` -> `AGENT_HANDOFF.zh-TW.md` | 先看每個已推送 checkpoint 屬於哪個開發階段、改了什麼、如何驗證、還有什麼風險。 |
 | 要回答整體進度 / 成熟度 | `PROJECT_MATURITY_MATRIX.zh-TW.md` -> `PROJECT_GTD.md` -> `AGENT_HANDOFF.zh-TW.md` | 不再用單一百分比；用成熟度矩陣區分可交付小閉環、bounded、partial、contract-only 與 planned。 |
 | 要準備 Integration Planning Gate | `CORE_INTEGRATION_PLANNING_GATE_READINESS.zh-TW.md` -> `VISUAL_SKIN_ASSET_CONTRACT.zh-TW.md` -> `PROJECT_MATURITY_MATRIX.zh-TW.md` | 先看 Core 目前能提供的 registry/lifecycle/manifest/review/job-status/lineage evidence 與缺口；不得把 `partial` gate 解讀成可整合。 |
+| 要檢查 review-required / unknown payload evidence | `CORE_INTEGRATION_PLANNING_GATE_READINESS.zh-TW.md` -> `CONTENT_REGISTRY` 相關測試 / `--core-review-required-report-json` | 先看 Core 目前如何把 heavy/unknown content 留在 review lane；不要把 review-required promoted 成 ready。 |
 | 想理解產品 | `PRODUCT_POSITIONING.zh-TW.md` -> `TECHNICAL_OVERVIEW.zh-TW.md` -> `ARCHITECTURE.zh-TW.md` | 先理解「資料工程版 Steam」和整體資料管線。 |
 | 想理解中長期資料資產平台概念 | `DATA_ASSET_PLATFORM_CONCEPTS.zh-TW.md` -> `PRODUCT_POSITIONING.zh-TW.md` -> `PROJECT_GTD.md` | 先看資料資產、Discovery Tool、爬蟲資產 / Crawler Asset、湖倉/K8S、Render Studio、ML 與 connector 的總體概念，再回到 MVP 收束。 |
 | 要改 crawler / adapter | `DATASET_DISCOVERY_NOTES.zh-TW.md` -> `MVP_FLOW_AUDIT.zh-TW.md` -> `PROJECT_GTD.md` | 避免把資料集硬寫死，維持 crawler-first，並確認候選、resolver、下載與匯入是否真的閉環。 |
