@@ -1,4 +1,9 @@
 # Agent 接力卡
+## 2026-06-02 15:52 +08:00 CLI JSON stdout regression guard
+- 本輪在 `tests/test_cli_json.py` 新增 repository-level guard：掃描 `api_launcher/**/*.py`，若再次出現 `print(json.dumps(...))` 這種直接 stdout JSON 輸出就 fail。這把剛剛的人工 `rg` 檢查固化成測試，避免 agent-readable JSON stdout 繞過 `print_cli_json()`。
+- 邊界：這是測試護欄，不改產品碼、不改任何 CLI payload、不改 Web/Tk、crawler/download/import/repair/visual registry 行為；寫檔用 `json.dumps(..., ensure_ascii=False)` 仍允許存在。
+- 已驗證：`py -3 -B -m unittest tests.test_cli_json tests.test_developer_diagnostics tests.test_project_maturity tests.test_handoff -v` 通過 33 tests；`py -3 -B -m py_compile tests\test_cli_json.py` OK；`git diff --check` OK；完整 smoke `state\logs\pre_push_smoke_20260602_155337.log` 通過 1089 tests / 4 skipped，MVP demo `download_import_completed` / `row_count=3`。CI 尚待 push 後確認。
+
 ## 2026-06-02 15:34 +08:00 Sub-CLI JSON stdout helper consolidation
 - 本輪把 `api_launcher.cli_json.print_cli_json()` 從 `core.py` 主入口延伸到子 CLI JSON stdout path：`cli_dataset_discovery.py`、`cli_crawler_assets.py`、`cli_visual_asset_registry.py`、`cli_manual_import.py`、`cli_download_plan.py`、`cli_database_repair.py`、`cli_crawler_run_records.py`。`api_launcher` 內已無直接 `print(json.dumps(...))` 的 stdout JSON 輸出；寫檔 JSON 仍保留 UTF-8 / `ensure_ascii=False`。
 - 邊界：這是 agent-readable stdout encoding hardening，不改 JSON payload shape、不改下載 / 匯入 / crawler registry / visual registry / repair 語意、不改 Web/Tk 顯示，也不修正缺少必要 action flag 時主程式回到預設 template path 的既有 CLI UX。

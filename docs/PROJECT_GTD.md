@@ -3,6 +3,7 @@
 Last updated: 2026-06-02
 
 ## 目前工作焦點 / Active Focus
+- [x] 2026-06-02 CLI JSON stdout regression guard 已補：`tests/test_cli_json.py` 現在會掃描 `api_launcher/**/*.py`，防止未來再次出現直接 `print(json.dumps(...))` 的 stdout JSON 輸出；寫檔 JSON 不受此 guard 影響。
 - [x] 2026-06-02 Sub-CLI JSON stdout helper 已補：`cli_dataset_discovery.py`、`cli_crawler_assets.py`、`cli_visual_asset_registry.py`、`cli_manual_import.py`、`cli_download_plan.py`、`cli_database_repair.py`、`cli_crawler_run_records.py` 皆改用 `api_launcher.cli_json.print_cli_json()`；`api_launcher` 內不再有直接 `print(json.dumps(...))` stdout JSON。這是子命令 agent-readable JSON pipeline hardening，不改 payload 語意、Web/Tk 顯示或產品流程。
 - [x] 2026-06-02 CLI JSON stdout encoding helper 已補：新增 `api_launcher.cli_json.print_cli_json()` / `cli_json_dumps()`，並將 `core.py` 主要 agent-readable JSON stdout mode 收斂到同一個 ASCII-escaped stdout helper；寫檔 JSON 仍保留 UTF-8 中文。這是 Windows pipeline / agent parser hardening，不改 payload 語意、Web/Tk 顯示或 crawler/download/import 行為。
 - [x] 2026-06-02 Project maturity JSON stdout pipeline guard 已補：`--project-maturity-json` stdout 改用 ASCII-escaped JSON，避免 Windows PowerShell legacy pipeline / redirection 把成熟度矩陣中文與 emoji label 轉成 `????`；寫檔仍保留 UTF-8 中文，JSON parse 後仍還原原本文案。這是 agent-readable progress入口的 encoding hardening，不改成熟度語意。
