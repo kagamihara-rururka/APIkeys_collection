@@ -26,7 +26,8 @@
 | Core bounded scheduler plan CI | `5b1b831` / GitHub Actions run `26838847085` PASS |
 | Core scheduler job contract draft | `b1b241d` / `core_scheduler_job_contract_draft.v1` exposed through `--core-bounded-scheduler-plan-json` |
 | Core scheduler job contract CI | GitHub Actions run `26840935942` PASS |
-| Core scheduler queue DDL preview | `core_scheduler_queue_persistence_contract.v1` exposed through `--core-bounded-scheduler-plan-json` |
+| Core scheduler queue DDL preview | `44b7615` / `core_scheduler_queue_persistence_contract.v1` exposed through `--core-bounded-scheduler-plan-json` |
+| Core scheduler queue DDL preview CI | GitHub Actions run `26841895028` PASS |
 | Core lifecycle audit diagnostic | `--core-lifecycle-audit-json` / `core_lifecycle_audit_report.v1` |
 | Core manifest-reference diagnostic | `--core-manifest-reference-report-json` / `core_manifest_reference_report.v1` |
 | Core deep-adapter coverage diagnostic | `--core-deep-adapter-coverage-json` / `core_deep_adapter_coverage_report.v1` |
