@@ -1,4 +1,11 @@
 # Agent 接力卡
+## 2026-06-02 22:40 +08:00 Core readiness report JSON checkpoint
+- 本輪新增 `--core-readiness-report-json`，由 `api_launcher/core_readiness_report.py` 聚合 RRKAL Core 的 registry、lifecycle、manifest reference、review_required、job status 與 asset lineage evidence；CLI helper 放在 `api_launcher/cli_core_readiness.py`，`core.py` 只做小型路由，`cli_flags.command_requested()` 可偵測此 JSON mode。
+- 邊界：這是 evidence aggregation / diagnostic slice，不是 integration。它不新增 lifecycle status、不改 lifecycle schema、不 import displaytools / visual-compressor、不讀 `.npz` 或 renderer payload、不實作 RendererSkinAsset / SkinAsset、不做 compression 或跨 repo code。`integration_planning_gate.status` 保守維持 `partial`，不宣稱 `ready_for_planning`。
+- 已驗證：`py -3 -B -m py_compile api_launcher\core_readiness_report.py api_launcher\cli_core_readiness.py api_launcher\core.py api_launcher\cli_flags.py tests\test_core_readiness_report.py` 通過；focused tests `tests.test_core_readiness_report tests.test_cli_flags tests.test_cli_json` 通過 8 tests；broader related tests 通過 53 tests；`py -3 -B APIkeys_collection.py --core-readiness-report-json | py -3 -B -c "import sys,json; json.load(sys.stdin)"` 通過；完整 smoke `state\logs\pre_push_smoke_20260602_215026.log` 通過 1101 tests / 4 skipped；GitHub Actions run `26825598254` 通過 Ubuntu、Windows 與 real DB smoke。Code commit：`0ead886 feat(core): add readiness report JSON diagnostic`。
+- Repo consistency audit `#repo_consistency_audit`：`git status` 乾淨且 `HEAD` / `origin/rrkal-32e215c-recovery` 都在 `0ead886`；目前 active coordination route 是 Notion `Agents討論區`，`L:\AGENT_EXCHANGE` 只作 archive / historical reference；GitHub commits、tests、smoke、CLI JSON 與 CI 是產品證據；本輪發現並修補 `docs/WORKFLOW.zh-TW.md`、`docs/DOCS_INDEX.zh-TW.md`、`docs/VISUAL_SKIN_ASSET_CONTRACT.zh-TW.md` 仍把 `L:\AGENT_EXCHANGE` 寫成 active route 的漂移。
+- 下一個安全動作：若要繼續 Core readiness，優先補「review_required / job status evidence」的可查報表或持久化證據；若涉及 lifecycle schema/status、SkinAsset/RendererSkinAsset、cross-repo contract 或 integration wording，先送 `o_1` review。
+
 ## 2026-06-02 19:41 +08:00 Handoff CLI helper consolidation
 - 本輪新增 `api_launcher/cli_handoff.py`，把 `--handoff-report` 與 `--handoff-report-json` 的 argparse、active check、JSON stdout 判斷、Markdown 寫檔與 dispatch 從 `core.py` 抽成專責 helper；`core.py` 只呼叫 `run_handoff_cli()`，`cli_flags.command_requested()` 也改用同一個 `handoff_command_active()`。
 - 邊界：這是 consolidation slice，用來阻止 `core.py` 繼續吸收 handoff report CLI 責任；不改 handoff payload、不改 JSON schema、不改 Web/Tk、crawler、download/import、Visual/Skin lifecycle、RendererSkinAsset / SkinAsset integration，也不跨 repo。
@@ -191,7 +198,7 @@
 ## 2026-06-01 21:43 +08:00 Workspace boundary correction
 - 使用者最新明確指令：`L:\RRKAL_project` 是 RRKAL active workspace 與提交來源；`K:` 只作歷史紀錄、舊狀態查詢與必要資料參考。
 - 後續 RRKAL 開發不要主動掃全 K 槽、不要治理 K 槽文件或資料、不要把 K 槽當 fallback 工作區；需要查舊狀態時才 read-only 查詢。
-- 交換區檢查：`L:\AGENT_EXCHANGE\inbox\*_RRKAL_project.md` 目前沒有新的相關 `Status: new` entry 需要回覆。
+- 交換區檢查（歷史紀錄，已被 2026-06-02 Notion policy supersede）：`L:\AGENT_EXCHANGE\inbox\*_RRKAL_project.md` 當時沒有新的相關 `Status: new` entry 需要回覆。
 - 本輪是 docs drift 修補，不改產品碼；已推送 `77d2b53 Clarify active L workspace boundary`。下一個安全行動是回到 RRKAL Core control-plane 主線，優先考慮 Visual/Skin Asset Registry contract 草案，且不得 import displaytools / visual-compressor / vis_2_dis 或讀 renderer payload。
 ## 2026-05-31 15:44 Web asset initials raw-id fallback guard
 - 本輪把 Web Preview 的 `assetInitials()` 收斂為只使用 `asset.display_name`；缺顯示名稱時使用中性 `RR`，不再從 `provider_id` / `asset_id` 取可見 initials。
@@ -229,12 +236,12 @@
 ## 2026-05-31 13:53 Web display helper ownership consolidation
 - 本輪延續上一個 Web display-contract consolidation：把 `downloadImportStageText()` / `downloadImportNextActionText()`、asset/seed display text、flow/plan/review/stale passport labels、content review summary、status/capability/bounds field label/help、asset initials 與 source surface/source type display helper 從 `app.js` 移到 `frontends/web/static/display_contract.js`。
 - 保持邊界：這仍是 Web 顯示 helper ownership cleanup；不改 Web API、crawler/download/import/credential policy、event payload、route/search/debug raw id、Tk 顯示或後端 display contract。`app.js` 只少一批純顯示轉換，互動與 endpoint 呼叫不變。
-- 交換區：checkpoint 前已檢查 `L:\AGENT_EXCHANGE\inbox\*_RRKAL_project.md`，沒有新的 RRKAL `Status: new` 需要回覆；displaytools 既有 ViewModel / Boundary contract 建議仍維持 `backlogged`。
+- 交換區（歷史紀錄，已被 2026-06-02 Notion policy supersede）：checkpoint 前已檢查 `L:\AGENT_EXCHANGE\inbox\*_RRKAL_project.md`，當時沒有新的 RRKAL `Status: new` 需要回覆；displaytools 既有 ViewModel / Boundary contract 建議維持 `backlogged`。
 - 已驗證：`node --check frontends\web\static\display_contract.js` OK；`node --check frontends\web\static\app.js` OK；`py -3 -B -m unittest -v tests.test_web_preview` 通過 65 tests；`frontends\web\static\display_contract.js` mojibake scan OK；`git diff --check` 無 whitespace error（Git 仍提示 Web static files line-ending warning）；完整 smoke `state\logs\pre_push_smoke_20260531_135629.log` 通過，1039 tests / 4 skipped，MVP demo `download_import_completed` / `row_count=3`；GitHub Actions manual run `26704873947` 通過 Ubuntu、Windows 與 real DB smoke。
 ## 2026-05-31 13:36 Web display contract helper extraction
 - 本輪做小型 consolidation：新增 `frontends/web/static/display_contract.js`，把 `displayTextOrFallback()`、backend-token guard、event context label、content review lane/parser label 與 provider display helper 從巨型 `app.js` 拆出；`index.html` 先載 display helper，再載 `app.js`。
 - 保持邊界：這是 Web 顯示 helper 解耦，不改 Web API、crawler/download/import/credential policy、event payload、route/search/debug raw id 或 Tk 顯示。`display_contract.js` 只能轉換可見文案，不得承擔業務規則。
-- 交換區：已讀並回覆 `L:\AGENT_EXCHANGE\inbox\c_3_RRKAL_project.md` 的 `20260531-1329-c_3-viewmodel-contract`，決策為 `backlogged`；未來 RRKAL 可定義 renderer-agnostic ViewModel producer contract，但不打斷目前小閉環。
+- 交換區（歷史紀錄，已被 2026-06-02 Notion policy supersede）：已讀並回覆 `L:\AGENT_EXCHANGE\inbox\c_3_RRKAL_project.md` 的 `20260531-1329-c_3-viewmodel-contract`，決策為 `backlogged`；未來 RRKAL 可定義 renderer-agnostic ViewModel producer contract，但不打斷目前小閉環。
 - 已驗證：`node --check frontends\web\static\display_contract.js` OK；`node --check frontends\web\static\app.js` OK；`py -3 -B -m unittest -v tests.test_web_preview` 通過 65 tests；docs / `display_contract.js` mojibake scan OK；`git diff --check` 無 whitespace error（Git 仍提示 Web static files line-ending warning）；完整 smoke `state\logs\pre_push_smoke_20260531_133812.log` 通過，1039 tests / 4 skipped，MVP demo `download_import_completed` / `row_count=3`。
 ## 2026-05-31 13:26 Web asset card provider label
 - 本輪把 Web Preview asset card slot 副標接到 `providerDisplayText(asset)`；卡片不再直接顯示 `asset.provider_id`，而是使用 provider name/label 或可追溯 provider fallback。
@@ -261,8 +268,8 @@
 - 保持邊界：raw `asset_id`、`dataset_uid`、`next_action` 仍保留在 route、JSON/debug、writeJson 與 provenance；Web API shape、crawler registry、seed enumeration、schema probe service、download/import service、credential storage、Tk 顯示與 project maturity 都沒改。這只是 Web mission queue visible display hygiene。
 - 已驗證：`node --check frontends\web\static\app.js` OK；`py -3 -B -m unittest -v tests.test_web_preview` 通過 65 tests；docs mojibake scan OK；`git diff --check` 無 whitespace error（Git 仍提示 `frontends/web/static/app.js` line-ending warning）；完整 smoke `state\logs\pre_push_smoke_20260531_123324.log` 通過，1039 tests / 4 skipped，MVP demo `download_import_completed` / `row_count=3`；GitHub Actions manual run `26703440667` 通過 Ubuntu、Windows 與 real DB smoke。
 ## 2026-05-31 12:21 Cross-agent exchange workflow docs
-- 本輪把 `L:\AGENT_EXCHANGE` 的 RRKAL 收信規則寫回 repo 入口文件：`AGENT_START_HERE`、`WORKFLOW`、`DOCS_INDEX` 都已明確要求開始新 session / checkpoint close 前檢查 `L:\AGENT_EXCHANGE\inbox\*_RRKAL_project.md`，並在相關 `Status: new` entry 的 `Responses` 區塊回覆 `Decision`、`Response`、`Next`。
-- 保持邊界：交換區不上 GitHub，不是 RRKAL source of truth；原始信件不複製進公開 repo。採納建議後才消化成 RRKAL 內部 GTD / handoff / docs / OpenSpec / code slice。
+- 本輪（歷史紀錄，已被 2026-06-02 Notion policy supersede）曾把 `L:\AGENT_EXCHANGE` 的 RRKAL 收信規則寫回 repo 入口文件：當時要求開始新 session / checkpoint close 前檢查 `L:\AGENT_EXCHANGE\inbox\*_RRKAL_project.md`，並在相關 `Status: new` entry 的 `Responses` 區塊回覆 `Decision`、`Response`、`Next`。現行規則已改為 Notion `Agents討論區`；`L:\AGENT_EXCHANGE` 只作 archive / historical reference。
+- 保持邊界（仍有效）：協調空間不是 RRKAL source of truth；原始信件不複製進公開 repo。採納建議後才消化成 RRKAL 內部 GTD / handoff / docs / OpenSpec / code slice。
 - 已驗證：本輪開始檢查交換區無新的 RRKAL `Status: new` 收信；`docs` mojibake scan 通過；`git diff --check` 通過。這是 workflow/docs 切片，不改產品碼、Web/Tk、crawler、download/import 或 credential flow。
 ## 2026-05-31 11:56 Web source type display label guard
 - 本輪把 Web Preview `sourceTypeDisplayText()` 的最後 raw fallback 拿掉：source type filter、asset card、Passport 與 selected hero 只顯示後端 `source_type_label` / capability profile label，缺 label 時顯示「來源範式待確認」，不再用 `shortPattern(source_type)` 把 raw source id 美化成假人類文案。
@@ -368,7 +375,7 @@
 ## 2026-05-31 03:36 Tk listing status display label
 - 本輪做 Tk display-contract 小切片：`run_selected_crawler_asset_listing()` 仍用 raw `asset.asset_id` 作為 single-flight key 與 listing worker 參數，但狀態列與 duplicate guard 改顯示 `asset.display_name`，不再把 `demo_index` 這類 asset id 當主要使用者文字。
 - 已驗證：`$env:PYTHONDONTWRITEBYTECODE='1'; py -3 -B -m py_compile frontends\tk\crawler_asset_workflows.py tests\test_tk_dialogs.py` OK；`$env:PYTHONDONTWRITEBYTECODE='1'; py -3 -B -m unittest tests.test_tk_dialogs -v` 通過 130 tests；完整 smoke `state\logs\pre_push_smoke_20260531_033255.log` 通過，1018 tests / 4 skipped，MVP demo `download_import_completed` / `row_count=3`；已推送 `1b60382 Label Tk listing status names` / `909cb26 Log Tk listing status checkpoint`，GitHub Actions manual run `26693093030` 通過 Ubuntu、Windows 與 real DB smoke。
-- 交換區：已回覆 `L:\AGENT_EXCHANGE\inbox\c_3_RRKAL_project.md` 的 territory / EEZ / maritime-boundary manifest 建議，決策為 `backlogged`；這是未來 geospatial governance / OpenSpec 題，不打斷目前 Tk display-contract checkpoint。
+- 交換區（歷史紀錄，已被 2026-06-02 Notion policy supersede）：已回覆 `L:\AGENT_EXCHANGE\inbox\c_3_RRKAL_project.md` 的 territory / EEZ / maritime-boundary manifest 建議，決策為 `backlogged`；這是未來 geospatial governance / OpenSpec 題，不打斷目前 Tk display-contract checkpoint。
 ## 2026-05-31 03:21 Tk metadata crawl status label
 - 本輪做 Tk display-contract 小切片：`run_selected_crawler_asset_metadata()` 仍用 raw `provider_id` 設定 `active_provider_id` 給既有 metadata crawl 流程，但狀態列改顯示 `asset.display_name`，不再把 provider id 當主要使用者文字。
 - 已驗證：`$env:PYTHONDONTWRITEBYTECODE='1'; py -3 -B -m py_compile frontends\tk\crawler_asset_workflows.py tests\test_tk_dialogs.py` OK；`$env:PYTHONDONTWRITEBYTECODE='1'; py -3 -B -m unittest tests.test_tk_dialogs -v` 通過 129 tests；第一次完整 smoke `state\logs\pre_push_smoke_20260531_031658.log` 在 `unittest discover` 起點遇到雲端碟 transient `Start directory is not importable: 'tests'`；同一環境立即確認 `tests\__init__.py` 存在且手動 `py -3 -B -m unittest discover -s tests -p "test*.py" -v` 通過 1017 tests / 4 skipped；第二次完整 smoke `state\logs\pre_push_smoke_20260531_031911.log` 通過，1017 tests / 4 skipped，MVP demo `download_import_completed` / `row_count=3`；已推送 `aa92271 Label Tk metadata crawl status` / `a8c97ab Log Tk metadata status checkpoint`，GitHub Actions manual run `26692761185` 通過 Ubuntu、Windows 與 real DB smoke。

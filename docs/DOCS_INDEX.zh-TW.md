@@ -51,7 +51,7 @@ RRKAL 本身是資料資產治理專案，專案文件也可以用資料治理�
 | 情境 | 建議先讀 | 目的 |
 | --- | --- | --- |
 | 新 Agent 接手 | `AGENT_START_HERE.zh-TW.md` -> `AGENT_HANDOFF.zh-TW.md` -> `PROJECT_GTD.md` -> `DOCS_INDEX.zh-TW.md` | 先看權威順序、目前主線與不要做什麼，再看最新接力、進度與文件地圖。 |
-| 檢查跨 agent 建議 | `L:\AGENT_EXCHANGE\README.zh-TW.md` -> `L:\AGENT_EXCHANGE\inbox\*_RRKAL_project.md` -> 本 repo 的 `AGENT_HANDOFF.zh-TW.md` / `PROJECT_GTD.md` | 交換區不上 GitHub；相關 `Status: new` entry 要在原信 `Responses` 回覆，採納後才消化進 RRKAL 正式文件或 code slice。 |
+| 檢查跨 agent 建議 | Notion `Agents討論區` -> `04_Agent_Inbox` / `03_OAI_Review_Requests` / `02_Decision_Log` -> 本 repo 的 `AGENT_HANDOFF.zh-TW.md` / `PROJECT_GTD.md` | Notion 是 coordination dashboard，不是產品證據；採納後才消化進 RRKAL 正式文件、OpenSpec、code slice、tests、smoke 或 CI evidence。`L:\AGENT_EXCHANGE` 只作 archive / historical reference。 |
 | 檢查文件是否漂移 | `DOCS_DRIFT_AUDIT.zh-TW.md` -> `AGENT_HANDOFF.zh-TW.md` -> 實際 CLI/test/UI/CI 證據 | 先看已知漂移與本輪修補，再用已驗證行為判斷文件是否可採信。 |
 | 檢查程式健康 / 風險 | `CODE_HEALTH_AUDIT.zh-TW.md` -> 相關測試 -> `CODE_RELATIONSHIP_MAP.zh-TW.md` | 先看已確認的 P1/P2/P3 風險、已修補項目與下一個 hardening slice。 |
 | 參考其他 GitHub 專案進度 | `EXTERNAL_PROJECT_CONTEXT.zh-TW.md` -> `AGENT_HANDOFF.zh-TW.md` -> 對應 repo 的 read-only GitHub commit / CI | 只抽取 workflow、display contract、governance 或 UIUX 概念，不把其他 repo 當成 RRKAL 產品碼來源。 |

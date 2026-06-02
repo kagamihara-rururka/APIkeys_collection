@@ -166,7 +166,7 @@ flowchart TD
 
 1. 若要真正落地 registry persistence，先由 `visual_asset_registry_sqlite_ddl_preview()` 審閱 migration SQL，再消費 `visual_asset_registry_persistence_schema()` 與 `visual_asset_registry_entry_persistence_record()`，不得讓 repository layer 自行發明欄位或 row shape；正式 DB 路徑不能直接沿用 owned test helper 的 opt-in。
 2. 若要把 owned test-only explicit event CLI 推進到正式 repository workflow，必須先定義正式 DB ownership / migration guard 與 duplicate-event policy 的持久化策略；不得讓 table write/upsert 自動發 event。
-3. 與 displaytools / compressor 透過 `L:\AGENT_EXCHANGE` 或正式 OpenSpec 對齊欄位，不直接 import 對方 repo。
+3. 與 displaytools / compressor 透過 Notion `Agents討論區` 的 coordination route、`o_1` review 或正式 OpenSpec 對齊欄位，不直接 import 對方 repo；`L:\AGENT_EXCHANGE` 只作歷史封存參考。
 4. 若下游需要更多欄位，先版本化 projection schema，不要讓 downstream 直接依賴 `entry.to_dict()` 的完整內部形狀。
 
 不建議下一步：
