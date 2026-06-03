@@ -1,5 +1,9 @@
 ﻿# Agent Handoff
 
+## 2026-06-03 16:50 +08:00 Core readiness docs registry refresh
+- Updated `docs/DOCS_REGISTRY.csv` to include `CORE_READINESS_EVIDENCE_PACKET.zh-TW.md` and `CORE_INTEGRATION_PLANNING_GATE_READINESS.zh-TW.md`; refreshed the audit row evidence string.
+- Boundary: docs-only registry correction. Markdown remains source of truth; CSV is an auxiliary index. Gate remains `partial`.
+
 ## 2026-06-03 16:45 +08:00 Core readiness docs index refresh
 - Updated `docs/DOCS_INDEX.zh-TW.md` to include `CORE_READINESS_EVIDENCE_PACKET.zh-TW.md` as the route for `n_1` / Notion summary alignment and added a Core JSON diagnostics sweep route for `--core-json-diagnostic-sweep-plan-json`.
 - Boundary: docs-only index correction. Notion remains dashboard; GitHub/CI/CLI JSON remain evidence. Gate remains `partial`.

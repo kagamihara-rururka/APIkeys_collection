@@ -3,6 +3,7 @@
 Last updated: 2026-06-03
 
 ## 目前工作焦點 / Active Focus
+- [x] 2026-06-03 Core readiness docs registry 已刷新：`docs/DOCS_REGISTRY.csv` 現已補入 `CORE_READINESS_EVIDENCE_PACKET.zh-TW.md` 與 `CORE_INTEGRATION_PLANNING_GATE_READINESS.zh-TW.md`，並刷新 control-plane audit row 的 evidence；CSV 仍是輔助索引，不取代 Markdown source of truth。
 - [x] 2026-06-03 Core readiness docs index 已刷新：`docs/DOCS_INDEX.zh-TW.md` 現已列出 `CORE_READINESS_EVIDENCE_PACKET.zh-TW.md` 作為 `n_1` / Notion summary 對齊入口，並新增 `--core-json-diagnostic-sweep-plan-json` 的 Core JSON diagnostics sweep 閱讀路線，明確標示 sweep-plan CLI 是 non-executing command plan。
 - [x] 2026-06-03 Core integration gate readiness 文件已刷新：`docs/CORE_INTEGRATION_PLANNING_GATE_READINESS.zh-TW.md` 現已補入 OpenSpec inventory、gate aggregation guard、downstream safety guard、Core JSON stderr guard、repository metadata、diagnostic sweep-plan CLI、control-plane audit refresh 與 evidence packet refresh；並新增 `Core JSON Sweep Plan Evidence` 說明 `--core-json-diagnostic-sweep-plan-json` 是 non-executing plan，不是 readiness promotion。
 - [x] 2026-06-03 Core readiness evidence packet 已刷新：`docs/CORE_READINESS_EVIDENCE_PACKET.zh-TW.md` 現已對齊 Core checkpoint `030a986`、docs checkpoint `f111bec`、GitHub Actions run `26873231414` PASS，並把 `--core-json-diagnostic-sweep-plan-json` 明確標成 non-executing sweep plan CLI。這是 docs-only evidence alignment，Integration Planning Gate 仍為 `partial`。

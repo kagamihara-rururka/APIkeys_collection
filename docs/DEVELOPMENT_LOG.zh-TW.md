@@ -1,5 +1,10 @@
 ﻿# Development Log
 
+## 2026-06-03 Core readiness docs registry refresh
+- Updated `docs/DOCS_REGISTRY.csv` so the diff-friendly docs registry now includes `CORE_READINESS_EVIDENCE_PACKET.zh-TW.md` and `CORE_INTEGRATION_PLANNING_GATE_READINESS.zh-TW.md`, alongside the refreshed control-plane responsibility audit row.
+- This keeps the Markdown source-of-truth map and CSV auxiliary registry aligned for future docs drift checks and `n_1` evidence routing.
+- Docs-only registry correction; no product behavior, schema/status, readiness, or integration changes.
+
 ## 2026-06-03 Core readiness docs index refresh
 - Updated `docs/DOCS_INDEX.zh-TW.md` so `CORE_READINESS_EVIDENCE_PACKET.zh-TW.md` is now an explicit route for `n_1` / Notion Core readiness summary work.
 - Added a Core JSON diagnostics sweep route that points to `--core-json-diagnostic-sweep-plan-json` while stating it is a non-executing command plan and not product evidence by itself.
