@@ -29,8 +29,18 @@ class CoreJsonDiagnosticSweepPlanTests(unittest.TestCase):
                 self.assertEqual(("APIkeys_collection.py", "--db", db_path, plan.flag), plan.launcher_args)
 
     def test_db_path_classifier_marks_cloud_drives_as_risky_for_sweeps(self) -> None:
-        self.assertEqual("cloud_drive", classify_core_json_sweep_db_path(r"L:\RRKAL_project\state\launcher.sqlite"))
-        self.assertEqual("cloud_drive", classify_core_json_sweep_db_path(r"K:\APIkeys_collection\state\launcher.sqlite"))
+        cloud_paths = (
+            r"L:\RRKAL_project\state\launcher.sqlite",
+            r"L:/RRKAL_project/state/launcher.sqlite",
+            "L:",
+            r"K:\APIkeys_collection\state\launcher.sqlite",
+            r"K:/APIkeys_collection/state/launcher.sqlite",
+            "K:",
+        )
+
+        for path in cloud_paths:
+            with self.subTest(path=path):
+                self.assertEqual("cloud_drive", classify_core_json_sweep_db_path(path))
 
     def test_db_path_classifier_accepts_temp_path(self) -> None:
         db_path = os.path.join(tempfile.gettempdir(), "rrkal_core_json_sweep_test.sqlite")

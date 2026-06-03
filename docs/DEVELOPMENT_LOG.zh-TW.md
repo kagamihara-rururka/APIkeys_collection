@@ -1,5 +1,10 @@
 ﻿# Development Log
 
+## 2026-06-03 Core JSON sweep cloud-drive classifier test hardening
+- Expanded `tests/test_core_json_diagnostic_sweep_plan.py` so the cloud-drive classifier regression guard covers backslash paths, forward-slash paths, and bare `L:` / `K:` drive tokens.
+- Verification: focused sweep-plan tests PASS (3 tests); related Core diagnostic / CLI JSON tests PASS (10 tests); pre-push smoke PASS in `state/logs/pre_push_smoke_20260603_143947.log` (1151 tests, 4 skipped, MVP demo `download_import_completed`, `row_count=3`). Follow-up GitHub Actions are pending for this test-only checkpoint.
+- Boundary: test-hardening only. No production code change, no CLI behavior change, no JSON payload change, no lifecycle/status schema change, no readiness promotion, no cross-repo integration.
+
 ## 2026-06-03 Core JSON sweep cloud-drive classifier CI fix
 - GitHub Actions run `26867270368` failed on Ubuntu after `0605552` because the new sweep-plan path classifier depended on `pathlib.Path(...).drive`, which does not classify raw Windows `L:` / `K:` paths when tests run on POSIX.
 - Fixed `api_launcher/core_json_diagnostic_sweep_plan.py` with a raw-string `L:` / `K:` guard before platform-native path normalization. This preserves the intended cloud-drive warning for Core JSON sweeps across Windows and Linux.
