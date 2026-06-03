@@ -1,5 +1,10 @@
 ﻿# Development Log
 
+## 2026-06-03 Core readiness docs index refresh
+- Updated `docs/DOCS_INDEX.zh-TW.md` so `CORE_READINESS_EVIDENCE_PACKET.zh-TW.md` is now an explicit route for `n_1` / Notion Core readiness summary work.
+- Added a Core JSON diagnostics sweep route that points to `--core-json-diagnostic-sweep-plan-json` while stating it is a non-executing command plan and not product evidence by itself.
+- Docs-only index correction; no product behavior, schema/status, readiness, or integration changes.
+
 ## 2026-06-03 Core integration gate readiness doc refresh
 - Refreshed `docs/CORE_INTEGRATION_PLANNING_GATE_READINESS.zh-TW.md` to include the latest Core evidence rows: OpenSpec inventory, gate aggregation guard, downstream safety guard, Core JSON stderr guard, repository metadata, diagnostic sweep-plan CLI, control-plane audit refresh, and readiness evidence packet refresh.
 - Added a `Core JSON Sweep Plan Evidence` section clarifying that `--core-json-diagnostic-sweep-plan-json` is non-executing and does not create SQLite state, alter payloads, promote readiness, or authorize integration.

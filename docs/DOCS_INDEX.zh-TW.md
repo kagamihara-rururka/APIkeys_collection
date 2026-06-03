@@ -1,6 +1,6 @@
 # 文件索引與整理規則
 
-最後更新：2026-06-02
+最後更新：2026-06-03
 
 這份文件是「文件地圖」。它不是要把其他文件降級，而是要讓下一位 Agent 或組員知道每份文件負責什麼、該先讀哪裡、改完功能後要回頭更新哪幾份文件。
 
@@ -58,6 +58,8 @@ RRKAL 本身是資料資產治理專案，專案文件也可以用資料治理�
 | 要看版本變更 | `DEVELOPMENT_LOG.zh-TW.md` -> `PROJECT_GTD.md` -> `AGENT_HANDOFF.zh-TW.md` | 先看每個已推送 checkpoint 屬於哪個開發階段、改了什麼、如何驗證、還有什麼風險。 |
 | 要回答整體進度 / 成熟度 | `PROJECT_MATURITY_MATRIX.zh-TW.md` -> `PROJECT_GTD.md` -> `AGENT_HANDOFF.zh-TW.md` | 不再用單一百分比；用成熟度矩陣區分可交付小閉環、bounded、partial、contract-only 與 planned。 |
 | 要準備 Integration Planning Gate | `CORE_CONTROL_PLANE_RESPONSIBILITY_AUDIT.zh-TW.md` -> `CORE_INTEGRATION_PLANNING_GATE_READINESS.zh-TW.md` -> `VISUAL_SKIN_ASSET_CONTRACT.zh-TW.md` -> `PROJECT_MATURITY_MATRIX.zh-TW.md` | 先看 Core control-plane 責任邊界與 suggested handling，再看 registry/lifecycle/manifest/review/job-status/lineage evidence 與缺口；不得把 `partial` gate 解讀成可整合。 |
+| 要提供 n_1 / Notion Core readiness summary | `CORE_READINESS_EVIDENCE_PACKET.zh-TW.md` -> `CORE_CONTROL_PLANE_RESPONSIBILITY_AUDIT.zh-TW.md` -> GitHub Actions / CLI JSON evidence | `CORE_READINESS_EVIDENCE_PACKET` 是 repo-side evidence packet；Notion 只能摘要 verified repo evidence，不得把 dashboard 文字當 source of truth。 |
+| 要規劃 Core JSON diagnostics sweep | `CORE_READINESS_EVIDENCE_PACKET.zh-TW.md` -> `CORE_INTEGRATION_PLANNING_GATE_READINESS.zh-TW.md` -> `--core-json-diagnostic-sweep-plan-json` | sweep-plan CLI 是 non-executing command plan；真正 payload 證據仍要靠 CLI JSON parse、tests、smoke 或 CI。 |
 | 要檢查 source crawler / deep adapter coverage | `CORE_INTEGRATION_PLANNING_GATE_READINESS.zh-TW.md` -> `--core-deep-adapter-coverage-json` -> `DATASET_DISCOVERY_NOTES.zh-TW.md` | 先看 Core-only coverage diagnostic；它比較 14 個 source crawler type 與 3 個 provider deep adapter，不代表要立刻新增 adapter 或重寫 crawler。 |
 | 要檢查 manifest reference / sidecar evidence | `CORE_INTEGRATION_PLANNING_GATE_READINESS.zh-TW.md` -> `--core-manifest-reference-report-json` -> `VISUAL_SKIN_ASSET_CONTRACT.zh-TW.md` | 先看 Core-only manifest-reference diagnostic；它描述 download sidecar manifest 與 Visual/Skin manifest reference，不代表正式 user DB persistence 或 downstream consumer contract 已完成。 |
 | 要檢查 lifecycle vocabulary / transition audit | `CORE_INTEGRATION_PLANNING_GATE_READINESS.zh-TW.md` -> `--core-lifecycle-audit-json` -> `VISUAL_SKIN_ASSET_CONTRACT.zh-TW.md` | 先看 Core-only lifecycle audit；它描述 vocabulary/display profiles/ready-event guard，不代表 runtime state machine 已完成。 |
@@ -86,6 +88,7 @@ RRKAL 本身是資料資產治理專案，專案文件也可以用資料治理�
 | `PROJECT_GTD.md` | 進度主索引，列出每個產品區塊目前狀態與下一步。 | 每完成或改變一個功能閉環後更新。 |
 | `PROJECT_MATURITY_MATRIX.zh-TW.md` | 整體進度與成熟度口徑，定義 `deliverable_100`、`implemented_bounded`、`partial_bounded`、`contract_only`、`planned_not_started`、`hardening_needed`。 | 問「整體進度多少」、新增可交付 closure、或 source/adapter/renderer/UI 成熟度改變時更新。 |
 | `CORE_CONTROL_PLANE_RESPONSIBILITY_AUDIT.zh-TW.md` | RRKAL Core control-plane 責任邊界審計，整理 CLI、Core JSON diagnostics、readiness gate、scheduler/review/lifecycle/manifest evidence、Notion/GitHub evidence alignment 與 future safe slices。 | Core readiness responsibility、Integration Planning Gate 前置審計、或下一批 Core-only report/helper/consolidation slice 改變時更新；不得寫成 integration authorization。 |
+| `CORE_READINESS_EVIDENCE_PACKET.zh-TW.md` | 給 `n_1` / Notion summary 使用的 repo-side Core readiness evidence packet，整理最新 commit、CI、Core JSON diagnostics、OpenSpec validate、L-drive residue 與 `partial` gate。 | Core evidence checkpoint、GitHub Actions run、Core JSON diagnostics sweep、OpenSpec validate、Notion alignment packet 或 L-drive residue 判斷改變時更新；不得寫成 product readiness 或 integration authorization。 |
 | `CORE_INTEGRATION_PLANNING_GATE_READINESS.zh-TW.md` | RRKAL Core Integration Planning Gate readiness note，整理 Core 可提供的 registry、lifecycle、manifest reference、review_required、job-status、asset-lineage evidence 與缺口。 | Core readiness JSON、Integration Planning Gate、Visual/Skin control-plane boundary 或 gap-closure plan 改變時更新；不得寫成 integration authorization。 |
 | `DEVELOPMENT_LOG.zh-TW.md` | 開發日誌，從 2026-05-21 起用流水帳記錄 push / CI run；最近日期與同日內最新時間放最上方，成功 run 用 `**CHECKPOINT**` 標醒目，失敗 run 保留為 `**CI 失敗**`，每筆都要有 `開發階段` 與中文說明。 | 每次完成並推送一個版本 checkpoint 後追加，不重寫舊紀錄；需要回補時可用 GitHub Actions run list 反推。 |
 | `HEARTBEAT_AUTOMATION.zh-TW.md` | heartbeat automation 的安全規則、CLI/script 入口、外部排程與 agent runner 邊界。 | 更改 heartbeat CLI、scheduler、停止條件或自動推進規則時更新。 |

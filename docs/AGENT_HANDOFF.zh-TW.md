@@ -1,5 +1,9 @@
 ﻿# Agent Handoff
 
+## 2026-06-03 16:45 +08:00 Core readiness docs index refresh
+- Updated `docs/DOCS_INDEX.zh-TW.md` to include `CORE_READINESS_EVIDENCE_PACKET.zh-TW.md` as the route for `n_1` / Notion summary alignment and added a Core JSON diagnostics sweep route for `--core-json-diagnostic-sweep-plan-json`.
+- Boundary: docs-only index correction. Notion remains dashboard; GitHub/CI/CLI JSON remain evidence. Gate remains `partial`.
+
 ## 2026-06-03 16:40 +08:00 Core integration gate readiness doc refresh
 - Refreshed `docs/CORE_INTEGRATION_PLANNING_GATE_READINESS.zh-TW.md` with latest accepted Core evidence rows through `843fada` and latest CI `26873487153` PASS.
 - Added a short `Core JSON Sweep Plan Evidence` section to prevent agents from mistaking the new sweep-plan CLI for an executing diagnostic runner or readiness promotion.
