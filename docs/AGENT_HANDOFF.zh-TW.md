@@ -1,5 +1,10 @@
 # Agent Handoff
 
+## 2026-06-03 Capability addressing pattern ADR
+- Added `docs/CAPABILITY_ADDRESSING_PATTERN.zh-TW.md` to document the existing 4-bit crawler capability addressing pattern: `CrawlerCapabilityCode`, `CrawlerCapabilityMask`, `CAPABILITY_CODE_WIDTH`, `capability_code_for(...)`, `@crawler(...)`, and `CrawlerSpec.matrix_key`.
+- The ADR states the canonical rule for replacing condition trees deeper than four levels with declarative capability matrix slices, while keeping `CrawlerSpec` as the semantic source of truth.
+- Boundary: docs/pattern-only. No product behavior, lifecycle/status schema, readiness gate, renderer/compressor, SkinAsset/RendererSkinAsset, `.npz`, cross-repo integration, plugin framework, or universal capability framework changes. Gate remains `partial`.
+
 ## 2026-06-03 21:55 +08:00 Core control-plane responsibility audit refresh
 - Rewrote `docs/CORE_CONTROL_PLANE_RESPONSIBILITY_AUDIT.zh-TW.md` as clean ASCII Markdown after the audit was found to contain mojibake and stale evidence.
 - The refreshed audit maps Core zones for CLI/entrypoints, JSON diagnostics, readiness report generation, evidence packet, scheduler evidence, review item identity, OpenSpec, temp DB use, lifecycle/review semantics, GitHub/CI evidence, Notion dashboard references and L-drive residue.

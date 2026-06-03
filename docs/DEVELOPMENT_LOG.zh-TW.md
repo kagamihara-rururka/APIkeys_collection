@@ -1,5 +1,11 @@
 # Development Log
 
+## 2026-06-03 Capability addressing pattern ADR
+- Added `docs/CAPABILITY_ADDRESSING_PATTERN.zh-TW.md` as the docs-only ADR for the existing crawler capability addressing pattern.
+- The ADR documents the problem boundary (`if/else` trees deeper than four levels), current registry anatomy, lossy `CapabilityCode` index semantics, `CrawlerSpec` as semantic source of truth, CIDR-style mask queries, decorator registration safety, reuse candidates, and overuse limits.
+- Updated `docs/DOCS_INDEX.zh-TW.md`, `docs/DOCS_REGISTRY.csv`, `docs/PROJECT_GTD.md`, and `docs/AGENT_HANDOFF.zh-TW.md` with the new document route and checkpoint note.
+- Boundary: docs/pattern/evidence-only. Gate remains `partial`; no behavior, lifecycle/status schema, renderer/compressor, SkinAsset/RendererSkinAsset, `.npz`, cross-repo integration, plugin framework, or universal capability framework changes.
+
 ## 2026-06-03 Core control-plane responsibility audit refresh
 - Rewrote `docs/CORE_CONTROL_PLANE_RESPONSIBILITY_AUDIT.zh-TW.md` as clean ASCII Markdown after attachment-driven review found mojibake and stale evidence in the old audit.
 - The audit now includes the required responsibility map table, readiness gate boundary audit, evidence ledger, future safe slice table, and `n_1` packet.
