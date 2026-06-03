@@ -3,6 +3,7 @@
 Last updated: 2026-06-03
 
 ## 目前工作焦點 / Active Focus
+- [x] 2026-06-03 Core readiness gate aggregation guard 已補：`tests/test_core_readiness_report.py` 現在鎖住 `integration_planning_gate` 必須聚合所有 section 的 missing / blocked / contract-only / planned surfaces，且任一 incomplete surface 都會讓 gate 維持 `partial`。這是 test-hardening，不改 JSON payload、不改 lifecycle/status schema、不做 cross-repo integration。
 - [x] 2026-06-03 Core readiness OpenSpec inventory evidence 已補：新增 `api_launcher/core_openspec_evidence.py`，並把 `openspec_evidence` 接進 `--core-readiness-report-json`。這只盤點 active specs / archived changes，不執行 OpenSpec validate、不改 OpenSpec 檔、不改產品行為；報表保守保留 `openspec_validate_result_not_embedded_in_report`，Integration Planning Gate 仍是 `partial`。
 - [x] 2026-06-03 Core JSON diagnostics catalog live payload guard 已補：`tests/test_core_json_diagnostics_catalog.py` 現在會對現有 8 個 Core JSON diagnostic CLI 做 live payload guard，要求使用明確 local temp `--db`、stdout 可解析、schema version 對齊 catalog、`status_path` 可解析。這是 test-hardening，不新增 CLI 行為、不改 JSON payload、不改 lifecycle/status schema、不做 integration。
 - [x] 2026-06-03 Core JSON sweep cloud-drive classifier test hardening 已補：`tests/test_core_json_diagnostic_sweep_plan.py` 現在覆蓋 `L:\...`、`L:/...`、裸 `L:`、`K:\...`、`K:/...`、裸 `K:`，把 raw Windows cloud-drive path 的跨平台分類行為鎖成 regression guard。這是 test-hardening，不改 production code、CLI、JSON payload、lifecycle/status schema 或 integration。

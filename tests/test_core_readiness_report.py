@@ -11,6 +11,7 @@ from api_launcher.cli_flags import command_requested
 from api_launcher.core import parse_args
 from api_launcher.core_readiness_report import (
     CORE_READINESS_SCHEMA_VERSION,
+    _integration_planning_gate,
     build_core_readiness_report,
 )
 from api_launcher.core_readiness_sections import build_core_readiness_sections
@@ -88,6 +89,39 @@ class CoreReadinessReportTests(unittest.TestCase):
         self.assertIn("visual_skin_asset_registry_persistence", gate["contract_only_surfaces"])
         self.assertIn("unified_bounded_job_scheduler_not_yet_implemented", gate["missing_evidence"])
         self.assertIn("openspec_validate_result_not_embedded_in_report", gate["missing_evidence"])
+
+    def test_integration_gate_aggregates_all_section_surface_buckets(self) -> None:
+        report = build_core_readiness_report()
+        sections = {key: value for key, value in report.items() if key.endswith("_evidence")}
+        gate = report["integration_planning_gate"]
+
+        self.assertEqual(_flatten_section_items(sections, "missing_evidence"), gate["missing_evidence"])
+        self.assertEqual(_flatten_section_items(sections, "blocked_surfaces"), gate["blocked_reasons"])
+        self.assertEqual(_flatten_section_items(sections, "contract_only_surfaces"), gate["contract_only_surfaces"])
+        self.assertEqual(_flatten_section_items(sections, "planned_surfaces"), gate["planned_surfaces"])
+
+    def test_integration_gate_stays_partial_for_any_incomplete_surface(self) -> None:
+        complete_section = {
+            "existing_evidence": {},
+            "missing_evidence": (),
+            "blocked_surfaces": (),
+            "review_required_surfaces": (),
+            "contract_only_surfaces": (),
+            "planned_surfaces": (),
+            "next_safe_actions": (),
+        }
+        self.assertEqual("ready_for_planning", _integration_planning_gate({"complete": complete_section})["status"])
+
+        for key, value in (
+            ("missing_evidence", ("missing_contract",)),
+            ("blocked_surfaces", ("blocked_surface",)),
+            ("contract_only_surfaces", ("contract_only_surface",)),
+            ("planned_surfaces", ("future_surface",)),
+        ):
+            with self.subTest(key=key):
+                section = dict(complete_section)
+                section[key] = value
+                self.assertEqual("partial", _integration_planning_gate({"incomplete": section})["status"])
 
     def test_registry_and_review_evidence_use_existing_reports(self) -> None:
         report = build_core_readiness_report()
@@ -203,6 +237,14 @@ class CoreReadinessReportTests(unittest.TestCase):
         self.assertEqual(CORE_READINESS_SCHEMA_VERSION, payload["schema_version"])
         self.assertEqual("partial", payload["integration_planning_gate"]["status"])
         self.assertEqual("", completed.stderr)
+
+
+def _flatten_section_items(sections: dict[str, dict[str, object]], key: str) -> list[str]:
+    values = set()
+    for section in sections.values():
+        raw_items = section.get(key, ())
+        values.update(str(item) for item in raw_items if item)
+    return sorted(values)
 
 
 if __name__ == "__main__":

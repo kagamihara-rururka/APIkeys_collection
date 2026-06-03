@@ -1,5 +1,11 @@
 ﻿# Agent Handoff
 
+## 2026-06-03 Core readiness gate aggregation guard
+- Added regression coverage in `tests/test_core_readiness_report.py` so `integration_planning_gate` must aggregate every section's `missing_evidence`, `blocked_surfaces`, `contract_only_surfaces`, and `planned_surfaces`.
+- Added a guard that any missing / blocked / contract-only / planned surface keeps the gate `partial`; `ready_for_planning` is only allowed for a synthetic complete section set. This is test-hardening only and does not change `core_readiness_report.v1` output.
+- Verification: focused readiness tests PASS (10 tests); related Core JSON / CLI tests PASS (18 tests); pre-push smoke PASS (`state/logs/pre_push_smoke_20260603_152901.log`, 1157 tests, skipped 4, MVP demo `download_import_completed`, row_count=3). Remote CI evidence is tracked in GitHub Actions after push.
+- Boundary: no product behavior change, no lifecycle/status schema change, no readiness promotion, no cross-repo integration, no renderer/compressor touch.
+
 ## 2026-06-03 Core readiness OpenSpec inventory evidence
 - Added `api_launcher/core_openspec_evidence.py` and wired `openspec_evidence` into `--core-readiness-report-json`. The helper inventories active OpenSpec specs and archived changes without running OpenSpec, changing files, or claiming validation.
 - `openspec_evidence` is conservative: `validation.executed_by_report=false`, `contract_only_surfaces` includes `openspec_governance_inventory`, and `missing_evidence` includes `openspec_validate_result_not_embedded_in_report`, so the Integration Planning Gate remains `partial`.
