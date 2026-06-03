@@ -1,9 +1,15 @@
 from __future__ import annotations
 
+import json
+import subprocess
+import sys
+import tempfile
 import unittest
+from pathlib import Path
 
 from api_launcher.cli_flags import command_requested
 from api_launcher.core import parse_args
+from api_launcher.core_json_diagnostic_sweep_plan import build_core_json_diagnostic_sweep_plan
 from api_launcher.core_json_diagnostics_catalog import (
     core_json_diagnostic_flags,
     core_json_diagnostic_schema_versions,
@@ -75,6 +81,26 @@ class CoreJsonDiagnosticsCatalogTests(unittest.TestCase):
         )
         self.assertEqual("partial", status_from_payload(review_required, {"status": "partial"}))
         self.assertEqual("", status_from_payload(readiness, {"status": "partial"}))
+
+    def test_catalog_status_paths_resolve_against_live_cli_payloads(self) -> None:
+        repo_root = Path(__file__).resolve().parents[1]
+
+        for spec in iter_core_json_diagnostic_specs():
+            with self.subTest(flag=spec.flag), tempfile.TemporaryDirectory() as temp_dir:
+                db_path = Path(temp_dir) / "rrkal_core_json_catalog_status_test.sqlite"
+                plan = build_core_json_diagnostic_sweep_plan(str(db_path), specs=(spec,))[0]
+                completed = subprocess.run(
+                    [sys.executable, "-B", *plan.launcher_args],
+                    cwd=repo_root,
+                    text=True,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    check=True,
+                )
+                payload = json.loads(completed.stdout)
+                self.assertEqual(spec.schema_version, payload["schema_version"])
+                self.assertEqual("local_temp", plan.db_path_kind)
+                self.assertIn(status_from_payload(spec, payload), {"partial", "not_ready", "contract_only"})
 
 
 if __name__ == "__main__":

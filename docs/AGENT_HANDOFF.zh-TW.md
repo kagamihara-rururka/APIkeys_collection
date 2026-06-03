@@ -1,5 +1,11 @@
 ﻿# Agent Handoff
 
+## 2026-06-03 Core JSON diagnostics catalog live payload guard
+- Expanded `tests/test_core_json_diagnostics_catalog.py` with a live CLI payload regression guard: every cataloged Core JSON diagnostic runs through an explicit local temp `--db`, parses as JSON, matches the catalog schema version, and resolves the catalog `status_path`.
+- The first full smoke attempt exposed fixed temp DB coupling; the test now gives each diagnostic flag its own temporary directory and SQLite path.
+- Scope: test-hardening only. No production code change, no CLI behavior change, no JSON payload change, no lifecycle/status schema change, no readiness promotion, no cross-repo integration.
+- Verification: focused catalog tests PASS (5 tests); related Core diagnostic / CLI JSON tests PASS (11 tests); pre-push smoke PASS in `state/logs/pre_push_smoke_20260603_150015.log` (1152 tests, 4 skipped, MVP demo `download_import_completed`, `row_count=3`). Remote CI evidence is tracked in GitHub Actions / final checkpoint report.
+
 ## 2026-06-03 Core JSON sweep cloud-drive classifier test hardening
 - Expanded `tests/test_core_json_diagnostic_sweep_plan.py` so the cloud-drive classifier regression guard covers backslash paths, forward-slash paths, and bare `L:` / `K:` drive tokens.
 - Scope: test-hardening only. No production code change, no CLI behavior change, no JSON payload change, no lifecycle/status schema change, no readiness promotion, no cross-repo integration.
