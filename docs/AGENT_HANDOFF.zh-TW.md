@@ -1,4 +1,10 @@
-﻿# Agent Handoff
+# Agent Handoff
+
+## 2026-06-03 17:15 +08:00 Core readiness evidence packet drift repair
+- Rewrote `docs/CORE_READINESS_EVIDENCE_PACKET.zh-TW.md` as clean ASCII Markdown after the packet was found to contain mojibake and stale checkpoint evidence.
+- Packet now points to current evidence HEAD `7731ef0`, latest CI `26874252703` PASS, Core behavior checkpoint `030a986`, OpenSpec validate PASS, and the 8 Core JSON diagnostics parse sweep with explicit local temp DB.
+- Updated `docs/DOCS_REGISTRY.csv` so the auxiliary docs registry points to the refreshed packet evidence.
+- Boundary: docs/evidence repair only. Gate remains `partial`; no product behavior, schema/status, readiness, renderer/compressor, or cross-repo integration changes.
 
 ## 2026-06-03 16:50 +08:00 Core readiness docs registry refresh
 - Updated `docs/DOCS_REGISTRY.csv` to include `CORE_READINESS_EVIDENCE_PACKET.zh-TW.md` and `CORE_INTEGRATION_PLANNING_GATE_READINESS.zh-TW.md`; refreshed the audit row evidence string.

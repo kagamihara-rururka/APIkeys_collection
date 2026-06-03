@@ -1,4 +1,9 @@
-﻿# Development Log
+# Development Log
+
+## 2026-06-03 Core readiness evidence packet drift repair
+- Rewrote `docs/CORE_READINESS_EVIDENCE_PACKET.zh-TW.md` as clean ASCII Markdown after read-only completion audit found mojibake and stale packet evidence.
+- The packet now records current evidence HEAD `7731ef0`, CI `26874252703` PASS, Core behavior checkpoint `030a986`, 8/8 Core JSON diagnostics parse with explicit local temp DB, OpenSpec validate PASS, and the `partial` gate.
+- Updated `docs/DOCS_REGISTRY.csv` to match the refreshed packet evidence. This is docs/evidence repair only; no product behavior, schema/status, readiness, renderer/compressor, or cross-repo changes.
 
 ## 2026-06-03 Core readiness docs registry refresh
 - Updated `docs/DOCS_REGISTRY.csv` so the diff-friendly docs registry now includes `CORE_READINESS_EVIDENCE_PACKET.zh-TW.md` and `CORE_INTEGRATION_PLANNING_GATE_READINESS.zh-TW.md`, alongside the refreshed control-plane responsibility audit row.
