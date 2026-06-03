@@ -42,6 +42,17 @@ class CoreReadinessReportTests(unittest.TestCase):
         self.assertFalse(report["safety"]["changes_lifecycle_schema"])
         self.assertFalse(report["safety"]["cross_repo_implementation"])
 
+    def test_report_never_sets_downstream_or_schema_safety_flags_true(self) -> None:
+        report = build_core_readiness_report()
+        violations = []
+
+        for path, mapping in _walk_dicts(report):
+            for flag in _FORBIDDEN_TRUE_SAFETY_FLAGS:
+                if mapping.get(flag) is True:
+                    violations.append(f"{path}.{flag}")
+
+        self.assertEqual([], violations)
+
     def test_report_separates_evidence_categories(self) -> None:
         report = build_core_readiness_report()
 
@@ -245,6 +256,46 @@ def _flatten_section_items(sections: dict[str, dict[str, object]], key: str) -> 
         raw_items = section.get(key, ())
         values.update(str(item) for item in raw_items if item)
     return sorted(values)
+
+
+_FORBIDDEN_TRUE_SAFETY_FLAGS = frozenset(
+    {
+        "adds_cross_repo_job_adapter",
+        "calls_visual_asset_ready_writer",
+        "changes_lifecycle_schema",
+        "changes_lifecycle_statuses",
+        "changes_openspec_files",
+        "changes_product_behavior",
+        "changes_scheduler_schema",
+        "cross_repo_implementation",
+        "defines_durable_queue_schema",
+        "emits_lifecycle_events",
+        "enables_auto_lifecycle_events",
+        "executes_openspec",
+        "implements_scheduler_runtime",
+        "imports_compressor_projects",
+        "imports_renderer_projects",
+        "payload_columns_allowed",
+        "payload_loading",
+        "reads_npz",
+        "reads_renderer_payloads",
+        "starts_asyncio_runtime_migration",
+    }
+)
+
+
+def _walk_dicts(value: object, path: str = "report") -> list[tuple[str, dict[str, object]]]:
+    if isinstance(value, dict):
+        children = [(path, value)]
+        for key, child in value.items():
+            children.extend(_walk_dicts(child, f"{path}.{key}"))
+        return children
+    if isinstance(value, (list, tuple)):
+        children = []
+        for index, child in enumerate(value):
+            children.extend(_walk_dicts(child, f"{path}[{index}]"))
+        return children
+    return []
 
 
 if __name__ == "__main__":

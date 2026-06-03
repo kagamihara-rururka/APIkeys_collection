@@ -1,5 +1,11 @@
 ﻿# Agent Handoff
 
+## 2026-06-03 Core readiness downstream safety flag guard
+- Added recursive regression coverage in `tests/test_core_readiness_report.py` so `core_readiness_report.v1` cannot set downstream / schema safety flags to `true` anywhere in the nested payload.
+- Guarded flags include renderer/compressor imports, renderer payload reads, `.npz` reads, cross-repo implementation, lifecycle/schema/status changes, scheduler runtime/schema changes, OpenSpec execution, product behavior changes, and payload-column loading.
+- Verification: focused readiness tests PASS (11 tests); related Core JSON / CLI tests PASS (19 tests); pre-push smoke PASS (`state/logs/pre_push_smoke_20260603_153935.log`, 1158 tests, skipped 4, MVP demo `download_import_completed`, row_count=3). Remote CI evidence is tracked in GitHub Actions after push.
+- Boundary: test-hardening only. No product behavior change, no readiness promotion, no lifecycle/status schema change, no cross-repo integration, no renderer/compressor touch.
+
 ## 2026-06-03 Core readiness gate aggregation guard
 - Added regression coverage in `tests/test_core_readiness_report.py` so `integration_planning_gate` must aggregate every section's `missing_evidence`, `blocked_surfaces`, `contract_only_surfaces`, and `planned_surfaces`.
 - Added a guard that any missing / blocked / contract-only / planned surface keeps the gate `partial`; `ready_for_planning` is only allowed for a synthetic complete section set. This is test-hardening only and does not change `core_readiness_report.v1` output.
