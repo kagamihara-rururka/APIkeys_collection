@@ -1,5 +1,10 @@
 ﻿# Agent Handoff
 
+## 2026-06-03 Core JSON diagnostic sweep plan helper
+- Added `api_launcher/core_json_diagnostic_sweep_plan.py`, a non-executing helper that builds explicit `--db` command plans for the existing Core JSON diagnostics and classifies DB paths as `local_temp`, `cloud_drive`, or `other`.
+- Scope: planning/evidence helper and tests only. It does not run subprocesses, create SQLite files, change CLI behavior, or hide real DB failures.
+- Verification: focused sweep-plan tests PASS (3 tests); related Core report / CLI JSON tests PASS (58 tests); plan-driven Core JSON sweep PASS (8/8 parse with local temp DB, all `partial`); OpenSpec validate PASS (3 specs); pre-push smoke PASS in `state/logs/pre_push_smoke_20260603_140956.log` (1151 tests, 4 skipped, MVP demo `download_import_completed`, `row_count=3`).
+
 ## 2026-06-03 Core JSON diagnostics catalog
 - Added `api_launcher/core_json_diagnostics_catalog.py` as a static catalog for the existing 8 Core JSON diagnostic entrypoints: flag, argparse attr, schema version, evidence area, status path, and repository requirement.
 - Scope: declarative metadata / test hardening only. No new CLI behavior, no report payload change, no lifecycle/status schema change, no integration work, no downstream repo import.

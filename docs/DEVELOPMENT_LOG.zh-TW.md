@@ -1,5 +1,11 @@
 ﻿# Development Log
 
+## 2026-06-03 Core JSON diagnostic sweep plan helper
+- Added `api_launcher/core_json_diagnostic_sweep_plan.py`, a non-executing helper that builds explicit `--db` command plans from the Core JSON diagnostics catalog and classifies sweep DB paths.
+- Added tests proving all catalog flags use explicit temp DB plan entries, `L:` / `K:` paths are classified as `cloud_drive`, and temp paths classify as `local_temp`.
+- Verification: `py_compile` PASS; `tests.test_core_json_diagnostic_sweep_plan -v` PASS (3 tests); related Core report / CLI JSON tests PASS (58 tests); plan-driven Core JSON diagnostics sweep PASS (8/8 parse with local temp DB, all `partial`); OpenSpec validate PASS (3 specs); pre-push smoke PASS in `state/logs/pre_push_smoke_20260603_140956.log` (1151 tests, 4 skipped, MVP demo `download_import_completed`, `row_count=3`).
+- Boundary: planning/evidence helper only. No subprocess execution, no SQLite creation, no CLI behavior change, no lifecycle/status schema change, no readiness promotion.
+
 ## 2026-06-03 Core JSON diagnostics catalog
 - Added `api_launcher/core_json_diagnostics_catalog.py` as a declarative evidence table for the existing Core JSON diagnostic entrypoints.
 - Added tests for catalog order, schema versions, `parse_args` / `command_requested` coverage, and nested readiness gate status extraction.

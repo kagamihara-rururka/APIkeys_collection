@@ -72,6 +72,7 @@ Stop and ask Owner / `o_1` before any future work that needs:
 | Evidence packet | `09f8775` / CI `26852115783` | Repo-side `n_1` packet records JSON sweep, OpenSpec validate, L-drive residue and `partial` gate. |
 | Readiness section builder extraction | this checkpoint / local checks | `core_readiness_report.py` now delegates evidence section assembly to `core_readiness_sections.py`; payload semantics and gate remain unchanged. |
 | Core JSON diagnostics catalog | this checkpoint / local checks | `core_json_diagnostics_catalog.py` records the existing 8 diagnostic flags, schema versions and status paths as static evidence metadata. |
+| Core JSON diagnostic sweep plan helper | this checkpoint / local checks | `core_json_diagnostic_sweep_plan.py` generates explicit `--db` command plans and classifies `L:` / `K:` sweep DB paths as `cloud_drive`. |
 
 ## Future Safe Slice Candidates
 
@@ -81,7 +82,7 @@ Stop and ask Owner / `o_1` before any future work that needs:
 | Core JSON diagnostics evidence table helper | `completed_static_catalog` | Implemented as `core_json_diagnostics_catalog.py`; catalog-driven sweep validates the existing 8 entrypoints without adding CLI behavior. |
 | Scheduler evidence aggregation helper | `needs_tests_first` | Could centralize scheduler evidence imports; must not bind to runtime scheduler or persistence. |
 | Review item identity evidence helper | `needs_tests_first` | Could keep review queue/readiness reports aligned; must not create queue schema or resolution statuses. |
-| Local temp DB precheck helper | `evidence/reporting helper candidate` | Could reduce false failures on cloud-drive SQLite; should remain opt-in and not hide real DB errors. |
+| Local temp DB precheck helper | `completed_non_executing_plan_helper` | Implemented as `core_json_diagnostic_sweep_plan.py`; it plans explicit temp-DB sweeps and flags cloud-drive DB paths without executing or creating DBs. |
 | OpenSpec archive evidence checker | `candidate_only` | Could summarize active specs and archive residue; not needed until OpenSpec evidence grows further. |
 | Lifecycle transition runtime | `requires_o_1_review` | Changes product semantics; not a docs-only slice. |
 | Cross-repo SkinAsset / RendererSkinAsset integration | `do not touch without integration gate` | Outside `c_1` current authorization. |

@@ -1,0 +1,96 @@
+from __future__ import annotations
+
+import os
+import tempfile
+from dataclasses import dataclass
+from pathlib import Path
+
+from api_launcher.core_json_diagnostics_catalog import (
+    CoreJsonDiagnosticSpec,
+    iter_core_json_diagnostic_specs,
+)
+
+
+@dataclass(frozen=True)
+class CoreJsonDiagnosticCommandPlan:
+    flag: str
+    schema_version: str
+    evidence_area: str
+    status_path: tuple[str, ...]
+    launcher_args: tuple[str, ...]
+    db_path: str
+    db_path_kind: str
+    uses_explicit_db: bool
+
+
+def build_core_json_diagnostic_sweep_plan(
+    db_path: str | os.PathLike[str],
+    *,
+    launcher: str = "APIkeys_collection.py",
+    specs: tuple[CoreJsonDiagnosticSpec, ...] | None = None,
+) -> tuple[CoreJsonDiagnosticCommandPlan, ...]:
+    """Describe how to run Core diagnostics with an explicit SQLite path.
+
+    The helper does not execute commands and does not touch the database. It is
+    an evidence/planning surface for agents and tests that need a repeatable
+    sweep without accidentally falling back to the cloud-drive default DB.
+    """
+
+    normalized_db_path = str(db_path)
+    diagnostic_specs = specs if specs is not None else iter_core_json_diagnostic_specs()
+    return tuple(
+        CoreJsonDiagnosticCommandPlan(
+            flag=spec.flag,
+            schema_version=spec.schema_version,
+            evidence_area=spec.evidence_area,
+            status_path=spec.status_path,
+            launcher_args=(launcher, "--db", normalized_db_path, spec.flag),
+            db_path=normalized_db_path,
+            db_path_kind=classify_core_json_sweep_db_path(normalized_db_path),
+            uses_explicit_db=True,
+        )
+        for spec in diagnostic_specs
+    )
+
+
+def classify_core_json_sweep_db_path(db_path: str | os.PathLike[str]) -> str:
+    path = Path(db_path)
+    drive = path.drive.upper()
+    if drive in {"L:", "K:"}:
+        return "cloud_drive"
+
+    temp_roots = _normalized_temp_roots()
+    try:
+        resolved = path.resolve(strict=False)
+    except OSError:
+        resolved = path.absolute()
+    normalized = os.path.normcase(str(resolved))
+    for temp_root in temp_roots:
+        if normalized == temp_root or normalized.startswith(temp_root + os.sep):
+            return "local_temp"
+    return "other"
+
+
+def _normalized_temp_roots() -> tuple[str, ...]:
+    roots = {
+        tempfile.gettempdir(),
+        os.environ.get("TEMP", ""),
+        os.environ.get("TMP", ""),
+    }
+    normalized: list[str] = []
+    for root in roots:
+        if not root:
+            continue
+        try:
+            resolved = Path(root).resolve(strict=False)
+        except OSError:
+            resolved = Path(root).absolute()
+        normalized.append(os.path.normcase(str(resolved)))
+    return tuple(sorted(set(normalized)))
+
+
+__all__ = [
+    "CoreJsonDiagnosticCommandPlan",
+    "build_core_json_diagnostic_sweep_plan",
+    "classify_core_json_sweep_db_path",
+]
