@@ -11,6 +11,7 @@ from api_launcher.core_json_diagnostic_sweep_plan import (
 from api_launcher.core_json_diagnostics_catalog import (
     core_json_diagnostic_flags,
     core_json_diagnostic_schema_versions,
+    core_json_diagnostic_specs_by_flag,
 )
 
 
@@ -19,6 +20,7 @@ class CoreJsonDiagnosticSweepPlanTests(unittest.TestCase):
         db_path = os.path.join(tempfile.gettempdir(), "rrkal_core_json_sweep_test.sqlite")
         plans = build_core_json_diagnostic_sweep_plan(db_path)
         versions = core_json_diagnostic_schema_versions()
+        specs_by_flag = core_json_diagnostic_specs_by_flag()
 
         self.assertEqual(core_json_diagnostic_flags(), tuple(plan.flag for plan in plans))
         for plan in plans:
@@ -26,7 +28,16 @@ class CoreJsonDiagnosticSweepPlanTests(unittest.TestCase):
                 self.assertTrue(plan.uses_explicit_db)
                 self.assertEqual("local_temp", plan.db_path_kind)
                 self.assertEqual(versions[plan.flag], plan.schema_version)
+                self.assertEqual(specs_by_flag[plan.flag].requires_repository, plan.requires_repository)
                 self.assertEqual(("APIkeys_collection.py", "--db", db_path, plan.flag), plan.launcher_args)
+
+    def test_sweep_plan_preserves_non_repository_diagnostic_metadata(self) -> None:
+        db_path = os.path.join(tempfile.gettempdir(), "rrkal_core_json_sweep_test.sqlite")
+        plans = build_core_json_diagnostic_sweep_plan(db_path)
+        requires_repo = {plan.flag: plan.requires_repository for plan in plans}
+
+        self.assertFalse(requires_repo["--core-deep-adapter-coverage-json"])
+        self.assertTrue(requires_repo["--core-readiness-report-json"])
 
     def test_db_path_classifier_marks_cloud_drives_as_risky_for_sweeps(self) -> None:
         cloud_paths = (

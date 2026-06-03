@@ -1,5 +1,11 @@
 ﻿# Development Log
 
+## 2026-06-03 Core JSON sweep repository requirement metadata
+- Added `requires_repository` to `CoreJsonDiagnosticCommandPlan`, so the non-executing Core JSON sweep plan preserves whether each diagnostic needs repository/DB context.
+- Tests now assert the non-repository diagnostic `--core-deep-adapter-coverage-json` stays marked `requires_repository=false`, while repository-backed diagnostics such as `--core-readiness-report-json` remain `true`.
+- Verification: focused sweep-plan tests PASS (4 tests); related Core JSON / readiness / CLI tests PASS (23 tests); pre-push smoke PASS (`state/logs/pre_push_smoke_20260603_160301.log`, 1159 tests, skipped 4, MVP demo `download_import_completed`, row_count=3). Remote CI evidence is tracked in GitHub Actions after push.
+- Boundary: evidence helper metadata only. No CLI behavior change, no JSON diagnostic payload change, no product behavior change, no lifecycle/status schema change, no cross-repo integration.
+
 ## 2026-06-03 Core JSON diagnostics stderr guard
 - Tightened `tests/test_core_json_diagnostics_catalog.py` so every cataloged Core JSON diagnostic CLI must emit parseable stdout JSON and empty stderr when run through the explicit local temp `--db` sweep plan.
 - This is test-hardening only. It does not change JSON payload semantics, lifecycle/status schema, product behavior, readiness gate, or cross-repo integration boundaries.

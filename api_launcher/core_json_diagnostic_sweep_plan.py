@@ -21,6 +21,7 @@ class CoreJsonDiagnosticCommandPlan:
     db_path: str
     db_path_kind: str
     uses_explicit_db: bool
+    requires_repository: bool
 
 
 def build_core_json_diagnostic_sweep_plan(
@@ -48,6 +49,7 @@ def build_core_json_diagnostic_sweep_plan(
             db_path=normalized_db_path,
             db_path_kind=classify_core_json_sweep_db_path(normalized_db_path),
             uses_explicit_db=True,
+            requires_repository=spec.requires_repository,
         )
         for spec in diagnostic_specs
     )

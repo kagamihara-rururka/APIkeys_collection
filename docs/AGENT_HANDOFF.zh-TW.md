@@ -1,5 +1,11 @@
 ﻿# Agent Handoff
 
+## 2026-06-03 Core JSON sweep repository requirement metadata
+- Added `requires_repository` to `CoreJsonDiagnosticCommandPlan`, preserving each cataloged diagnostic's repository requirement inside the non-executing sweep plan.
+- Added regression coverage so `--core-deep-adapter-coverage-json` remains marked `requires_repository=false` while repository-backed diagnostics such as `--core-readiness-report-json` remain `true`.
+- Verification: focused sweep-plan tests PASS (4 tests); related Core JSON / readiness / CLI tests PASS (23 tests); pre-push smoke PASS (`state/logs/pre_push_smoke_20260603_160301.log`, 1159 tests, skipped 4, MVP demo `download_import_completed`, row_count=3). Remote CI evidence is tracked in GitHub Actions after push.
+- Boundary: evidence helper metadata only. No CLI behavior change, no JSON diagnostic payload change, no product behavior change, no lifecycle/status schema change, no cross-repo integration.
+
 ## 2026-06-03 Core JSON diagnostics stderr guard
 - Tightened `tests/test_core_json_diagnostics_catalog.py`: every cataloged Core JSON diagnostic CLI now must produce parseable stdout JSON and empty stderr when run with an explicit local temp `--db`.
 - This guards agent-readable JSON mode against side-channel warning/log noise while preserving existing payload semantics and conservative statuses.
