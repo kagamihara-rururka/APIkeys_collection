@@ -1,5 +1,11 @@
 ﻿# Development Log
 
+## 2026-06-03 Core JSON sweep cloud-drive classifier CI fix
+- GitHub Actions run `26867270368` failed on Ubuntu after `0605552` because the new sweep-plan path classifier depended on `pathlib.Path(...).drive`, which does not classify raw Windows `L:` / `K:` paths when tests run on POSIX.
+- Fixed `api_launcher/core_json_diagnostic_sweep_plan.py` with a raw-string `L:` / `K:` guard before platform-native path normalization. This preserves the intended cloud-drive warning for Core JSON sweeps across Windows and Linux.
+- Verification: `py_compile` PASS; focused/related Core diagnostic tests PASS (10 tests); plan-driven Core JSON sweep PASS (8/8 parse with local temp DB, all `partial`); pre-push smoke PASS in `state/logs/pre_push_smoke_20260603_142422.log` (1151 tests, 4 skipped, MVP demo `download_import_completed`, `row_count=3`). Follow-up GitHub Actions are pending for the fix commit.
+- Boundary: CI regression fix only. No CLI behavior change, no JSON payload change, no lifecycle/status schema change, no readiness promotion, no cross-repo integration.
+
 ## 2026-06-03 Core JSON diagnostic sweep plan helper
 - Added `api_launcher/core_json_diagnostic_sweep_plan.py`, a non-executing helper that builds explicit `--db` command plans from the Core JSON diagnostics catalog and classifies sweep DB paths.
 - Added tests proving all catalog flags use explicit temp DB plan entries, `L:` / `K:` paths are classified as `cloud_drive`, and temp paths classify as `local_temp`.

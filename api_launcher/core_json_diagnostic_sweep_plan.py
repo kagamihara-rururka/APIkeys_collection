@@ -54,7 +54,11 @@ def build_core_json_diagnostic_sweep_plan(
 
 
 def classify_core_json_sweep_db_path(db_path: str | os.PathLike[str]) -> str:
-    path = Path(db_path)
+    raw_path = str(db_path)
+    if _looks_like_cloud_drive_path(raw_path):
+        return "cloud_drive"
+
+    path = Path(raw_path)
     drive = path.drive.upper()
     if drive in {"L:", "K:"}:
         return "cloud_drive"
@@ -69,6 +73,18 @@ def classify_core_json_sweep_db_path(db_path: str | os.PathLike[str]) -> str:
         if normalized == temp_root or normalized.startswith(temp_root + os.sep):
             return "local_temp"
     return "other"
+
+
+def _looks_like_cloud_drive_path(raw_path: str) -> bool:
+    """Detect Windows cloud-drive paths even when tests run on POSIX.
+
+    `pathlib.Path()` cannot infer a Windows drive from a raw L-drive
+    string on Linux, so CI needs a raw string guard before
+    platform-native path normalization runs.
+    """
+
+    normalized = raw_path.strip().replace("/", "\\").upper()
+    return normalized == "L:" or normalized == "K:" or normalized.startswith(("L:\\", "K:\\"))
 
 
 def _normalized_temp_roots() -> tuple[str, ...]:

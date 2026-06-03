@@ -73,6 +73,7 @@ Stop and ask Owner / `o_1` before any future work that needs:
 | Readiness section builder extraction | this checkpoint / local checks | `core_readiness_report.py` now delegates evidence section assembly to `core_readiness_sections.py`; payload semantics and gate remain unchanged. |
 | Core JSON diagnostics catalog | this checkpoint / local checks | `core_json_diagnostics_catalog.py` records the existing 8 diagnostic flags, schema versions and status paths as static evidence metadata. |
 | Core JSON diagnostic sweep plan helper | this checkpoint / local checks | `core_json_diagnostic_sweep_plan.py` generates explicit `--db` command plans and classifies `L:` / `K:` sweep DB paths as `cloud_drive`. |
+| Core JSON sweep path classifier CI fix | this checkpoint / CI follow-up pending | GitHub Actions run `26867270368` exposed that POSIX `pathlib` does not infer Windows `L:` / `K:` drives; the classifier now checks raw drive strings before platform-native normalization. |
 
 ## Future Safe Slice Candidates
 
