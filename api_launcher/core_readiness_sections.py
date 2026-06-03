@@ -5,6 +5,7 @@ from typing import Any
 
 from api_launcher.content_registry import content_registry_report
 from api_launcher.core_review_item_contracts import review_item_identity_contract_draft
+from api_launcher.core_openspec_evidence import build_core_openspec_evidence
 from api_launcher.core_scheduler_contracts import (
     scheduler_job_contract_draft,
     scheduler_lifecycle_event_emission_guard_contract,
@@ -40,6 +41,7 @@ def build_core_readiness_sections(repository: Any | None = None) -> dict[str, di
     visual_schema = visual_asset_registry_persistence_schema()
     empty_visual_summary = visual_asset_registry_summary(())
     maturity_payload = build_project_maturity_payload(repository) if repository is not None else {}
+    openspec_report = build_core_openspec_evidence()
 
     return {
         "registry_evidence": _registry_evidence(crawler_report, content_report, adapter_report),
@@ -51,6 +53,7 @@ def build_core_readiness_sections(repository: Any | None = None) -> dict[str, di
         ),
         "job_status_evidence": _job_status_evidence(visual_schema, maturity_payload),
         "asset_lineage_evidence": _asset_lineage_evidence(visual_schema),
+        "openspec_evidence": _openspec_evidence(openspec_report),
     }
 
 
@@ -265,6 +268,25 @@ def _asset_lineage_evidence(visual_schema: dict[str, Any]) -> dict[str, Any]:
         "next_safe_actions": (
             "persist_lineage_only_after_explicit_migration_guard",
             "do_not_copy_notional_or_archive_threads_into_product_lineage",
+        ),
+    }
+
+
+def _openspec_evidence(openspec_report: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "existing_evidence": {
+            "openspec_inventory": openspec_report,
+            "active_spec_count": int(openspec_report.get("active_spec_count") or 0),
+            "archived_change_count": int(openspec_report.get("archived_change_count") or 0),
+        },
+        "missing_evidence": ("openspec_validate_result_not_embedded_in_report",),
+        "blocked_surfaces": (),
+        "review_required_surfaces": (),
+        "contract_only_surfaces": ("openspec_governance_inventory",),
+        "planned_surfaces": (),
+        "next_safe_actions": (
+            "run_openspec_validate_as_explicit_checkpoint_command",
+            "keep_openspec_inventory_separate_from_runtime_product_behavior",
         ),
     }
 

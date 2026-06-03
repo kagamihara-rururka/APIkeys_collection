@@ -28,6 +28,7 @@ class CoreReadinessReportTests(unittest.TestCase):
             "review_required_evidence",
             "job_status_evidence",
             "asset_lineage_evidence",
+            "openspec_evidence",
             "integration_planning_gate",
         ):
             self.assertIn(section, report)
@@ -50,6 +51,7 @@ class CoreReadinessReportTests(unittest.TestCase):
             "review_required_evidence",
             "job_status_evidence",
             "asset_lineage_evidence",
+            "openspec_evidence",
         ):
             section = report[section_name]
             self.assertIn("existing_evidence", section)
@@ -71,6 +73,7 @@ class CoreReadinessReportTests(unittest.TestCase):
             "review_required_evidence",
             "job_status_evidence",
             "asset_lineage_evidence",
+            "openspec_evidence",
         )
         self.assertEqual(set(expected_section_names), set(sections))
         for section_name in expected_section_names:
@@ -84,6 +87,7 @@ class CoreReadinessReportTests(unittest.TestCase):
         self.assertNotEqual("ready_for_planning", gate["status"])
         self.assertIn("visual_skin_asset_registry_persistence", gate["contract_only_surfaces"])
         self.assertIn("unified_bounded_job_scheduler_not_yet_implemented", gate["missing_evidence"])
+        self.assertIn("openspec_validate_result_not_embedded_in_report", gate["missing_evidence"])
 
     def test_registry_and_review_evidence_use_existing_reports(self) -> None:
         report = build_core_readiness_report()
@@ -158,6 +162,20 @@ class CoreReadinessReportTests(unittest.TestCase):
             "core_scheduler_o1_review_gate_contract",
             job_status["contract_only_surfaces"],
         )
+
+    def test_openspec_evidence_is_inventory_only(self) -> None:
+        report = build_core_readiness_report()
+        openspec = report["openspec_evidence"]
+        inventory = openspec["existing_evidence"]["openspec_inventory"]
+        spec_ids = {entry["spec_id"] for entry in inventory["active_specs"]}
+
+        self.assertEqual("core_openspec_evidence.v1", inventory["schema_version"])
+        self.assertFalse(inventory["validation"]["executed_by_report"])
+        self.assertFalse(inventory["safety"]["executes_openspec"])
+        self.assertGreaterEqual(openspec["existing_evidence"]["active_spec_count"], 3)
+        self.assertIn("bounded-scheduler-core-contract", spec_ids)
+        self.assertIn("openspec_validate_result_not_embedded_in_report", openspec["missing_evidence"])
+        self.assertIn("openspec_governance_inventory", openspec["contract_only_surfaces"])
 
     def test_cli_json_stdout_is_parseable_and_command_requested(self) -> None:
         args = parse_args(["--core-readiness-report-json"])

@@ -1,5 +1,11 @@
 ﻿# Development Log
 
+## 2026-06-03 Core readiness OpenSpec inventory evidence
+- Added `api_launcher/core_openspec_evidence.py` and wired `openspec_evidence` into `--core-readiness-report-json`. The helper inventories active OpenSpec specs and archived changes without running OpenSpec, changing files, or claiming validation.
+- `openspec_evidence` remains conservative: `validation.executed_by_report=false`, `contract_only_surfaces` includes `openspec_governance_inventory`, and `missing_evidence` includes `openspec_validate_result_not_embedded_in_report`, so the Integration Planning Gate remains `partial`.
+- Verification: focused OpenSpec/readiness tests PASS (10 tests); related Core JSON tests PASS (21 tests); `--core-readiness-report-json` parse check PASS with `openspec_evidence.active_spec_count=3` and gate `partial`; OpenSpec validate PASS (3 specs); pre-push smoke PASS (`state/logs/pre_push_smoke_20260603_151635.log`, 1155 tests, skipped 4, MVP demo `download_import_completed`, row_count=3). Remote CI evidence is tracked in GitHub Actions after push.
+- Boundary: Core readiness evidence only. No product behavior change, no lifecycle/status schema change, no readiness promotion, no cross-repo integration, no renderer/compressor touch.
+
 ## 2026-06-03 Core JSON diagnostics catalog live payload guard
 - Expanded `tests/test_core_json_diagnostics_catalog.py` with a live CLI payload regression guard: every cataloged Core JSON diagnostic runs through an explicit local temp `--db`, parses as JSON, matches the catalog schema version, and resolves the catalog `status_path`.
 - First full smoke attempt exposed fixed temp DB coupling; the test now gives each diagnostic flag its own temporary directory and SQLite path.
