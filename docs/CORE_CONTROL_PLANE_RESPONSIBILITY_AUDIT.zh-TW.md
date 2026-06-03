@@ -1,58 +1,77 @@
 # Core Control-Plane Responsibility Audit
 
-最後更新：2026-06-03 16:26 +08:00
+Updated: 2026-06-03 21:55 +08:00
 
-這份文件盤點 RRKAL Core control plane 目前負責什麼、不負責什麼，以及哪些證據足以支持下一步 review。它是 docs-only audit，不新增 Core 功能，不授權 renderer、compressor、SkinAsset、RendererSkinAsset 或 cross-repo integration。
+Purpose: define the RRKAL Core control-plane responsibility map, align the
+current evidence ledger, and keep future Core work inside the registry /
+lifecycle / manifest / review_required / job-status / asset-lineage boundary.
 
-一句話邊界：
-
-> RRKAL Core 管資產生命週期、manifest reference、registry、job status、review_required 與 lineage 的控制面證據；它不讀 renderer payload，也不決定資產怎麼畫、怎麼壓縮或由哪個 renderer 消費。
+This is a docs-only audit. It does not authorize renderer, compressor,
+SkinAsset, RendererSkinAsset, `.npz`, payload reading, lifecycle schema/status
+changes, or cross-repo implementation.
 
 ## Baseline
 
-| 欄位 | 目前證據 |
+| Item | Evidence |
 | --- | --- |
 | Repo | `L:\RRKAL_project` |
 | Branch | `rrkal-32e215c-recovery` |
-| Baseline before audit | `09f8775` / `docs: align core readiness evidence summary` |
-| Latest Core evidence checkpoint | `030a986` / `feat(core): expose diagnostic sweep plan json` |
-| Latest accepted CI | GitHub Actions run `26872795697` / PASS |
+| Latest accepted evidence before this audit | `3c45496` / `docs: refresh core readiness evidence packet` |
+| Latest accepted CI | GitHub Actions run `26875337280` / PASS / head SHA `3c45496e4c8a6cc54e0bef71764719f9889b26b4` |
 | Core readiness gate | `partial` |
-| Core JSON diagnostics | 8/8 parse with explicit local temp DB; all catalog live payload tests PASS; all remain conservative |
+| Core readiness schema | `core_readiness_report.v1` |
+| Core JSON diagnostics | 8/8 parse with explicit local temp DB; all remain conservative |
 | OpenSpec validate | PASS, 3 specs |
-| Known environment residue | `git status` may warn about archived OpenSpec path permission on L-drive; treat as cloud-drive residue unless tracked state validation fails |
+| Focused tests | PASS, 22 tests: `tests.test_core_readiness_report`, `tests.test_core_json_diagnostic_sweep_plan`, `tests.test_core_json_diagnostics_catalog` |
+| Pre-push smoke | PASS, 1161 tests, skipped 4, MVP demo `download_import_completed`, row_count 3 |
+| Known environment residue | L-drive cloud sync can cause transient stale permission / SQLite warnings. Treat as environment residue unless tracked Git / CI / JSON validation fails. |
+
+## Boundary Statement
+
+RRKAL Core manages asset lifecycle evidence, manifests, registry references,
+job status, review-required surfaces, and lineage references. It does not draw,
+compress, render, read renderer payloads, import downstream repos, or decide
+that integration is ready.
 
 ## Responsibility Map
 
 | Zone | Current files / functions | Responsibility | Inputs | Outputs | Evidence | Risk if changed | Suggested handling |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| CLI / entrypoints | `api_launcher/core.py`, `api_launcher/cli_flags.py`, `api_launcher/cli_core_*.py`, `api_launcher/cli_json.py` | Route Core diagnostic flags and keep JSON stdout parseable. | `argparse` flags, repository, explicit `--db`. | Pure JSON stdout for agent-readable commands. | CI `26872795697`; 8 JSON diagnostics parse via `json.load(sys.stdin)`; sweep-plan CLI parse sample PASS. | Extra banners/logs break downstream agents; direct `print(json.dumps(...))` can regress Windows encoding behavior. | `test hardening candidate`; keep helper routing thin. |
-| Core JSON diagnostics | `core_readiness_report.py`, `core_json_diagnostics_catalog.py`, `core_json_diagnostic_sweep_plan.py`, `core_review_required_report.py`, `core_review_queue_readiness_report.py`, `core_job_status_report.py`, `core_manifest_reference_report.py`, `core_lifecycle_audit_report.py`, `core_deep_adapter_coverage_report.py`, `core_bounded_scheduler_plan_report.py` | Expose conservative machine-readable evidence for Core readiness areas and provide non-executing sweep metadata. | Registry reports, maturity payload, Visual/Skin contracts, scheduler/review contracts, explicit local temp DB path. | `schema_version` payloads with `status` / gate `partial`; `core_json_diagnostic_sweep_plan.v1` command plan. | `docs/CORE_READINESS_EVIDENCE_PACKET.zh-TW.md`; local temp DB catalog live payload tests 5/5 PASS; latest CI `26872795697` PASS. | Report text can overclaim readiness or hide missing evidence; sweep plan must not execute diagnostics or create DB state. | `docs-only clarification` plus `test hardening candidate`. |
-| Readiness report generation | `build_core_readiness_report()`, `build_core_readiness_sections()` | Aggregate registry, lifecycle, manifest, review, job-status and lineage evidence into the Integration Planning Gate. | Crawler/content/dataset adapter reports, project maturity, Visual/Skin schema, scheduler/review contract drafts. | `core_readiness_report.v1`; `integration_planning_gate.status=partial`; safety flags; section builder parity test. | `26e7d63`, `feb183a`, CI `26847859365`, `26849126467`; local section-builder tests in this checkpoint. | Circular imports or missing-evidence removal can make Core look ready when it is not. | `helper extraction completed`; no gate promotion without `o_1`. |
-| Scheduler evidence | `core_scheduler_contracts.py`, `core_scheduler_persistence_contract.py`, `core_bounded_scheduler_plan_report.py`, `core_job_status_report.py`, `sqlite_write_gate.py`, `frontends/tk/background_job_policies.py` | Keep scheduler planning evidence visible while proving runtime scheduler is not implemented. | Tk background policy registry, SQLite write gate profile, scheduler contract drafts, owned-test DDL preview. | `core_bounded_scheduler_plan_report.v1`, `core_job_status_report.v1`; contract-only scheduler evidence. | `b1b241d` through `26e7d63`; OpenSpec archive `e49d82b`; CI through `26847859365`. | Treating Tk thread policy or process-local SQLite gate as full scheduler; enabling auto lifecycle event. | `evidence/reporting helper candidate`; runtime scheduler, durable queue, lifecycle event emission require `o_1 review`. |
-| Review item identity evidence | `core_review_item_contracts.py`, `core_review_queue_readiness_report.py`, `core_review_required_report.py` | Define a stable review item identity draft without creating a persisted review queue. | Content review rules, unknown fallback, visual `review_required` lifecycle, readiness review evidence. | `core_review_item_identity_contract_draft.v1`; queue readiness remains `partial`. | `9327669`, `feb183a`, CI `26848479833`, `26849126467`. | Confusing identity draft with queue persistence or resolution workflow. | `safe_docs_first`; persisted queue schema / resolution statuses require `o_1 review`. |
-| Lifecycle / status / review semantics | `visual_asset_contracts.py`, `core_lifecycle_audit_report.py`, `core_review_required_report.py` | Preserve lifecycle vocabulary, display profiles, ready-event guards, review-required classification. | `SKIN_ASSET_LIFECYCLE_STATUSES`, display profiles, persistence schema guards. | Lifecycle audit JSON, display-safe status profiles, review-required surfaces. | `--core-lifecycle-audit-json`, `--core-review-required-report-json`; all `partial`. | Adding/renaming status or auto transition can silently change product semantics. | `requires o_1 review` for status/schema/runtime transition changes. |
-| Manifest reference / lineage | `visual_asset_contracts.py`, `core_manifest_reference_report.py`, `visual_asset_event_logging.py` | Describe manifest reference, registry projection, ready-event context and lineage without reading payloads. | Download sidecar manifest contract, Visual/Skin manifest reference schema, registry entry projection. | `core_manifest_reference_report.v1`; control-plane manifest / lineage evidence. | `--core-manifest-reference-report-json`; evidence packet notes no payload reads. | Reading `.npz` or renderer payload would cross the Core boundary. | `do not touch without integration gate`; health checks must avoid payload reads. |
-| OpenSpec archive / validation evidence | `api_launcher/core_openspec_evidence.py`, `openspec/specs/bounded-scheduler-core-contract/spec.md`, `openspec/specs/development-workflow/spec.md`, `openspec/specs/visual-asset-registry-persistence/spec.md` | Keep planning contracts inventoried and separate from runtime implementation. | OpenSpec specs and archived changes. | `core_openspec_evidence.v1` inventory; explicit `openspec validate --all` remains checkpoint command. | OpenSpec validate PASS in evidence packet; readiness report inventory is not validation. | Archived change paths on L-drive can produce stale permission warnings; active specs still validate. | `evidence/reporting helper completed`; use GitHub/validate evidence over cloud-drive warning. |
-| Local temp DB usage | CLI `--db`, repository initialization, Core JSON sweep commands, `core_json_diagnostic_sweep_plan.py` | Keep agent-readable JSON sweeps off the cloud-drive default SQLite path. | Explicit temp SQLite path under `%TEMP%`. | Deterministic JSON parse sweep and non-executing sweep command plan. | Handoff 05:39 note; 8/8 Core JSON diagnostics pass with temp DB; `030a986` exposes `--core-json-diagnostic-sweep-plan-json`. | Default L-drive SQLite can produce transient `disk I/O error`, causing false failures. | `completed_non_executing_plan_cli`; future runtime execution remains separate. |
-| Notion / GitHub evidence alignment | `docs/CORE_READINESS_EVIDENCE_PACKET.zh-TW.md`, `AGENT_HANDOFF`, `PROJECT_GTD`, GitHub Actions | Separate coordination dashboard from product evidence. | Notion relay requests, commits, CI, CLI JSON, OpenSpec validate. | Repo-side evidence packet for `n_1`; no Notion write by `c_1`. | Commit `09f8775`, CI `26852115783`. | Treating Notion text as source of truth can overrule verified behavior incorrectly. | `docs-only clarification`; Notion should summarize verified repo evidence only. |
+| CLI / entrypoints | `api_launcher/core.py`, `api_launcher/cli_flags.py`, `api_launcher/cli_core_*.py`, `api_launcher/cli_json.py` | Route Core diagnostic flags and keep agent-readable JSON stdout pure. | `argparse` flags, repository context, explicit `--db` path. | Parseable JSON stdout for Core diagnostic commands. | CI `26875337280`; focused tests 22 PASS; JSON parse checks PASS. | Extra banners, stderr noise, or direct ad-hoc JSON printing can break downstream agents and Windows pipelines. | `test hardening candidate`; keep routing helpers thin. |
+| Core JSON diagnostics | `core_readiness_report.py`, `core_readiness_sections.py`, `core_json_diagnostics_catalog.py`, `core_json_diagnostic_sweep_plan.py`, Core report modules | Expose conservative machine-readable evidence for Core readiness areas and provide a non-executing sweep plan. | Registry reports, maturity payload, lifecycle contracts, scheduler/review contracts, explicit local temp DB path. | `schema_version` payloads; gate/status remains `partial`; `core_json_diagnostic_sweep_plan.v1` status `planned`. | 8/8 diagnostics parse with explicit temp DB; `--core-json-diagnostic-sweep-plan-json` reports `executes_commands=false` and `creates_sqlite=false`. | A report can overclaim readiness or accidentally become an executing runner. | `test hardening candidate`; no behavior change without review. |
+| Readiness report generation | `build_core_readiness_report()`, `build_core_readiness_sections()`, `_integration_planning_gate()` | Aggregate registry, lifecycle, manifest, review, job-status, and lineage evidence into one gate. | Section payloads and safety flags from Core-only evidence helpers. | `core_readiness_report.v1`; `integration_planning_gate.status=partial`; missing evidence is visible. | `3c45496` packet; focused readiness tests PASS. | Removing missing / blocked / contract-only evidence can fake readiness. | `pure helper extraction candidate` only when tests preserve payload semantics. |
+| `CORE_READINESS_EVIDENCE_PACKET` | `docs/CORE_READINESS_EVIDENCE_PACKET.zh-TW.md`, `docs/DOCS_REGISTRY.csv`, `docs/DOCS_INDEX.zh-TW.md` | Provide the repo-side packet that `n_1` can summarize in Notion. | Git commits, CI run IDs, CLI JSON parse results, OpenSpec validate, smoke. | Notion-safe summary packet with clear `partial` gate and boundary text. | `3c45496`; CI `26875337280` PASS. | Stale packet evidence or mojibake can mislead cross-agent summary. | `docs-only clarification`. |
+| Scheduler evidence | `core_scheduler_contracts.py`, `core_scheduler_persistence_contract.py`, `core_bounded_scheduler_plan_report.py`, `core_job_status_report.py`, `sqlite_write_gate.py`, `frontends/tk/background_job_policies.py` | Show scheduler planning evidence without claiming a runtime scheduler exists. | Tk background policy registry, SQLite write gate profile, scheduler contract drafts, owned-test DDL preview. | `core_bounded_scheduler_plan_report.v1`; `core_job_status_report.v1`; contract-only scheduler evidence. | Scheduler OpenSpec archived; readiness report contains scheduler evidence; gate still `partial`. | Mistaking Tk threads or process-local SQLite gate for a durable scheduler. | Runtime scheduler, durable queue, cancellation/retry policy, and lifecycle event emission require `requires_o_1_review`. |
+| Review item identity evidence | `core_review_item_contracts.py`, `core_review_queue_readiness_report.py`, `core_review_required_report.py` | Define a stable review item identity draft without implementing a persisted review queue. | Content review rules, unknown fallback, visual `review_required` surface. | `core_review_item_identity_contract_draft.v1`; review queue readiness remains `partial`. | Review queue readiness JSON parse PASS; readiness report includes review identity evidence. | Treating identity draft as queue persistence or launch readiness. | `safe_docs_first`; persisted queue schema and resolution states require `requires_o_1_review`. |
+| OpenSpec archive / validation evidence | `core_openspec_evidence.py`, `openspec/specs/*`, archived OpenSpec changes | Keep planning contracts inventoried while validation stays an explicit checkpoint command. | Active specs and archived changes on disk. | `core_openspec_evidence.v1`; OpenSpec validate command evidence. | `npx.cmd -y @fission-ai/openspec@latest validate --all --no-interactive` PASS, 3 specs. | Treating inventory as validation, or L-drive archive warning as product failure. | `evidence/reporting helper candidate`; use CI/validate over cloud-drive residue. |
+| Local temp DB requirement | CLI `--db`, repository initialization, Core JSON sweep commands, `core_json_diagnostic_sweep_plan.py` | Keep automated Core JSON sweeps off the cloud-drive default SQLite path. | Explicit temp SQLite path under `%TEMP%`. | Deterministic JSON parse sweep; non-executing command plan. | 8/8 diagnostics parse with temp DB; packet and handoff record this requirement. | Default L-drive SQLite can produce transient `disk I/O error` and false failures. | `docs-only clarification`; runtime execution helper would need tests first. |
+| Lifecycle / status / `review_required` semantics | `visual_asset_contracts.py`, `core_lifecycle_audit_report.py`, `core_review_required_report.py`, display profile helpers | Preserve vocabulary, status display profiles, review-required classification, and ready-event guard. | Lifecycle constants, display profiles, review rules, explicit event writer contract. | Lifecycle audit JSON and review-required JSON surfaces. | `core_lifecycle_audit_report.v1`; `core_review_required_report.v1`; gate `partial`. | Adding or renaming status, changing schema, or adding auto transitions changes product semantics. | `requires_o_1_review`. |
+| Manifest reference / asset lineage | `visual_asset_contracts.py`, `core_manifest_reference_report.py`, `visual_asset_event_logging.py` | Describe manifest references, registry projection, ready-event context, and lineage without reading payloads. | Download sidecar manifest contract, Visual/Skin manifest reference schema, registry projection. | `core_manifest_reference_report.v1`; control-plane lineage evidence. | Manifest reference report JSON parse PASS; boundary tests ensure no payload read claims. | Reading `.npz`, renderer payloads, or downstream repo objects crosses the Core boundary. | `do_not_touch_without_integration_gate`. |
+| GitHub / CI evidence references | GitHub Actions, pre-push smoke logs, `git status`, `git log` | Keep product evidence tied to commits, tests, smoke, and CI. | Commits, run IDs, local validation logs. | Evidence ledger rows and n_1 packet. | Latest CI `26875337280` PASS; pre-push smoke PASS. | Treating local notes or Notion text as product evidence. | `docs-only clarification`. |
+| Notion handoff / dashboard references | `AGENT_HANDOFF`, `PROJECT_GTD`, Notion Agents dashboard policy | Let Notion summarize verified repo evidence without becoming source of truth. | Repo-side packet, owner routing, accepted decisions. | Notion-safe summary guidance. | Packet says what Notion should and must not say. | Notion wording can overclaim readiness if not grounded in repo evidence. | `docs-only clarification`; no Notion write by `c_1` unless requested. |
+| L-drive stale permission warning classification | Git status / OpenSpec archive path / default SQLite path | Classify cloud-drive residue separately from tracked repo evidence. | L-drive cloud sync behavior, Git/CI/JSON validation results. | Environment-residue note in packet and audit. | Current `git status` clean; CI and JSON evidence pass. | Overreacting to cloud-drive residue can derail repo work; ignoring tracked failures would be unsafe. | `docs-only clarification`; stop only if tracked validation is blocked. |
 
 ## Readiness Gate Boundary Audit
 
-Current audit result:
+Current result:
 
 - Gate remains `partial`.
-- No reviewed Core report or docs wording should be read as `ready_for_planning` or production-ready.
-- Scheduler evidence is contract/report evidence, not runtime scheduler implementation.
-- Review item identity evidence is a stable draft shape, not persisted review queue readiness.
-- Visual/Skin lifecycle and manifest contracts are Core control-plane references, not renderer/compressor implementation.
-- Notion is a coordination dashboard; GitHub commits, CI, CLI JSON, smoke and OpenSpec validate are product evidence.
-- The L-drive archived OpenSpec permission warning is environment residue unless tracked state validation fails.
+- No reviewed report or docs wording should be read as `ready_for_planning`,
+  production-ready, or integration-ready.
+- Cross-repo integration is not authorized.
+- Scheduler evidence is contract/report/planning evidence, not runtime
+  scheduler implementation.
+- Review item identity evidence is a stable identity draft, not review queue
+  persistence, resolution workflow, or launch readiness.
+- Lifecycle and manifest contracts are Core control-plane references, not
+  renderer/compressor implementation.
+- Notion is a dashboard. GitHub commits, CI, smoke, OpenSpec validation, and
+  CLI JSON diagnostics remain the evidence layer.
 
-Stop and ask Owner / `o_1` before any future work that needs:
+Stop and ask Owner / `o_1` before any work that needs:
 
 - readiness gate promotion away from `partial`
-- lifecycle status / lifecycle schema change
+- lifecycle status or lifecycle schema change
 - persisted review queue schema or resolution workflow
 - durable scheduler runtime or user DB queue migration
 - automatic lifecycle event emission
@@ -64,49 +83,69 @@ Stop and ask Owner / `o_1` before any future work that needs:
 
 | Evidence | Commit / run | Meaning |
 | --- | --- | --- |
-| Core readiness JSON diagnostic baseline | `0ead886` / CI `26825598254` | Initial `core_readiness_report.v1`, conservative gate. |
-| Bounded scheduler OpenSpec archive | `e49d82b` / CI `26847210237` | Scheduler contract moved to formal spec/archive; no runtime implementation. |
-| Scheduler evidence in readiness | `26e7d63` / CI `26847859365` | Readiness report now exposes scheduler contract evidence. |
-| Review item identity draft | `9327669` / CI `26848479833` | Review-required item identity draft exposed through queue readiness report. |
-| Review identity in readiness | `feb183a` / CI `26849126467` | Readiness report exposes shared review identity evidence without circular import. |
-| Temp DB operation note | `a2a937b` / CI `26849553709` | Handoff documents local temp DB requirement for Core JSON sweeps. |
-| Evidence packet | `09f8775` / CI `26852115783` | Repo-side `n_1` packet records JSON sweep, OpenSpec validate, L-drive residue and `partial` gate. |
-| Readiness section builder extraction | `1a13d21` / CI `26866374226` | `core_readiness_report.py` delegates evidence section assembly to `core_readiness_sections.py`; payload semantics and gate remain unchanged. |
-| Core JSON diagnostics catalog | `d5310ad` / local + later CI coverage | `core_json_diagnostics_catalog.py` records the existing 8 diagnostic flags, schema versions and status paths as static evidence metadata. |
-| Core JSON diagnostic sweep plan helper | `0605552` / local + later CI coverage | `core_json_diagnostic_sweep_plan.py` generates explicit `--db` command plans and classifies sweep DB paths. |
-| Core JSON sweep path classifier CI fix | `3cb4526` / CI `26867841240` | GitHub Actions run `26867270368` exposed that POSIX `pathlib` does not infer Windows `L:` / `K:` drives; the classifier now checks raw drive strings before platform-native normalization. |
-| Core readiness OpenSpec inventory | `0ff67b6` / CI `26869976989` | Readiness report now includes `openspec_evidence` inventory while still treating validation as external checkpoint evidence. |
-| Core readiness gate aggregation guard | `49ef4e5` / CI `26870562033` | Tests require incomplete surfaces to keep Integration Planning Gate `partial`. |
-| Core readiness downstream safety guard | `cafd631` / CI `26871002397` | Tests guard nested payload safety flags against renderer/compressor import, `.npz` read, schema/status change, scheduler runtime change and product behavior change. |
-| Core JSON diagnostics stderr guard | `bad262a` / CI `26871594516` | Cataloged Core JSON diagnostics must emit parseable stdout JSON and empty stderr with explicit local temp `--db`. |
-| Core JSON sweep repository requirement metadata | `e17edd1` / CI `26872104289` | Sweep plans preserve each diagnostic's repository requirement; non-repository diagnostics stay identifiable. |
-| Core JSON diagnostic sweep plan CLI | `030a986` / CI `26872795697` | `--core-json-diagnostic-sweep-plan-json` emits `core_json_diagnostic_sweep_plan.v1` without executing diagnostics or creating DB state. |
+| Temp DB operation note | `a2a937b` / CI `26849553709` PASS | Handoff records local temp DB requirement for Core JSON sweeps and the L-drive SQLite transient failure mode. |
+| OpenSpec inventory in readiness report | `0ff67b6` / CI `26869976989` PASS | Readiness report includes OpenSpec inventory while validation remains explicit checkpoint evidence. |
+| Readiness gate aggregation guard | `49ef4e5` / CI `26870562033` PASS | Tests require incomplete surfaces to keep the Integration Planning Gate `partial`. |
+| Readiness downstream safety guard | `cafd631` / CI `26871002397` PASS | Tests guard nested safety flags against downstream imports, payload reads, schema/status changes, and product behavior changes. |
+| Core JSON diagnostics stderr guard | `bad262a` / CI `26871594516` PASS | Cataloged Core JSON diagnostics must emit parseable stdout JSON and empty stderr with explicit local temp `--db`. |
+| Core JSON sweep repository requirement metadata | `e17edd1` / CI `26872104289` PASS | Sweep plans preserve each diagnostic's repository requirement. |
+| Core JSON diagnostic sweep plan CLI | `030a986` / CI `26872795697` PASS | `--core-json-diagnostic-sweep-plan-json` emits a non-executing plan and does not create DB state. |
+| Control-plane responsibility audit refresh | `f111bec` / CI `26873231414` PASS | Earlier audit aligned Core responsibility zones through `030a986`. |
+| Evidence packet refresh | `843fada` / CI `26873487153` PASS | Repo-side Notion packet introduced. |
+| Integration gate readiness refresh | `c5e4b55` / CI `26873746076` PASS | Integration gate readiness doc records sweep-plan evidence and gate boundary. |
+| Docs index refresh | `96b7328` / CI `26874010810` PASS | Docs index routes `n_1` to the packet and Core JSON sweep plan. |
+| Docs registry refresh | `7731ef0` / CI `26874252703` PASS | Docs registry registers the packet and gate-readiness docs. |
+| Evidence packet drift repair | `3c45496` / CI `26875337280` PASS | Evidence packet was rewritten cleanly, updated to current evidence, and kept the gate `partial`. |
+| Core JSON diagnostics sweep | local validation | 8/8 Core JSON diagnostics parse through downstream `json.load(sys.stdin)` with explicit temp DB. |
+| Focused tests | local validation | 22 tests PASS for readiness report, sweep plan, and diagnostics catalog. |
+| Pre-push smoke | local validation | 1161 tests PASS, skipped 4; MVP demo `download_import_completed`, row_count 3. |
+| OpenSpec validate | local validation | 3 specs PASS. |
 
 ## Future Safe Slice Candidates
 
-| Candidate | Classification | Why / Boundary |
-| --- | --- | --- |
-| Readiness report section builder extraction | `completed_helper_extraction` | Implemented as `core_readiness_sections.py`; parity test preserves report payload semantics and gate stays `partial`. |
-| Core JSON diagnostics evidence table helper | `completed_static_catalog` | Implemented as `core_json_diagnostics_catalog.py`; catalog-driven sweep validates the existing 8 entrypoints without adding CLI behavior. |
-| Scheduler evidence aggregation helper | `needs_tests_first` | Could centralize scheduler evidence imports; must not bind to runtime scheduler or persistence. |
-| Review item identity evidence helper | `needs_tests_first` | Could keep review queue/readiness reports aligned; must not create queue schema or resolution statuses. |
-| Local temp DB precheck helper | `completed_non_executing_plan_cli` | Implemented as `core_json_diagnostic_sweep_plan.py` plus `--core-json-diagnostic-sweep-plan-json`; it plans explicit temp-DB sweeps and flags cloud-drive DB paths without executing or creating DBs. |
-| OpenSpec archive evidence checker | `completed_inventory_helper` | Implemented as `core_openspec_evidence.py`; it inventories active specs / archived changes but does not execute validation or change OpenSpec files. |
-| Lifecycle transition runtime | `requires_o_1_review` | Changes product semantics; not a docs-only slice. |
-| Cross-repo SkinAsset / RendererSkinAsset integration | `do not touch without integration gate` | Outside `c_1` current authorization. |
+| Candidate slice | Why useful | Risk | Required validation | Classification |
+| --- | --- | --- | --- | --- |
+| Readiness report section builder extraction | Keeps `core_readiness_report.py` smaller and makes sections independently testable. | Payload drift could change gate semantics. | Snapshot / semantic tests for `core_readiness_report.v1`; gate remains `partial`. | `candidate_only` because helper extraction already exists; repeat only if new sections grow. |
+| Core JSON diagnostics evidence table helper | Keeps CLI flag/schema/status metadata centralized. | A helper could accidentally execute commands or create DB state. | Tests proving non-executing behavior, parseable JSON, and `creates_sqlite=false`. | `needs_tests_first`. |
+| Scheduler evidence aggregation helper | Reduces duplicated scheduler contract evidence across readiness/job/scheduler reports. | Could look like runtime scheduler implementation. | Report parity tests; explicit missing durable queue/runtime evidence. | `needs_tests_first`. |
+| Review item identity evidence helper | Keeps review queue and readiness reports aligned. | Could be mistaken for persisted review queue readiness. | Identity shape tests; missing persistence/resolution evidence remains visible. | `safe_docs_first`. |
+| Local temp DB precheck helper | Reduces false failures from L-drive SQLite during agent-readable sweeps. | Could become an executing runner or delete the wrong path. | Owned temp-path tests; no default L-drive writes; cleanup guard. | `needs_tests_first`. |
+| OpenSpec archive evidence checker | Could identify archive/spec drift without using Notion as evidence. | Could treat inventory as validation. | OpenSpec validate remains separate; checker is read-only. | `safe_docs_first`. |
+| Capability addressing pattern documentation | Documents future declarative/profile routing without changing handlers. | Could be mistaken for implementation plan. | Docs-only review; no product claims. | `candidate_only`. |
+| Lifecycle transition runtime | Would eventually make lifecycle state changes explicit. | Changes product semantics and persistence model. | OpenSpec, o_1 review, schema migration tests. | `requires_o_1_review`. |
+| Cross-repo SkinAsset / RendererSkinAsset integration | Future integration planning target. | Crosses current Core boundary. | Separate Integration Planning Gate and downstream repo review. | `not_now`. |
 
-## n_1 Summary Packet
+## n_1 Packet
+
+What changed:
+
+- This audit document was refreshed to clean, readable Markdown and aligned to
+  the current evidence baseline through `3c45496` and CI `26875337280`.
+- It maps Core control-plane responsibilities by zone and records the evidence
+  ledger, readiness boundary, and future safe slices.
+
+Evidence links:
+
+- Latest accepted evidence packet: `docs/CORE_READINESS_EVIDENCE_PACKET.zh-TW.md`
+- Latest CI: `26875337280` PASS
+- Core JSON diagnostics: 8/8 parse with explicit temp DB
+- OpenSpec validate: 3 specs PASS
+- Focused tests: 22 PASS
+- Pre-push smoke: 1161 tests PASS, skipped 4
 
 What Notion should say:
 
-- `c_1` completed a Core control-plane responsibility audit in repo docs.
-- Current Core readiness gate remains `partial`.
-- Evidence source remains GitHub/CI/Core JSON/OpenSpec, not Notion text.
-- Latest accepted packet baseline before this audit: `09f8775`, CI `26852115783` PASS.
-- Existing Core diagnostics cover registry, lifecycle, manifest reference, review-required, review queue, job status, deep adapter coverage and bounded scheduler planning; all remain conservative.
+- RRKAL Core has a clearer control-plane responsibility map and evidence
+  ledger.
+- The Core readiness gate remains `partial`.
+- GitHub/CI/Core JSON/OpenSpec are evidence; Notion summarizes only verified
+  repo evidence.
 
-What Notion should not say:
+What Notion must not say:
 
-- Do not say RRKAL Core is ready for cross-repo integration.
-- Do not say scheduler runtime, durable review queue, lifecycle state machine or downstream renderer/compressor integration is implemented.
-- Do not treat L-drive permission residue as product evidence failure unless tracked Git/CI/JSON validation fails.
+- Do not say RRKAL Core is integration-ready or production-ready.
+- Do not say scheduler runtime, durable review queue, lifecycle state machine,
+  renderer/compressor integration, or SkinAsset/RendererSkinAsset
+  implementation exists in Core.
+- Do not treat L-drive residue or Notion text as stronger evidence than Git,
+  CI, smoke, OpenSpec validation, or CLI JSON diagnostics.

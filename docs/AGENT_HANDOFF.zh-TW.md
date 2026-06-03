@@ -1,5 +1,11 @@
 # Agent Handoff
 
+## 2026-06-03 21:55 +08:00 Core control-plane responsibility audit refresh
+- Rewrote `docs/CORE_CONTROL_PLANE_RESPONSIBILITY_AUDIT.zh-TW.md` as clean ASCII Markdown after the audit was found to contain mojibake and stale evidence.
+- The refreshed audit maps Core zones for CLI/entrypoints, JSON diagnostics, readiness report generation, evidence packet, scheduler evidence, review item identity, OpenSpec, temp DB use, lifecycle/review semantics, GitHub/CI evidence, Notion dashboard references and L-drive residue.
+- Baseline now points to `3c45496` / CI `26875337280` PASS; gate remains `partial`.
+- Boundary: docs/audit/evidence-only. No product behavior, schema/status, readiness promotion, renderer/compressor, SkinAsset/RendererSkinAsset, `.npz`, or cross-repo implementation changes.
+
 ## 2026-06-03 17:15 +08:00 Core readiness evidence packet drift repair
 - Rewrote `docs/CORE_READINESS_EVIDENCE_PACKET.zh-TW.md` as clean ASCII Markdown after the packet was found to contain mojibake and stale checkpoint evidence.
 - Packet now points to current evidence HEAD `7731ef0`, latest CI `26874252703` PASS, Core behavior checkpoint `030a986`, OpenSpec validate PASS, and the 8 Core JSON diagnostics parse sweep with explicit local temp DB.

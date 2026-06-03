@@ -1,6 +1,6 @@
 # Core Readiness Evidence Packet
 
-Updated: 2026-06-03 17:15 +08:00
+Updated: 2026-06-03 21:55 +08:00
 
 Purpose: repo-side evidence packet for `n_1` / Notion alignment. This packet
 summarizes verified RRKAL Core control-plane readiness evidence. It is not a
@@ -16,10 +16,10 @@ validation, and CLI JSON diagnostics remain the evidence layer.
 | --- | --- |
 | Repo | `L:\RRKAL_project` |
 | Branch | `rrkal-32e215c-recovery` |
-| Current evidence HEAD | `7731ef0` / `docs: register core readiness evidence docs` |
+| Latest accepted evidence before audit refresh | `3c45496` / `docs: refresh core readiness evidence packet` |
 | Latest Core behavior checkpoint | `030a986` / `feat(core): expose diagnostic sweep plan json` |
-| Latest docs checkpoint | `7731ef0` / `docs: register core readiness evidence docs` |
-| Latest accepted CI | GitHub Actions run `26874252703` / PASS / head SHA `7731ef03426a876f134124f0d617533db64fe1c5` |
+| Latest docs checkpoint | `3c45496` / `docs: refresh core readiness evidence packet` |
+| Latest accepted CI | GitHub Actions run `26875337280` / PASS / head SHA `3c45496e4c8a6cc54e0bef71764719f9889b26b4` |
 | Core readiness schema | `core_readiness_report.v1` |
 | Integration planning gate | `partial` |
 | OpenSpec validate | PASS, 3 specs: `bounded-scheduler-core-contract`, `development-workflow`, `visual-asset-registry-persistence` |
@@ -79,6 +79,7 @@ path itself is valid.
 | Integration gate readiness refresh | `c5e4b55` / CI `26873746076` PASS | `CORE_INTEGRATION_PLANNING_GATE_READINESS.zh-TW.md` records the sweep-plan evidence and gate boundary. |
 | Docs index refresh | `96b7328` / CI `26874010810` PASS | `DOCS_INDEX.zh-TW.md` routes `n_1` to this packet and the Core JSON sweep plan. |
 | Docs registry refresh | `7731ef0` / CI `26874252703` PASS | `DOCS_REGISTRY.csv` registers this packet and the gate-readiness document. |
+| Evidence packet drift repair | `3c45496` / CI `26875337280` PASS | This packet was rewritten as clean Markdown and refreshed to the latest accepted evidence baseline. |
 
 ## Current Validation Snapshot
 
@@ -89,14 +90,14 @@ Commands verified on 2026-06-03:
 - `py -3 -B -m unittest tests.test_core_readiness_report tests.test_core_json_diagnostic_sweep_plan tests.test_core_json_diagnostics_catalog` -> PASS, 22 tests
 - 8 Core JSON diagnostics with explicit local temp DB -> PASS
 - `npx.cmd -y @fission-ai/openspec@latest validate --all --no-interactive` -> PASS, 3 specs
-- latest GitHub Actions run `26874252703` -> PASS
+- latest GitHub Actions run `26875337280` -> PASS
 
 ## n_1 Notion Alignment Packet
 
 Status for Notion:
 
 - RRKAL Core readiness gate remains `partial`.
-- Latest repo-side evidence HEAD: `7731ef0`, CI `26874252703` PASS.
+- Latest accepted repo-side evidence before audit refresh: `3c45496`, CI `26875337280` PASS.
 - Latest Core behavior checkpoint: `030a986`, CI `26872795697` PASS.
 - Core JSON diagnostics: 8/8 parse with explicit local temp DB.
 - Core JSON sweep plan CLI: `030a986` exposes a non-executing command plan; it does not run diagnostics or create DB state.

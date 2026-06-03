@@ -1,5 +1,11 @@
 # Development Log
 
+## 2026-06-03 Core control-plane responsibility audit refresh
+- Rewrote `docs/CORE_CONTROL_PLANE_RESPONSIBILITY_AUDIT.zh-TW.md` as clean ASCII Markdown after attachment-driven review found mojibake and stale evidence in the old audit.
+- The audit now includes the required responsibility map table, readiness gate boundary audit, evidence ledger, future safe slice table, and `n_1` packet.
+- Baseline evidence is `3c45496`, CI `26875337280` PASS, Core JSON diagnostics 8/8 local-temp parse PASS, OpenSpec validate 3 specs PASS, focused tests 22 PASS, and pre-push smoke 1161 tests PASS / skipped 4. Gate remains `partial`.
+- Docs/audit/evidence-only; no product behavior, schema/status, readiness, renderer/compressor, or cross-repo changes.
+
 ## 2026-06-03 Core readiness evidence packet drift repair
 - Rewrote `docs/CORE_READINESS_EVIDENCE_PACKET.zh-TW.md` as clean ASCII Markdown after read-only completion audit found mojibake and stale packet evidence.
 - The packet now records current evidence HEAD `7731ef0`, CI `26874252703` PASS, Core behavior checkpoint `030a986`, 8/8 Core JSON diagnostics parse with explicit local temp DB, OpenSpec validate PASS, and the `partial` gate.
