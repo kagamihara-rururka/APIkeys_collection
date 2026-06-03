@@ -3,7 +3,7 @@
 ## 2026-06-03 Core JSON sweep cloud-drive classifier CI fix
 - GitHub Actions run `26867270368` failed on Ubuntu after `0605552` because the new sweep-plan path classifier depended on `pathlib.Path(...).drive`, which does not classify raw Windows `L:` / `K:` paths when tests run on POSIX.
 - Fixed `api_launcher/core_json_diagnostic_sweep_plan.py` with a raw-string `L:` / `K:` guard before platform-native path normalization. This preserves the intended cloud-drive warning for Core JSON sweeps across Windows and Linux.
-- Verification: `py_compile` PASS; focused/related Core diagnostic tests PASS (10 tests); plan-driven Core JSON sweep PASS (8/8 parse with local temp DB, all `partial`); pre-push smoke PASS in `state/logs/pre_push_smoke_20260603_142422.log` (1151 tests, 4 skipped, MVP demo `download_import_completed`, `row_count=3`). Follow-up GitHub Actions are pending for the fix commit.
+- Verification: `py_compile` PASS; focused/related Core diagnostic tests PASS (10 tests); plan-driven Core JSON sweep PASS (8/8 parse with local temp DB, all `partial`); pre-push smoke PASS in `state/logs/pre_push_smoke_20260603_142422.log` (1151 tests, 4 skipped, MVP demo `download_import_completed`, `row_count=3`); GitHub Actions run `26867841240` PASS on Ubuntu, Windows and real DB smoke.
 - Boundary: CI regression fix only. No CLI behavior change, no JSON payload change, no lifecycle/status schema change, no readiness promotion, no cross-repo integration.
 
 ## 2026-06-03 Core JSON diagnostic sweep plan helper
