@@ -1,5 +1,11 @@
 # Development Log
 
+## 2026-06-03 Core evidence and capability pattern index
+- Added `docs/CORE_EVIDENCE_AND_PATTERN_INDEX.zh-TW.md` as the docs/evidence-index-only checkpoint for Core readiness and capability pattern references.
+- The index maps the accepted readiness evidence packet, control-plane responsibility audit, capability addressing ADR, Core JSON diagnostics, OpenSpec validate, focused tests, GitHub Actions CI, local temp DB requirement, and L-drive stale warning classification.
+- Added explicit Notion wording boundaries and future safe slices so `n_1` can summarize verified repo evidence without overclaiming integration readiness.
+- Boundary: gate remains `partial`; no product behavior, lifecycle/status schema, renderer/compressor integration, SkinAsset/RendererSkinAsset implementation, `.npz` read, payload read, or cross-repo implementation changes.
+
 ## 2026-06-03 Capability addressing pattern ADR
 - Added `docs/CAPABILITY_ADDRESSING_PATTERN.zh-TW.md` as the docs-only ADR for the existing crawler capability addressing pattern.
 - The ADR documents the problem boundary (`if/else` trees deeper than four levels), current registry anatomy, lossy `CapabilityCode` index semantics, `CrawlerSpec` as semantic source of truth, CIDR-style mask queries, decorator registration safety, reuse candidates, and overuse limits.

@@ -1,5 +1,10 @@
 # Agent Handoff
 
+## 2026-06-03 Core evidence and capability pattern index
+- Added `docs/CORE_EVIDENCE_AND_PATTERN_INDEX.zh-TW.md` as a repo-side quick index for `n_1`, `o_1`, and Owner references. It links the readiness evidence packet, control-plane responsibility audit, capability addressing ADR, Core JSON diagnostics, OpenSpec validate, focused tests, GitHub Actions CI, local temp DB requirement, and L-drive stale warning classification.
+- The index includes the Notion wording boundary: allowed wording is that Core evidence is clearer, the gate remains `partial`, capability addressing is documented as a Core pattern, and control-plane responsibilities are mapped. Forbidden wording includes production-ready, integration-ready, completed scheduler runtime, completed durable review queue, authorized renderer/compressor integration, or completed SkinAsset / RendererSkinAsset implementation.
+- Boundary: docs/evidence-index-only. No product behavior, lifecycle/status schema, readiness promotion, renderer/compressor, SkinAsset/RendererSkinAsset, `.npz`, payload read, or cross-repo implementation changes. Gate remains `partial`.
+
 ## 2026-06-03 Capability addressing pattern ADR
 - Added `docs/CAPABILITY_ADDRESSING_PATTERN.zh-TW.md` to document the existing 4-bit crawler capability addressing pattern: `CrawlerCapabilityCode`, `CrawlerCapabilityMask`, `CAPABILITY_CODE_WIDTH`, `capability_code_for(...)`, `@crawler(...)`, and `CrawlerSpec.matrix_key`.
 - The ADR states the canonical rule for replacing condition trees deeper than four levels with declarative capability matrix slices, while keeping `CrawlerSpec` as the semantic source of truth.

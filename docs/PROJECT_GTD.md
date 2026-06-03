@@ -3,6 +3,7 @@
 Last updated: 2026-06-03
 
 ## 目前工作焦點 / Active Focus
+- [x] 2026-06-03 Core evidence / pattern index 已補：新增 `docs/CORE_EVIDENCE_AND_PATTERN_INDEX.zh-TW.md`，把 readiness evidence packet、control-plane responsibility audit、capability addressing ADR、Core JSON diagnostics、OpenSpec validate、CI、local temp DB requirement 與 L-drive residue classification 收成 `n_1` / `o_1` / Owner 快速引用索引。這是 docs/evidence-index-only；gate 仍為 `partial`，不做 integration authorization。
 - [x] 2026-06-03 Capability addressing pattern ADR 已補：新增 `docs/CAPABILITY_ADDRESSING_PATTERN.zh-TW.md`，把目前 `api_launcher/crawlers/registry.py` 的 4-bit `CrawlerCapabilityCode`、`CrawlerCapabilityMask`、CIDR-style prefix query、`@crawler(...)` registration safety boundary 與 `CrawlerSpec.matrix_key` 語意來源整理成可引用模式。這是 docs/pattern-only；gate 仍為 `partial`，不做 universal framework、不做 integration。
 - [x] 2026-06-03 Core control-plane responsibility audit refreshed: `docs/CORE_CONTROL_PLANE_RESPONSIBILITY_AUDIT.zh-TW.md` was rewritten as clean ASCII Markdown and aligned to baseline `3c45496` / CI `26875337280` PASS. It now includes responsibility map, gate boundary, evidence ledger, future safe slices and `n_1` packet. Gate remains `partial`.
 - [x] 2026-06-03 Core readiness evidence packet drift 已修：`docs/CORE_READINESS_EVIDENCE_PACKET.zh-TW.md` 原本存在 mojibake 且 evidence 停在較早 checkpoint；已重寫為乾淨 ASCII Markdown，對齊 current evidence HEAD `7731ef0`、CI `26874252703` PASS、Core behavior checkpoint `030a986`、8/8 Core JSON diagnostics local-temp parse、OpenSpec validate PASS，gate 仍為 `partial`。`docs/DOCS_REGISTRY.csv` 也已同步刷新。
