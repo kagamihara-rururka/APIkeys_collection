@@ -1,6 +1,6 @@
 # Core Integration Planning Gate Readiness
 
-最後更新：2026-06-03
+最後更新：2026-06-03 16:40 +08:00
 
 這份文件整理 RRKAL Core 目前可提供給未來 Integration Planning Gate 的證據與缺口。它只描述 Core control-plane readiness，不授權 renderer、compressor、SkinAsset、RendererSkinAsset 或跨 repo integration。
 
@@ -49,6 +49,17 @@
 | Core lifecycle audit diagnostic | `--core-lifecycle-audit-json` / `core_lifecycle_audit_report.v1` |
 | Core manifest-reference diagnostic | `--core-manifest-reference-report-json` / `core_manifest_reference_report.v1` |
 | Core deep-adapter coverage diagnostic | `--core-deep-adapter-coverage-json` / `core_deep_adapter_coverage_report.v1` |
+| Core readiness OpenSpec inventory | `0ff67b6` / `openspec_evidence` exposed through `--core-readiness-report-json`; validation remains external checkpoint evidence |
+| Core readiness OpenSpec inventory CI | GitHub Actions run `26869976989` PASS |
+| Core readiness gate aggregation guard | `49ef4e5` / tests require missing, blocked, contract-only, or planned surfaces to keep gate `partial` |
+| Core readiness downstream safety guard | `cafd631` / nested safety-flag tests prohibit downstream imports, payload reads, `.npz` reads, lifecycle/schema/status changes, scheduler runtime changes, OpenSpec execution, and product behavior changes |
+| Core JSON diagnostics stderr guard | `bad262a` / 8 cataloged Core JSON diagnostics must emit parseable stdout JSON and empty stderr with explicit local temp `--db` |
+| Core JSON sweep repository metadata | `e17edd1` / sweep plan preserves per-diagnostic `requires_repository` metadata |
+| Core JSON diagnostic sweep plan CLI | `030a986` / `--core-json-diagnostic-sweep-plan-json` emits non-executing `core_json_diagnostic_sweep_plan.v1` |
+| Core JSON diagnostic sweep plan CLI CI | GitHub Actions run `26872795697` PASS |
+| Control-plane responsibility audit refresh | `f111bec` / `docs/CORE_CONTROL_PLANE_RESPONSIBILITY_AUDIT.zh-TW.md` refreshed to current evidence |
+| Readiness evidence packet refresh | `843fada` / `docs/CORE_READINESS_EVIDENCE_PACKET.zh-TW.md` refreshed for `n_1` Notion alignment |
+| Latest docs evidence CI | GitHub Actions run `26873487153` PASS |
 
 `partial` 是刻意保守的狀態。它表示 Core 已有 registry / lifecycle / manifest / review / lineage 的 evidence surface，但仍缺 runtime state machine、unified scheduler、review queue persistence、deep adapter coverage 等證據。不得把此狀態解讀為 integration 已可開工。
 
@@ -90,6 +101,21 @@
   - `cross_repo_implementation=false`
 
 注意：Windows PowerShell 的 `>` 重導可能把 JSON 檔寫成 UTF-16。驗證 JSON stdout 時，優先使用 pipe 或 Python `subprocess.check_output()` 直接讀 bytes；不要把 PowerShell redirection 產生的檔案當成 CLI encoding 失敗證據。
+
+## Core JSON Sweep Plan Evidence
+
+`--core-json-diagnostic-sweep-plan-json` is an agent-readable planning diagnostic for the existing Core JSON diagnostics. It emits `core_json_diagnostic_sweep_plan.v1`, command count 8, DB path kind, status paths, schema versions, launcher args, and `requires_repository` metadata.
+
+It is intentionally non-executing:
+
+- does not run subprocess diagnostics
+- does not create SQLite files
+- does not change existing diagnostic payloads
+- does not change lifecycle/status schema
+- does not promote the Integration Planning Gate
+- does not authorize integration work
+
+Use it to plan explicit local temp DB sweeps; use the live catalog tests or direct CLI execution to prove JSON payloads parse.
 
 ## Review Required Evidence Report
 

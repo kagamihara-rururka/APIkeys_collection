@@ -1,5 +1,10 @@
 ﻿# Agent Handoff
 
+## 2026-06-03 16:40 +08:00 Core integration gate readiness doc refresh
+- Refreshed `docs/CORE_INTEGRATION_PLANNING_GATE_READINESS.zh-TW.md` with latest accepted Core evidence rows through `843fada` and latest CI `26873487153` PASS.
+- Added a short `Core JSON Sweep Plan Evidence` section to prevent agents from mistaking the new sweep-plan CLI for an executing diagnostic runner or readiness promotion.
+- Boundary: docs-only drift correction. Gate remains `partial`; no schema/status change, no product behavior change, no integration authorization.
+
 ## 2026-06-03 16:34 +08:00 Core readiness evidence packet refresh
 - Refreshed `docs/CORE_READINESS_EVIDENCE_PACKET.zh-TW.md` to current repo-side evidence: `030a986` Core sweep-plan CLI, `f111bec` control-plane audit refresh, and GitHub Actions run `26873231414` PASS.
 - The packet now records `--core-json-diagnostic-sweep-plan-json` as a non-executing sweep plan separate from the 8 Core JSON diagnostics. `integration_planning_gate.status` remains `partial`.

@@ -1,5 +1,10 @@
 ﻿# Development Log
 
+## 2026-06-03 Core integration gate readiness doc refresh
+- Refreshed `docs/CORE_INTEGRATION_PLANNING_GATE_READINESS.zh-TW.md` to include the latest Core evidence rows: OpenSpec inventory, gate aggregation guard, downstream safety guard, Core JSON stderr guard, repository metadata, diagnostic sweep-plan CLI, control-plane audit refresh, and readiness evidence packet refresh.
+- Added a `Core JSON Sweep Plan Evidence` section clarifying that `--core-json-diagnostic-sweep-plan-json` is non-executing and does not create SQLite state, alter payloads, promote readiness, or authorize integration.
+- This is docs-only drift correction. Gate remains `partial`; no product behavior, schema/status, renderer/compressor, or cross-repo changes.
+
 ## 2026-06-03 Core readiness evidence packet refresh
 - Refreshed `docs/CORE_READINESS_EVIDENCE_PACKET.zh-TW.md` to current repo-side evidence: Core checkpoint `030a986`, docs checkpoint `f111bec`, latest GitHub Actions run `26873231414` PASS, and `--core-json-diagnostic-sweep-plan-json` / `core_json_diagnostic_sweep_plan.v1`.
 - The packet now distinguishes the 8 Core JSON diagnostics from the non-executing sweep-plan CLI and keeps the Integration Planning Gate at `partial`.
