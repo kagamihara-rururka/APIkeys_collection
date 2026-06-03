@@ -1,9 +1,14 @@
 ﻿# Development Log
 
+## 2026-06-03 Core JSON diagnostics catalog
+- Added `api_launcher/core_json_diagnostics_catalog.py` as a declarative evidence table for the existing Core JSON diagnostic entrypoints.
+- Added tests for catalog order, schema versions, `parse_args` / `command_requested` coverage, and nested readiness gate status extraction.
+- Verification: `py_compile` PASS; `tests.test_core_json_diagnostics_catalog -v` PASS (4 tests); related Core report / CLI JSON tests PASS (55 tests); catalog-driven Core JSON diagnostics sweep PASS (8/8 parse with local temp DB, all `partial`); OpenSpec validate PASS (3 specs); pre-push smoke PASS in `state/logs/pre_push_smoke_20260603_135734.log` (1148 tests, 4 skipped, MVP demo `download_import_completed`, `row_count=3`).
+- Boundary: static catalog / test hardening only. No new CLI behavior, no JSON payload semantic change, no lifecycle/status schema change, no cross-repo integration.
 ## 2026-06-03 Core readiness section builder extraction
 - Extracted Core readiness evidence section assembly from `api_launcher/core_readiness_report.py` into `api_launcher/core_readiness_sections.py`; `core_readiness_report.py` now owns schema version, Integration Planning Gate, and safety flags.
 - Added a parity test to ensure `build_core_readiness_sections()` matches the sections in `build_core_readiness_report()`.
-- Verification: `py_compile` PASS; `tests.test_core_readiness_report -v` PASS (7 tests); related Core report / CLI JSON tests PASS (51 tests); Core JSON diagnostics sweep PASS (8/8 parse with local temp DB, all `partial`); OpenSpec validate PASS (3 specs); pre-push smoke PASS in `state/logs/pre_push_smoke_20260603_134408.log` (1144 tests, 4 skipped, MVP demo `download_import_completed`, `row_count=3`).
+- Verification: `py_compile` PASS; `tests.test_core_readiness_report -v` PASS (7 tests); related Core report / CLI JSON tests PASS (51 tests); Core JSON diagnostics sweep PASS (8/8 parse with local temp DB, all `partial`); OpenSpec validate PASS (3 specs); pre-push smoke PASS in `state/logs/pre_push_smoke_20260603_134408.log` (1144 tests, 4 skipped, MVP demo `download_import_completed`, `row_count=3`); GitHub Actions run `26866374226` PASS.
 - Boundary: Core helper extraction only. No renderer/compressor repo touch, no SkinAsset/RendererSkinAsset implementation, no lifecycle/status schema change, no readiness promotion.
 # 開發日誌
 
