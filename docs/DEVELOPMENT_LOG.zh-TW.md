@@ -1,5 +1,10 @@
 ﻿# Development Log
 
+## 2026-06-03 Core control-plane responsibility audit refresh
+- Refreshed `docs/CORE_CONTROL_PLANE_RESPONSIBILITY_AUDIT.zh-TW.md` to current Core evidence checkpoint `030a986` / `feat(core): expose diagnostic sweep plan json` and GitHub Actions run `26872795697` PASS.
+- The audit now records the completed Core JSON diagnostics catalog, sweep-plan helper, repository-requirement metadata, stderr guard, readiness gate aggregation guard, downstream safety guard, OpenSpec inventory, and the new non-executing sweep-plan CLI. The Integration Planning Gate remains `partial`.
+- Verification: latest CI `26872795697` PASS; `tests.test_core_json_diagnostics_catalog -v` PASS (5 tests); OpenSpec validate PASS (3 specs). This is docs-only evidence refresh: no product behavior change, no lifecycle/status schema change, no readiness promotion, no cross-repo integration.
+
 ## 2026-06-03 Core JSON diagnostic sweep plan CLI
 - Added `--core-json-diagnostic-sweep-plan-json`, backed by `api_launcher/cli_core_json_diagnostic_sweep_plan.py`, to emit `core_json_diagnostic_sweep_plan.v1`.
 - The new CLI emits an agent-readable non-executing command plan for the existing Core JSON diagnostics: flag, launcher args, schema version, status path, DB path kind, and `requires_repository`. It does not execute diagnostics, create SQLite files, change diagnostic payloads, or alter readiness semantics.
