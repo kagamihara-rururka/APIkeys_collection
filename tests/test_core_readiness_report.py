@@ -13,6 +13,7 @@ from api_launcher.core_readiness_report import (
     CORE_READINESS_SCHEMA_VERSION,
     build_core_readiness_report,
 )
+from api_launcher.core_readiness_sections import build_core_readiness_sections
 
 
 class CoreReadinessReportTests(unittest.TestCase):
@@ -58,6 +59,22 @@ class CoreReadinessReportTests(unittest.TestCase):
             self.assertIn("contract_only_surfaces", section)
             self.assertIn("planned_surfaces", section)
             self.assertIn("next_safe_actions", section)
+
+    def test_section_builder_matches_report_sections(self) -> None:
+        sections = build_core_readiness_sections()
+        report = build_core_readiness_report()
+
+        expected_section_names = (
+            "registry_evidence",
+            "lifecycle_evidence",
+            "manifest_reference_evidence",
+            "review_required_evidence",
+            "job_status_evidence",
+            "asset_lineage_evidence",
+        )
+        self.assertEqual(set(expected_section_names), set(sections))
+        for section_name in expected_section_names:
+            self.assertEqual(sections[section_name], report[section_name])
 
     def test_missing_or_contract_only_evidence_does_not_fake_ready_for_planning(self) -> None:
         report = build_core_readiness_report()

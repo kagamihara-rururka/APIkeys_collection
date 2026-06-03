@@ -1,3 +1,10 @@
+﻿# Development Log
+
+## 2026-06-03 Core readiness section builder extraction
+- Extracted Core readiness evidence section assembly from `api_launcher/core_readiness_report.py` into `api_launcher/core_readiness_sections.py`; `core_readiness_report.py` now owns schema version, Integration Planning Gate, and safety flags.
+- Added a parity test to ensure `build_core_readiness_sections()` matches the sections in `build_core_readiness_report()`.
+- Verification: `py_compile` PASS; `tests.test_core_readiness_report -v` PASS (7 tests); related Core report / CLI JSON tests PASS (51 tests); Core JSON diagnostics sweep PASS (8/8 parse with local temp DB, all `partial`); OpenSpec validate PASS (3 specs); pre-push smoke PASS in `state/logs/pre_push_smoke_20260603_134408.log` (1144 tests, 4 skipped, MVP demo `download_import_completed`, `row_count=3`).
+- Boundary: Core helper extraction only. No renderer/compressor repo touch, no SkinAsset/RendererSkinAsset implementation, no lifecycle/status schema change, no readiness promotion.
 # 開發日誌
 
 最後更新：2026-06-03

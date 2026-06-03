@@ -1,3 +1,10 @@
+﻿# Agent Handoff
+
+## 2026-06-03 Core readiness section builder extraction
+- Implemented a Core-only consolidation slice: `api_launcher/core_readiness_report.py` now delegates section assembly to new `api_launcher/core_readiness_sections.py`; report-level schema, gate and safety flags stay in the original module.
+- Scope: helper extraction / test hardening only. No product behavior change, no lifecycle/status schema change, no Scheduler runtime, no review queue schema, no RendererSkinAsset/SkinAsset implementation, no `.npz` or renderer payload reads, no cross-repo implementation.
+- Verification: focused readiness tests PASS (7 tests); related Core report / CLI JSON tests PASS (51 tests); 8 Core JSON diagnostics parse through local temp DB and all remain `partial`; OpenSpec validate PASS (3 specs); pre-push smoke PASS in `state/logs/pre_push_smoke_20260603_134408.log` (1144 tests, 4 skipped, MVP demo `download_import_completed`, `row_count=3`).
+- Next checkpoint steps: commit/push and watch GitHub Actions.
 # Agent 接力卡
 ## 2026-06-03 06:45 +08:00 Core control-plane responsibility audit
 - 本輪新增 `docs/CORE_CONTROL_PLANE_RESPONSIBILITY_AUDIT.zh-TW.md`，把 RRKAL Core control plane 分成 CLI/entrypoints、Core JSON diagnostics、readiness report、scheduler evidence、review item identity、lifecycle/status/review semantics、manifest/lineage、OpenSpec validation、local temp DB 與 Notion/GitHub evidence alignment 等責任區域。
