@@ -1,5 +1,10 @@
 ﻿# Development Log
 
+## 2026-06-03 Core readiness evidence packet refresh
+- Refreshed `docs/CORE_READINESS_EVIDENCE_PACKET.zh-TW.md` to current repo-side evidence: Core checkpoint `030a986`, docs checkpoint `f111bec`, latest GitHub Actions run `26873231414` PASS, and `--core-json-diagnostic-sweep-plan-json` / `core_json_diagnostic_sweep_plan.v1`.
+- The packet now distinguishes the 8 Core JSON diagnostics from the non-executing sweep-plan CLI and keeps the Integration Planning Gate at `partial`.
+- Verification source: latest CI `26873231414` PASS, Core JSON catalog live payload tests PASS, OpenSpec validate PASS. Docs-only evidence refresh; no product behavior or schema/status change.
+
 ## 2026-06-03 Core control-plane responsibility audit refresh
 - Refreshed `docs/CORE_CONTROL_PLANE_RESPONSIBILITY_AUDIT.zh-TW.md` to current Core evidence checkpoint `030a986` / `feat(core): expose diagnostic sweep plan json` and GitHub Actions run `26872795697` PASS.
 - The audit now records the completed Core JSON diagnostics catalog, sweep-plan helper, repository-requirement metadata, stderr guard, readiness gate aggregation guard, downstream safety guard, OpenSpec inventory, and the new non-executing sweep-plan CLI. The Integration Planning Gate remains `partial`.

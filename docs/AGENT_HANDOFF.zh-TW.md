@@ -1,5 +1,10 @@
 ﻿# Agent Handoff
 
+## 2026-06-03 16:34 +08:00 Core readiness evidence packet refresh
+- Refreshed `docs/CORE_READINESS_EVIDENCE_PACKET.zh-TW.md` to current repo-side evidence: `030a986` Core sweep-plan CLI, `f111bec` control-plane audit refresh, and GitHub Actions run `26873231414` PASS.
+- The packet now records `--core-json-diagnostic-sweep-plan-json` as a non-executing sweep plan separate from the 8 Core JSON diagnostics. `integration_planning_gate.status` remains `partial`.
+- Boundary: docs/evidence alignment only. No product behavior change, no lifecycle/status schema change, no readiness promotion, no cross-repo integration.
+
 ## 2026-06-03 16:26 +08:00 Core control-plane responsibility audit refresh
 - Refreshed `docs/CORE_CONTROL_PLANE_RESPONSIBILITY_AUDIT.zh-TW.md` to current Core evidence checkpoint `030a986` and GitHub Actions run `26872795697` PASS.
 - The audit now reflects the completed Core JSON diagnostics catalog, non-executing sweep-plan helper/CLI, repository requirement metadata, stderr guard, readiness gate aggregation guard, downstream safety guard, and OpenSpec inventory evidence. `integration_planning_gate.status` remains `partial`.

@@ -3,6 +3,7 @@
 Last updated: 2026-06-03
 
 ## 目前工作焦點 / Active Focus
+- [x] 2026-06-03 Core readiness evidence packet 已刷新：`docs/CORE_READINESS_EVIDENCE_PACKET.zh-TW.md` 現已對齊 Core checkpoint `030a986`、docs checkpoint `f111bec`、GitHub Actions run `26873231414` PASS，並把 `--core-json-diagnostic-sweep-plan-json` 明確標成 non-executing sweep plan CLI。這是 docs-only evidence alignment，Integration Planning Gate 仍為 `partial`。
 - [x] 2026-06-03 Core control-plane responsibility audit 已刷新：`docs/CORE_CONTROL_PLANE_RESPONSIBILITY_AUDIT.zh-TW.md` 現已對齊最新 Core evidence checkpoint `030a986` 與 GitHub Actions run `26872795697` PASS；audit 記錄 Core JSON diagnostics catalog / sweep-plan CLI / repository metadata / stderr guard / readiness gate guard / downstream safety guard / OpenSpec inventory。這是 docs-only evidence refresh，Integration Planning Gate 仍為 `partial`。
 - [x] 2026-06-03 Core JSON diagnostic sweep plan CLI 已補：新增 `--core-json-diagnostic-sweep-plan-json` / `core_json_diagnostic_sweep_plan.v1`，輸出現有 Core JSON diagnostics 的 non-executing command plan，包括 flag、launcher args、schema version、status path、DB path kind 與 `requires_repository`。這不執行 diagnostics、不建立 SQLite、不改 JSON payload、不做 integration。
 - [x] 2026-06-03 Core JSON sweep repository requirement metadata 已補：`CoreJsonDiagnosticCommandPlan` 現在保留每個 cataloged diagnostic 的 `requires_repository`，測試鎖住 `--core-deep-adapter-coverage-json` 為 `false`、`--core-readiness-report-json` 為 `true`。這是 non-executing evidence helper metadata，不改 CLI 行為、不改 JSON payload、不做 integration。
