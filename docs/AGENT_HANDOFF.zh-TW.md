@@ -1,5 +1,11 @@
 ﻿# Agent Handoff
 
+## 2026-06-03 Core JSON diagnostic sweep plan CLI
+- Added `--core-json-diagnostic-sweep-plan-json`, backed by new `api_launcher/cli_core_json_diagnostic_sweep_plan.py`, to emit `core_json_diagnostic_sweep_plan.v1`.
+- The payload is a non-executing command plan: it lists each cataloged Core JSON diagnostic flag, launcher args, schema version, status path, DB path kind, and `requires_repository`. It does not run subprocesses, create SQLite files, or change diagnostics payloads.
+- Verification: py_compile PASS; focused sweep-plan tests PASS (6 tests); related Core JSON / readiness / CLI tests PASS (25 tests); CLI parse sample PASS (`core_json_diagnostic_sweep_plan.v1 planned local_temp 8`); pre-push smoke PASS (`state/logs/pre_push_smoke_20260603_161535.log`, 1161 tests, skipped 4, MVP demo `download_import_completed`, row_count=3). Remote CI evidence is tracked in GitHub Actions after push.
+- Boundary: Core diagnostic planning only. No product behavior change, no lifecycle/status schema change, no readiness promotion, no cross-repo integration, no renderer/compressor touch.
+
 ## 2026-06-03 Core JSON sweep repository requirement metadata
 - Added `requires_repository` to `CoreJsonDiagnosticCommandPlan`, preserving each cataloged diagnostic's repository requirement inside the non-executing sweep plan.
 - Added regression coverage so `--core-deep-adapter-coverage-json` remains marked `requires_repository=false` while repository-backed diagnostics such as `--core-readiness-report-json` remain `true`.

@@ -1,5 +1,10 @@
 ﻿# Development Log
 
+## 2026-06-03 Core JSON diagnostic sweep plan CLI
+- Added `--core-json-diagnostic-sweep-plan-json`, backed by `api_launcher/cli_core_json_diagnostic_sweep_plan.py`, to emit `core_json_diagnostic_sweep_plan.v1`.
+- The new CLI emits an agent-readable non-executing command plan for the existing Core JSON diagnostics: flag, launcher args, schema version, status path, DB path kind, and `requires_repository`. It does not execute diagnostics, create SQLite files, change diagnostic payloads, or alter readiness semantics.
+- Verification: py_compile PASS; focused sweep-plan tests PASS (6 tests); related Core JSON / readiness / CLI tests PASS (25 tests); CLI parse sample PASS (`core_json_diagnostic_sweep_plan.v1 planned local_temp 8`); pre-push smoke PASS (`state/logs/pre_push_smoke_20260603_161535.log`, 1161 tests, skipped 4, MVP demo `download_import_completed`, row_count=3). Remote CI evidence is tracked in GitHub Actions after push.
+
 ## 2026-06-03 Core JSON sweep repository requirement metadata
 - Added `requires_repository` to `CoreJsonDiagnosticCommandPlan`, so the non-executing Core JSON sweep plan preserves whether each diagnostic needs repository/DB context.
 - Tests now assert the non-repository diagnostic `--core-deep-adapter-coverage-json` stays marked `requires_repository=false`, while repository-backed diagnostics such as `--core-readiness-report-json` remain `true`.

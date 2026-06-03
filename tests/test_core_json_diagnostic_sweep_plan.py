@@ -1,11 +1,19 @@
 from __future__ import annotations
 
+import json
 import os
+import subprocess
+import sys
 import tempfile
 import unittest
+from pathlib import Path
 
+from api_launcher.cli_flags import command_requested
+from api_launcher.core import parse_args
 from api_launcher.core_json_diagnostic_sweep_plan import (
+    CORE_JSON_DIAGNOSTIC_SWEEP_PLAN_SCHEMA_VERSION,
     build_core_json_diagnostic_sweep_plan,
+    build_core_json_diagnostic_sweep_plan_report,
     classify_core_json_sweep_db_path,
 )
 from api_launcher.core_json_diagnostics_catalog import (
@@ -38,6 +46,48 @@ class CoreJsonDiagnosticSweepPlanTests(unittest.TestCase):
 
         self.assertFalse(requires_repo["--core-deep-adapter-coverage-json"])
         self.assertTrue(requires_repo["--core-readiness-report-json"])
+
+    def test_sweep_plan_report_is_non_executing_and_agent_readable(self) -> None:
+        db_path = os.path.join(tempfile.gettempdir(), "rrkal_core_json_sweep_test.sqlite")
+        report = build_core_json_diagnostic_sweep_plan_report(db_path)
+
+        self.assertEqual(CORE_JSON_DIAGNOSTIC_SWEEP_PLAN_SCHEMA_VERSION, report["schema_version"])
+        self.assertEqual("planned", report["status"])
+        self.assertEqual("non_executing_command_plan", report["scope"])
+        self.assertEqual("local_temp", report["db_path_kind"])
+        self.assertEqual(len(core_json_diagnostic_flags()), report["command_count"])
+        self.assertFalse(report["safety"]["executes_commands"])
+        self.assertFalse(report["safety"]["creates_sqlite"])
+        self.assertFalse(report["safety"]["changes_product_behavior"])
+        self.assertFalse(report["safety"]["cross_repo_implementation"])
+
+    def test_sweep_plan_cli_json_is_parseable_and_command_requested(self) -> None:
+        args = parse_args(["--core-json-diagnostic-sweep-plan-json"])
+        self.assertTrue(command_requested(args))
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            db_path = Path(temp_dir) / "rrkal_core_json_sweep_plan.sqlite"
+            completed = subprocess.run(
+                [
+                    sys.executable,
+                    "-B",
+                    "APIkeys_collection.py",
+                    "--db",
+                    str(db_path),
+                    "--core-json-diagnostic-sweep-plan-json",
+                ],
+                cwd=Path(__file__).resolve().parents[1],
+                check=True,
+                capture_output=True,
+                encoding="utf-8",
+                text=True,
+            )
+
+        payload = json.loads(completed.stdout)
+        self.assertEqual(CORE_JSON_DIAGNOSTIC_SWEEP_PLAN_SCHEMA_VERSION, payload["schema_version"])
+        self.assertEqual("planned", payload["status"])
+        self.assertEqual("local_temp", payload["db_path_kind"])
+        self.assertEqual("", completed.stderr)
 
     def test_db_path_classifier_marks_cloud_drives_as_risky_for_sweeps(self) -> None:
         cloud_paths = (

@@ -11,6 +11,9 @@ from api_launcher.core_json_diagnostics_catalog import (
 )
 
 
+CORE_JSON_DIAGNOSTIC_SWEEP_PLAN_SCHEMA_VERSION = "core_json_diagnostic_sweep_plan.v1"
+
+
 @dataclass(frozen=True)
 class CoreJsonDiagnosticCommandPlan:
     flag: str
@@ -22,6 +25,46 @@ class CoreJsonDiagnosticCommandPlan:
     db_path_kind: str
     uses_explicit_db: bool
     requires_repository: bool
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "flag": self.flag,
+            "schema_version": self.schema_version,
+            "evidence_area": self.evidence_area,
+            "status_path": list(self.status_path),
+            "launcher_args": list(self.launcher_args),
+            "db_path": self.db_path,
+            "db_path_kind": self.db_path_kind,
+            "uses_explicit_db": self.uses_explicit_db,
+            "requires_repository": self.requires_repository,
+        }
+
+
+def build_core_json_diagnostic_sweep_plan_report(db_path: str | os.PathLike[str]) -> dict[str, object]:
+    """Return a non-executing agent-readable plan for Core JSON sweeps."""
+
+    plans = build_core_json_diagnostic_sweep_plan(db_path)
+    db_path_kinds = tuple(sorted({plan.db_path_kind for plan in plans}))
+    return {
+        "schema_version": CORE_JSON_DIAGNOSTIC_SWEEP_PLAN_SCHEMA_VERSION,
+        "status": "planned",
+        "scope": "non_executing_command_plan",
+        "command_count": len(plans),
+        "db_path_kind": db_path_kinds[0] if len(db_path_kinds) == 1 else "mixed",
+        "db_path_kinds": list(db_path_kinds),
+        "commands": [plan.to_dict() for plan in plans],
+        "safety": {
+            "executes_commands": False,
+            "creates_sqlite": False,
+            "changes_product_behavior": False,
+            "changes_lifecycle_schema": False,
+            "cross_repo_implementation": False,
+        },
+        "next_safe_actions": (
+            "run_planned_commands_only_with_explicit_local_temp_db",
+            "treat_cloud_drive_db_path_kind_as_sweep_risk",
+        ),
+    }
 
 
 def build_core_json_diagnostic_sweep_plan(
@@ -108,7 +151,9 @@ def _normalized_temp_roots() -> tuple[str, ...]:
 
 
 __all__ = [
+    "CORE_JSON_DIAGNOSTIC_SWEEP_PLAN_SCHEMA_VERSION",
     "CoreJsonDiagnosticCommandPlan",
     "build_core_json_diagnostic_sweep_plan",
+    "build_core_json_diagnostic_sweep_plan_report",
     "classify_core_json_sweep_db_path",
 ]

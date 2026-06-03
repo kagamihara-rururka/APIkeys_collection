@@ -3,6 +3,7 @@
 Last updated: 2026-06-03
 
 ## 目前工作焦點 / Active Focus
+- [x] 2026-06-03 Core JSON diagnostic sweep plan CLI 已補：新增 `--core-json-diagnostic-sweep-plan-json` / `core_json_diagnostic_sweep_plan.v1`，輸出現有 Core JSON diagnostics 的 non-executing command plan，包括 flag、launcher args、schema version、status path、DB path kind 與 `requires_repository`。這不執行 diagnostics、不建立 SQLite、不改 JSON payload、不做 integration。
 - [x] 2026-06-03 Core JSON sweep repository requirement metadata 已補：`CoreJsonDiagnosticCommandPlan` 現在保留每個 cataloged diagnostic 的 `requires_repository`，測試鎖住 `--core-deep-adapter-coverage-json` 為 `false`、`--core-readiness-report-json` 為 `true`。這是 non-executing evidence helper metadata，不改 CLI 行為、不改 JSON payload、不做 integration。
 - [x] 2026-06-03 Core JSON diagnostics stderr guard 已補：`tests/test_core_json_diagnostics_catalog.py` 現在要求 8 個 cataloged Core JSON diagnostic CLI 在明確 local temp `--db` 下 stdout 可解析且 stderr 為空，防止 agent-readable JSON mode 混入 warning/log 噪音。這是 test-hardening，不改 JSON payload、不改產品行為、不做 integration。
 - [x] 2026-06-03 Core readiness downstream safety flag guard 已補：`tests/test_core_readiness_report.py` 現在會遞迴檢查 `core_readiness_report.v1` 全 payload，禁止 renderer/compressor import、payload read、`.npz` read、cross-repo implementation、lifecycle/schema/status change、scheduler runtime/schema change、OpenSpec execution、product behavior change、payload-column loading 等 safety flags 被設成 `true`。這是 test-hardening，不改 JSON payload、不改產品行為、不做 integration。
