@@ -3,6 +3,7 @@
 Last updated: 2026-06-03
 
 ## 目前工作焦點 / Active Focus
+- [x] 2026-06-03 Core JSON diagnostics stderr guard 已補：`tests/test_core_json_diagnostics_catalog.py` 現在要求 8 個 cataloged Core JSON diagnostic CLI 在明確 local temp `--db` 下 stdout 可解析且 stderr 為空，防止 agent-readable JSON mode 混入 warning/log 噪音。這是 test-hardening，不改 JSON payload、不改產品行為、不做 integration。
 - [x] 2026-06-03 Core readiness downstream safety flag guard 已補：`tests/test_core_readiness_report.py` 現在會遞迴檢查 `core_readiness_report.v1` 全 payload，禁止 renderer/compressor import、payload read、`.npz` read、cross-repo implementation、lifecycle/schema/status change、scheduler runtime/schema change、OpenSpec execution、product behavior change、payload-column loading 等 safety flags 被設成 `true`。這是 test-hardening，不改 JSON payload、不改產品行為、不做 integration。
 - [x] 2026-06-03 Core readiness gate aggregation guard 已補：`tests/test_core_readiness_report.py` 現在鎖住 `integration_planning_gate` 必須聚合所有 section 的 missing / blocked / contract-only / planned surfaces，且任一 incomplete surface 都會讓 gate 維持 `partial`。這是 test-hardening，不改 JSON payload、不改 lifecycle/status schema、不做 cross-repo integration。
 - [x] 2026-06-03 Core readiness OpenSpec inventory evidence 已補：新增 `api_launcher/core_openspec_evidence.py`，並把 `openspec_evidence` 接進 `--core-readiness-report-json`。這只盤點 active specs / archived changes，不執行 OpenSpec validate、不改 OpenSpec 檔、不改產品行為；報表保守保留 `openspec_validate_result_not_embedded_in_report`，Integration Planning Gate 仍是 `partial`。

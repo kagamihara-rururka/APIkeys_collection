@@ -100,6 +100,7 @@ class CoreJsonDiagnosticsCatalogTests(unittest.TestCase):
                 payload = json.loads(completed.stdout)
                 self.assertEqual(spec.schema_version, payload["schema_version"])
                 self.assertEqual("local_temp", plan.db_path_kind)
+                self.assertEqual("", completed.stderr)
                 self.assertIn(status_from_payload(spec, payload), {"partial", "not_ready", "contract_only"})
 
 

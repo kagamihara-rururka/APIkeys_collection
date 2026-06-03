@@ -1,5 +1,11 @@
 ﻿# Agent Handoff
 
+## 2026-06-03 Core JSON diagnostics stderr guard
+- Tightened `tests/test_core_json_diagnostics_catalog.py`: every cataloged Core JSON diagnostic CLI now must produce parseable stdout JSON and empty stderr when run with an explicit local temp `--db`.
+- This guards agent-readable JSON mode against side-channel warning/log noise while preserving existing payload semantics and conservative statuses.
+- Verification: focused catalog tests PASS (5 tests); related Core JSON / readiness / CLI tests PASS (22 tests); pre-push smoke PASS (`state/logs/pre_push_smoke_20260603_155233.log`, 1158 tests, skipped 4, MVP demo `download_import_completed`, row_count=3). Remote CI evidence is tracked in GitHub Actions after push.
+- Boundary: test-hardening only. No product behavior change, no JSON payload change, no lifecycle/status schema change, no readiness promotion, no cross-repo integration, no renderer/compressor touch.
+
 ## 2026-06-03 Core readiness downstream safety flag guard
 - Added recursive regression coverage in `tests/test_core_readiness_report.py` so `core_readiness_report.v1` cannot set downstream / schema safety flags to `true` anywhere in the nested payload.
 - Guarded flags include renderer/compressor imports, renderer payload reads, `.npz` reads, cross-repo implementation, lifecycle/schema/status changes, scheduler runtime/schema changes, OpenSpec execution, product behavior changes, and payload-column loading.

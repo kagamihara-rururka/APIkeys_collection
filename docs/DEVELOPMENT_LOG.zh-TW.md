@@ -1,5 +1,10 @@
 ﻿# Development Log
 
+## 2026-06-03 Core JSON diagnostics stderr guard
+- Tightened `tests/test_core_json_diagnostics_catalog.py` so every cataloged Core JSON diagnostic CLI must emit parseable stdout JSON and empty stderr when run through the explicit local temp `--db` sweep plan.
+- This is test-hardening only. It does not change JSON payload semantics, lifecycle/status schema, product behavior, readiness gate, or cross-repo integration boundaries.
+- Verification: focused catalog tests PASS (5 tests); related Core JSON / readiness / CLI tests PASS (22 tests); pre-push smoke PASS (`state/logs/pre_push_smoke_20260603_155233.log`, 1158 tests, skipped 4, MVP demo `download_import_completed`, row_count=3). Remote CI evidence is tracked in GitHub Actions after push.
+
 ## 2026-06-03 Core readiness downstream safety flag guard
 - Added recursive test coverage in `tests/test_core_readiness_report.py` to walk the full `core_readiness_report.v1` payload and fail if any downstream / schema safety flag is `true`.
 - This protects the Core control-plane boundary from accidental overclaims inside nested contract payloads: no renderer/compressor imports, no renderer payload reads, no `.npz` reads, no cross-repo implementation, no lifecycle/schema/status changes, no scheduler runtime/schema changes, no OpenSpec execution, no product behavior change, and no payload-column loading.
