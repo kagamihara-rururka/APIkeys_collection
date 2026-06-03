@@ -1,4 +1,9 @@
 # Agent 接力卡
+## 2026-06-03 06:45 +08:00 Core control-plane responsibility audit
+- 本輪新增 `docs/CORE_CONTROL_PLANE_RESPONSIBILITY_AUDIT.zh-TW.md`，把 RRKAL Core control plane 分成 CLI/entrypoints、Core JSON diagnostics、readiness report、scheduler evidence、review item identity、lifecycle/status/review semantics、manifest/lineage、OpenSpec validation、local temp DB 與 Notion/GitHub evidence alignment 等責任區域。
+- 邊界：這是 docs-only responsibility audit，不新增 Core product behavior、不改 readiness gate、不碰 displaytools / visual-compressor、不實作 RendererSkinAsset / SkinAsset、不讀 `.npz` / renderer payload、不改 lifecycle schema/status、不宣稱 integration ready。Gate 仍為 `partial`。
+- 下一個安全動作：若繼續 Core readiness，可從 audit 的 candidate 表挑一個小切片，例如 readiness section helper extraction、Core JSON diagnostics evidence table helper、scheduler/review evidence helper 或 local temp DB precheck helper。凡涉及 lifecycle schema/status、durable scheduler/review queue、cross-repo contract 或 integration wording，先送 `o_1`。
+
 ## 2026-06-03 06:28 +08:00 Core readiness evidence packet
 - 本輪新增 repo-side evidence packet：`docs/CORE_READINESS_EVIDENCE_PACKET.zh-TW.md`，供 `n_1` 對齊 Notion summary。它整理 baseline `a2a937b`、GitHub Actions run `26849553709` PASS、8 個 Core JSON diagnostics 以本機 temp DB parse 成功、OpenSpec validate 3 specs PASS、L-drive stale permission warning 與 Core gate `partial`。
 - 邊界：這是 evidence aggregation / docs-only slice，不新增 Core product behavior、不改 readiness gate、不碰 displaytools / visual-compressor、不實作 RendererSkinAsset / SkinAsset、不讀 `.npz` / renderer payload、不改 lifecycle schema/status、不宣稱 integration ready。
