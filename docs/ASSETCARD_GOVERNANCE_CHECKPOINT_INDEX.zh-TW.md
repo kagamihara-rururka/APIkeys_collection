@@ -37,6 +37,14 @@ partial
 
 If this command emits a different schema version or gate status, stop and review before changing AssetCard docs or implementation scope.
 
+Local governance wrapper prototype:
+
+```powershell
+py -3 -B scripts\assetcard_governance_checkpoint.py
+```
+
+This wrapper emits pure JSON, checks the required governance docs are present, preserves Core gate status, and keeps `export_query_api_exists=false`, `json_fixture_driver_exists=false`, `cross_repo_integration=false`, and `payload_exposure=false`.
+
 ## AssetCard Governance Docs
 
 | Checkpoint | File | Role | Current meaning |
@@ -47,6 +55,7 @@ If this command emits a different schema version or gate status, stop and review
 | Touchpoint negative test matrix | `ASSETCARD_EXPORT_QUERY_TOUCHPOINT_NEGATIVE_TEST_MATRIX.zh-TW.md` | Maps Core touchpoints and future negative tests for projection/query behavior. | Test planning only; no code path. |
 | Redaction fixture matrix | `ASSETCARD_EXPORT_QUERY_REDACTION_FIXTURE_MATRIX.zh-TW.md` | Lists future positive/negative redaction fixture cases. | Fixture matrix only; no fixture driver. |
 | Redaction fixture packet design | `ASSETCARD_REDACTION_FIXTURE_PACKET_DESIGN.zh-TW.md` | Defines future fixture packet fields and diagnostics vocabulary. | Packet design only; examples remain unverified. |
+| Governance checkpoint command design | `ASSETCARD_GOVERNANCE_CHECKPOINT_COMMAND_DESIGN.zh-TW.md` | Documents the local governance wrapper prototype and expected JSON fields. | Governance tooling only; no export/query API. |
 
 ## Governance Chain
 
