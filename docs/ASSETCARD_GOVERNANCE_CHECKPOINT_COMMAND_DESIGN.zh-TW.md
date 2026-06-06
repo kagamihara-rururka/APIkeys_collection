@@ -10,6 +10,8 @@ The prototype script is `scripts/assetcard_governance_checkpoint.py`. It does no
 
 The validator script is `scripts/validate_assetcard_governance_checkpoint.py`. It validates the wrapper JSON and can run an in-memory negative self-test for false-safety fields. It does not execute redaction fixture packets or create any AssetCard export/query surface.
 
+Checkpoint and validator runners may aggregate leaf evidence only. They must not invoke pytest, unittest, or any test that calls the checkpoint/validator scripts again. If a future implementation uses subprocesses, every subprocess call must set an explicit timeout and the JSON report must disclose process fan-out evidence.
+
 ## TL;DR
 
 The checkpoint wrapper gives agents one local command to confirm the AssetCard governance lane is still safe before implementation planning.
@@ -149,6 +151,9 @@ Current prototype shape:
 | JSON mode | stdout is pure JSON; no banners, logs, Markdown, or warning text. |
 | readiness parsing | Must parse `--core-readiness-report-json` and preserve `partial`. |
 | docs inventory | Must only check tracked docs references, not infer implementation. |
+| recursion guard | Must not call tests, pytest, unittest, or the validator. |
+| timeout guard | Current prototype has zero subprocess fan-out. Future subprocess calls require explicit timeout. |
+| fan-out evidence | JSON must disclose process fan-out counters. |
 | no fixture execution | Must not run or materialize redaction fixture packets. |
 | no payload access | Must not read manifest payloads, `.npz`, renderer buffers, or private files. |
 | no cross-repo import | Must not import c_2/c_3/c_4, displaytools, visual-compressor, or Odoriba code. |

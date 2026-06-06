@@ -83,6 +83,18 @@ def build_assetcard_governance_checkpoint(repo_root: Path = ROOT) -> dict[str, A
         "missing_docs": missing_docs,
         **safety,
         "checkpoint_passed": checkpoint_passed,
+        "runner_constraints": {
+            "aggregates_leaf_evidence_only": True,
+            "invokes_tests": False,
+            "invokes_validator": False,
+            "subprocess_invocations": 0,
+            "subprocess_timeout_required": True,
+        },
+        "process_fanout": {
+            "subprocess_count": 0,
+            "test_runner_count": 0,
+            "validator_runner_count": 0,
+        },
         "next_safe_actions": (
             "keep_assetcard_governance_docs_current",
             "request_review_before_export_query_or_fixture_driver_implementation",

@@ -54,6 +54,8 @@ py -3 -B scripts\validate_assetcard_governance_checkpoint.py --self-test-negativ
 
 The validator verifies the wrapper JSON and detects in-memory unsafe mutations of false-safety fields, non-partial gate status, and non-empty `missing_docs`. It is not a JSON fixture driver and does not implement AssetCard export/query.
 
+Recursive validation boundary: the checkpoint wrapper and validator aggregate leaf evidence only. They must not call pytest, unittest, or tests that call the checkpoint/validator scripts. The current scripts disclose zero subprocess fan-out; any future subprocess use must carry explicit timeout and remain visible in JSON evidence.
+
 ## AssetCard Governance Docs
 
 | Checkpoint | File | Role | Current meaning |

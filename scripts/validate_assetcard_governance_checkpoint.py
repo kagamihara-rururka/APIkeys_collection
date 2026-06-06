@@ -113,6 +113,18 @@ def build_validation_report(*, self_test_negative: bool = False) -> dict[str, An
         },
         "errors": errors,
         "negative_self_test": negative,
+        "runner_constraints": {
+            "aggregates_leaf_evidence_only": True,
+            "invokes_tests": False,
+            "invokes_checkpoint_as_subprocess": False,
+            "subprocess_invocations": 0,
+            "subprocess_timeout_required": True,
+        },
+        "process_fanout": {
+            "subprocess_count": 0,
+            "test_runner_count": 0,
+            "checkpoint_subprocess_count": 0,
+        },
         "boundary": {
             "validator_only": True,
             "exports_assetcards": False,

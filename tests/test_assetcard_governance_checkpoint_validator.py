@@ -17,6 +17,7 @@ from scripts.validate_assetcard_governance_checkpoint import (
 
 ROOT = Path(__file__).resolve().parents[1]
 VALIDATOR = ROOT / "scripts" / "validate_assetcard_governance_checkpoint.py"
+CHECKPOINT = ROOT / "scripts" / "assetcard_governance_checkpoint.py"
 
 
 class AssetCardGovernanceCheckpointValidatorTests(unittest.TestCase):
@@ -40,6 +41,12 @@ class AssetCardGovernanceCheckpointValidatorTests(unittest.TestCase):
         self.assertIs(payload["checkpoint_passed"], True)
         self.assertEqual([], payload["missing_docs"])
         self.assertEqual([], payload["errors"])
+        self.assertIs(payload["runner_constraints"]["aggregates_leaf_evidence_only"], True)
+        self.assertIs(payload["runner_constraints"]["invokes_tests"], False)
+        self.assertIs(payload["runner_constraints"]["invokes_checkpoint_as_subprocess"], False)
+        self.assertEqual(0, payload["process_fanout"]["subprocess_count"])
+        self.assertEqual(0, payload["process_fanout"]["test_runner_count"])
+        self.assertEqual(0, payload["process_fanout"]["checkpoint_subprocess_count"])
         for field in SAFETY_FALSE_FIELDS:
             self.assertIs(payload["safety_false_fields"][field], False)
 
@@ -89,6 +96,14 @@ class AssetCardGovernanceCheckpointValidatorTests(unittest.TestCase):
         self.assertIs(payload["boundary"]["exports_assetcards"], False)
         self.assertIs(payload["boundary"]["runs_fixture_packets"], False)
         self.assertIs(payload["boundary"]["imports_downstream_repos"], False)
+
+    def test_validator_does_not_fan_out_to_tests_or_checkpoint_subprocess(self) -> None:
+        source = VALIDATOR.read_text(encoding="utf-8")
+
+        self.assertNotIn("subprocess.", source)
+        self.assertNotIn("pytest", source)
+        self.assertNotIn("unittest", source)
+        self.assertNotIn(str(CHECKPOINT), source)
 
 
 if __name__ == "__main__":

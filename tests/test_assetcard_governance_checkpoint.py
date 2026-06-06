@@ -49,9 +49,23 @@ class AssetCardGovernanceCheckpointTests(unittest.TestCase):
         self.assertIs(payload["payload_exposure"], False)
         self.assertIs(payload["private_path_exposure"], False)
         self.assertIs(payload["odoriba_consumption_claim"], False)
+        self.assertIs(payload["runner_constraints"]["aggregates_leaf_evidence_only"], True)
+        self.assertIs(payload["runner_constraints"]["invokes_tests"], False)
+        self.assertIs(payload["runner_constraints"]["invokes_validator"], False)
+        self.assertEqual(0, payload["process_fanout"]["subprocess_count"])
+        self.assertEqual(0, payload["process_fanout"]["test_runner_count"])
+        self.assertEqual(0, payload["process_fanout"]["validator_runner_count"])
         self.assertIs(payload["boundary"]["exports_assetcards"], False)
         self.assertIs(payload["boundary"]["runs_fixture_packets"], False)
         self.assertIs(payload["boundary"]["imports_downstream_repos"], False)
+
+    def test_checkpoint_runner_does_not_fan_out_to_tests_or_validator(self) -> None:
+        source = SCRIPT.read_text(encoding="utf-8")
+
+        self.assertNotIn("subprocess.", source)
+        self.assertNotIn("pytest", source)
+        self.assertNotIn("unittest", source)
+        self.assertNotIn("validate_assetcard_governance_checkpoint", source)
 
 
 if __name__ == "__main__":
