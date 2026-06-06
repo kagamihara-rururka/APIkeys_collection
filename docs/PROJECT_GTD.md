@@ -1,8 +1,9 @@
 # RuRuKa Asset Launcher GTD
 
-Last updated: 2026-06-03
+Last updated: 2026-06-06
 
 ## 目前工作焦點 / Active Focus
+- [x] 2026-06-06 Startup docs readability / active-source alignment 已補：`docs/AGENT_START_HERE.zh-TW.md` 現在在入口處直接標明 `L:\RRKAL_project` 是主工作區、舊 K 槽只作歷史唯讀、Notion `Agents討論區` 是 coordination dashboard、`L:\AGENT_EXCHANGE` 只作 archive，以及 Core gate 仍是 `partial`。這是 docs-only 啟動文件治理；不改 Core code、DB/schema/lifecycle/readiness，也不新增 AssetCard export/query API。
 - [x] 2026-06-03 Core evidence / pattern index 已補：新增 `docs/CORE_EVIDENCE_AND_PATTERN_INDEX.zh-TW.md`，把 readiness evidence packet、control-plane responsibility audit、capability addressing ADR、Core JSON diagnostics、OpenSpec validate、CI、local temp DB requirement 與 L-drive residue classification 收成 `n_1` / `o_1` / Owner 快速引用索引。這是 docs/evidence-index-only；gate 仍為 `partial`，不做 integration authorization。
 - [x] 2026-06-03 Capability addressing pattern ADR 已補：新增 `docs/CAPABILITY_ADDRESSING_PATTERN.zh-TW.md`，把目前 `api_launcher/crawlers/registry.py` 的 4-bit `CrawlerCapabilityCode`、`CrawlerCapabilityMask`、CIDR-style prefix query、`@crawler(...)` registration safety boundary 與 `CrawlerSpec.matrix_key` 語意來源整理成可引用模式。這是 docs/pattern-only；gate 仍為 `partial`，不做 universal framework、不做 integration。
 - [x] 2026-06-03 Core control-plane responsibility audit refreshed: `docs/CORE_CONTROL_PLANE_RESPONSIBILITY_AUDIT.zh-TW.md` was rewritten as clean ASCII Markdown and aligned to baseline `3c45496` / CI `26875337280` PASS. It now includes responsibility map, gate boundary, evidence ledger, future safe slices and `n_1` packet. Gate remains `partial`.

@@ -1,8 +1,16 @@
 # Agent Start Here
 
-最後更新：2026-06-01
+最後更新：2026-06-06
 
 這份文件是給接手 RRKAL / `APIkeys_collection` 的 agent 的最短入口地圖。它不取代詳細規格，只負責降低啟動時的判斷成本。
+
+## 當前協調與證據來源
+
+- 主工作區與提交來源是 `L:\RRKAL_project`；舊 `K:\APIkeys_collection` 只作歷史紀錄與唯讀查詢。
+- Notion `Agents討論區` 是目前 primary coordination dashboard。RRKAL status / handoff / relay 走 `04_Agent_Inbox`，`o_1` review request 走 `03_OAI_Review_Requests`，accepted decisions 走 `02_Decision_Log`，`n_1` operations 走 `06_n1_SOP`。
+- Notion 不是 source of truth。產品證據仍以 GitHub commits、tests、smoke、CLI JSON、GitHub Actions、實際 UI / diff 為準。
+- `L:\AGENT_EXCHANGE` 已降級為 archive / historical reference。不要把它當主要 inbox/outbox，也不要寫新 agent mail，除非使用者明確重新啟用。
+- Core / registry / lifecycle / readiness 相關工作目前 gate 仍是 `partial`。不要宣稱 Core 已具備生產交付成熟度、整合閘門已通過、下游消費已開放，或 Odoriba / renderer / compressor 已可直接 consume Core output。
 
 ## 文檔漂移防護
 

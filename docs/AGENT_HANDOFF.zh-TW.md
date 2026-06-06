@@ -1,8 +1,13 @@
 # Agent Handoff
 
+## 2026-06-06 Startup docs readability and active-source alignment
+- Updated `docs/AGENT_START_HERE.zh-TW.md` so the first entrypoint now states the current coordination and evidence rules before older workflow details: `L:\RRKAL_project` is the active workspace, old `K:\APIkeys_collection` is historical/read-only, Notion `Agents討論區` is the coordination dashboard, GitHub/tests/smoke/CLI JSON/UI/diff remain product evidence, and `L:\AGENT_EXCHANGE` is archive / historical reference only.
+- Updated `docs/PROJECT_GTD.md` to record this docs-only startup alignment checkpoint. Core gate remains `partial`; this slice did not change Core code, DB/schema/lifecycle/readiness, AssetCard export/query API, renderer/compressor integration, or cross-repo behavior.
+- UTF-8 note: strict UTF-8 decoding passed for touched docs. The earlier PowerShell console rendering can show Chinese as mojibake even when the file bytes decode correctly; use strict decode / U+FFFD scan before assuming the file is corrupted.
+
 ## 2026-06-03 Core evidence and capability pattern index
 - Added `docs/CORE_EVIDENCE_AND_PATTERN_INDEX.zh-TW.md` as a repo-side quick index for `n_1`, `o_1`, and Owner references. It links the readiness evidence packet, control-plane responsibility audit, capability addressing ADR, Core JSON diagnostics, OpenSpec validate, focused tests, GitHub Actions CI, local temp DB requirement, and L-drive stale warning classification.
-- The index includes the Notion wording boundary: allowed wording is that Core evidence is clearer, the gate remains `partial`, capability addressing is documented as a Core pattern, and control-plane responsibilities are mapped. Forbidden wording includes production-ready, integration-ready, completed scheduler runtime, completed durable review queue, authorized renderer/compressor integration, or completed SkinAsset / RendererSkinAsset implementation.
+- The index includes the Notion wording boundary: allowed wording is that Core evidence is clearer, the gate remains `partial`, capability addressing is documented as a Core pattern, and control-plane responsibilities are mapped. Forbidden wording covers claims of production maturity, passed integration gate, completed scheduler runtime, completed durable review queue, authorized renderer/compressor integration, or completed SkinAsset / RendererSkinAsset implementation.
 - Boundary: docs/evidence-index-only. No product behavior, lifecycle/status schema, readiness promotion, renderer/compressor, SkinAsset/RendererSkinAsset, `.npz`, payload read, or cross-repo implementation changes. Gate remains `partial`.
 
 ## 2026-06-03 Capability addressing pattern ADR
@@ -116,12 +121,12 @@
 # Agent 接力卡
 ## 2026-06-03 06:45 +08:00 Core control-plane responsibility audit
 - 本輪新增 `docs/CORE_CONTROL_PLANE_RESPONSIBILITY_AUDIT.zh-TW.md`，把 RRKAL Core control plane 分成 CLI/entrypoints、Core JSON diagnostics、readiness report、scheduler evidence、review item identity、lifecycle/status/review semantics、manifest/lineage、OpenSpec validation、local temp DB 與 Notion/GitHub evidence alignment 等責任區域。
-- 邊界：這是 docs-only responsibility audit，不新增 Core product behavior、不改 readiness gate、不碰 displaytools / visual-compressor、不實作 RendererSkinAsset / SkinAsset、不讀 `.npz` / renderer payload、不改 lifecycle schema/status、不宣稱 integration ready。Gate 仍為 `partial`。
+- 邊界：這是 docs-only responsibility audit，不新增 Core product behavior、不改 readiness gate、不碰 displaytools / visual-compressor、不實作 RendererSkinAsset / SkinAsset、不讀 `.npz` / renderer payload、不改 lifecycle schema/status、不宣稱整合閘門已通過。Gate 仍為 `partial`。
 - 下一個安全動作：若繼續 Core readiness，可從 audit 的 candidate 表挑一個小切片，例如 readiness section helper extraction、Core JSON diagnostics evidence table helper、scheduler/review evidence helper 或 local temp DB precheck helper。凡涉及 lifecycle schema/status、durable scheduler/review queue、cross-repo contract 或 integration wording，先送 `o_1`。
 
 ## 2026-06-03 06:28 +08:00 Core readiness evidence packet
 - 本輪新增 repo-side evidence packet：`docs/CORE_READINESS_EVIDENCE_PACKET.zh-TW.md`，供 `n_1` 對齊 Notion summary。它整理 baseline `a2a937b`、GitHub Actions run `26849553709` PASS、8 個 Core JSON diagnostics 以本機 temp DB parse 成功、OpenSpec validate 3 specs PASS、L-drive stale permission warning 與 Core gate `partial`。
-- 邊界：這是 evidence aggregation / docs-only slice，不新增 Core product behavior、不改 readiness gate、不碰 displaytools / visual-compressor、不實作 RendererSkinAsset / SkinAsset、不讀 `.npz` / renderer payload、不改 lifecycle schema/status、不宣稱 integration ready。
+- 邊界：這是 evidence aggregation / docs-only slice，不新增 Core product behavior、不改 readiness gate、不碰 displaytools / visual-compressor、不實作 RendererSkinAsset / SkinAsset、不讀 `.npz` / renderer payload、不改 lifecycle schema/status、不宣稱整合閘門已通過。
 - 操作提醒：Notion 是 coordination dashboard；GitHub commits、CI、smoke、OpenSpec validate 與 CLI JSON diagnostics 才是 product evidence。若後續要動 lifecycle schema/status、cross-repo contract、SkinAsset / RendererSkinAsset 或 integration wording，先送 `o_1` review。
 
 ## 2026-06-03 05:39 +08:00 Core JSON diagnostics sweep note
