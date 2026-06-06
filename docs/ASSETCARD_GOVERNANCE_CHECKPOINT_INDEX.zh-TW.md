@@ -56,6 +56,49 @@ The validator verifies the wrapper JSON and detects in-memory unsafe mutations o
 
 Recursive validation boundary: the checkpoint wrapper and validator aggregate leaf evidence only. They must not call pytest, unittest, or tests that call the checkpoint/validator scripts. The current scripts disclose zero subprocess fan-out; any future subprocess use must carry explicit timeout and remain visible in JSON evidence.
 
+## Checkpoint / Validator / Meta-Test Separation
+
+| Layer | Responsibility | Must not do |
+| ----- | -------------- | ----------- |
+| checkpoint | Aggregates leaf evidence: Core readiness JSON, governance docs presence, false-safety flags, and process fan-out counters. | Must not call tests, validator, fixture packets, export/query paths, or downstream repos. |
+| validator | Validates checkpoint JSON, boundary flags, `partial` gate status, and missing-doc state. | Must not call pytest/unittest or create checkpoint -> validator -> test loops. |
+| meta-test | Tests JSON purity, negative in-memory mutations, source-level recursion guards, and validator behavior. | Must not be invoked by checkpoint or validator scripts. |
+
+## Wrapper JSON Fields
+
+The wrapper currently emits these field families:
+
+- identity: `schema`, `status`;
+- Core gate evidence: `core_readiness_schema`, `core_gate_status`, `checkpoint_passed`;
+- docs evidence: `assetcard_governance_docs_present`, `redaction_docs_present`, `docs`, `missing_docs`;
+- false-safety fields: `export_query_api_exists`, `json_fixture_driver_exists`, `cross_repo_integration`, `payload_exposure`, `private_path_exposure`, `odoriba_consumption_claim`;
+- runner guard: `runner_constraints`;
+- fan-out evidence: `process_fanout`;
+- guidance and boundary: `next_safe_actions`, `boundary`, `evidence_command`.
+
+`process_fanout` currently records:
+
+- `subprocess_count=0`;
+- `test_runner_count=0`;
+- `validator_runner_count=0`.
+
+## Validator JSON Fields
+
+The validator currently emits:
+
+- identity: `schema`, `status`;
+- validated checkpoint identity: `validated_checkpoint_schema`;
+- Core gate evidence: `core_readiness_schema`, `core_gate_status`, `checkpoint_passed`;
+- docs evidence: `missing_docs`;
+- false-safety echo: `safety_false_fields`;
+- validation outcome: `errors`;
+- in-memory mutation evidence: `negative_self_test`;
+- runner guard: `runner_constraints`;
+- fan-out evidence: `process_fanout`;
+- boundary: `boundary`.
+
+`negative_self_test` mutates copies of the wrapper payload only. It must detect unsafe flips for false-safety fields, gate status not equal to `partial`, and non-empty `missing_docs`.
+
 ## AssetCard Governance Docs
 
 | Checkpoint | File | Role | Current meaning |

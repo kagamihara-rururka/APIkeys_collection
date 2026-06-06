@@ -140,9 +140,33 @@ Current prototype shape:
     "keep_docs_index_current",
     "request_review_before_any_implementation"
   ],
+  "runner_constraints": {
+    "aggregates_leaf_evidence_only": true,
+    "invokes_tests": false,
+    "invokes_validator": false,
+    "subprocess_invocations": 0,
+    "subprocess_timeout_required": true
+  },
+  "process_fanout": {
+    "subprocess_count": 0,
+    "test_runner_count": 0,
+    "validator_runner_count": 0
+  },
   "checkpoint_passed": true
 }
 ```
+
+The companion validator emits `assetcard_governance_checkpoint_validator.v1` with `validated_checkpoint_schema`, `safety_false_fields`, `errors`, `negative_self_test`, `runner_constraints`, `process_fanout`, and boundary flags. It validates the wrapper output and rejects unsafe in-memory mutations.
+
+## Checkpoint / Validator / Meta-Test Separation
+
+| Layer | Responsibility | Forbidden feedback loop |
+| ----- | -------------- | ----------------------- |
+| checkpoint | Aggregates leaf evidence and emits pure JSON. | Must not call validator or tests. |
+| validator | Validates checkpoint JSON and false-safety fields. | Must not call tests or invoke checkpoint through subprocess. |
+| meta-test | Exercises JSON purity, negative mutations, and source-level recursion guards. | Must not be called by checkpoint or validator scripts. |
+
+The current wrapper and validator disclose zero subprocess fan-out. If future code adds subprocess calls, each call needs explicit timeout and the JSON evidence must keep process fan-out visible.
 
 ## Required Wrapper Behavior
 
