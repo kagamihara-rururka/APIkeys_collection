@@ -8,6 +8,8 @@ Purpose: define and document the local Core AssetCard governance checkpoint wrap
 
 The prototype script is `scripts/assetcard_governance_checkpoint.py`. It does not add an export/query API, JSON fixture driver, database schema, lifecycle status, readiness change, renderer integration, compressor integration, Odoriba integration, or cross-repo implementation.
 
+The validator script is `scripts/validate_assetcard_governance_checkpoint.py`. It validates the wrapper JSON and can run an in-memory negative self-test for false-safety fields. It does not execute redaction fixture packets or create any AssetCard export/query surface.
+
 ## TL;DR
 
 The checkpoint wrapper gives agents one local command to confirm the AssetCard governance lane is still safe before implementation planning.
@@ -35,6 +37,39 @@ The output is pure JSON and should parse through:
 py -3 -B scripts\assetcard_governance_checkpoint.py |
   py -3 -c "import sys,json; d=json.load(sys.stdin); assert d['checkpoint_passed'] is True; assert d['core_gate_status'] == 'partial'"
 ```
+
+## Current Validator Command
+
+Run this from `L:\RRKAL_project`:
+
+```powershell
+py -3 -B scripts\validate_assetcard_governance_checkpoint.py
+```
+
+The validator output is pure JSON and should report:
+
+```text
+assetcard_governance_checkpoint_validator.v1
+passed
+partial
+```
+
+The negative self-test mutates in-memory JSON copies only:
+
+```powershell
+py -3 -B scripts\validate_assetcard_governance_checkpoint.py --self-test-negative
+```
+
+It must detect these unsafe mutations:
+
+- `export_query_api_exists=true`;
+- `json_fixture_driver_exists=true`;
+- `cross_repo_integration=true`;
+- `payload_exposure=true`;
+- `private_path_exposure=true`;
+- `odoriba_consumption_claim=true`;
+- `core_gate_status` not equal to `partial`;
+- `missing_docs` non-empty.
 
 ## Current Manual Command
 
@@ -131,6 +166,8 @@ Tests should assert:
 6. no payload/private path fields are emitted;
 7. no requester-consumption claim is emitted;
 8. no cross-repo imports are required.
+
+The current validator enforces these assertions against the wrapper output and keeps the negative self-test in memory only. It is a governance self-check, not an executable fixture driver.
 
 ## What This Design Does Not Authorize
 

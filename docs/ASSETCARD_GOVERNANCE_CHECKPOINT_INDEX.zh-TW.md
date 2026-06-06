@@ -45,6 +45,15 @@ py -3 -B scripts\assetcard_governance_checkpoint.py
 
 This wrapper emits pure JSON, checks the required governance docs are present, preserves Core gate status, and keeps `export_query_api_exists=false`, `json_fixture_driver_exists=false`, `cross_repo_integration=false`, and `payload_exposure=false`.
 
+Local governance validator:
+
+```powershell
+py -3 -B scripts\validate_assetcard_governance_checkpoint.py
+py -3 -B scripts\validate_assetcard_governance_checkpoint.py --self-test-negative
+```
+
+The validator verifies the wrapper JSON and detects in-memory unsafe mutations of false-safety fields, non-partial gate status, and non-empty `missing_docs`. It is not a JSON fixture driver and does not implement AssetCard export/query.
+
 ## AssetCard Governance Docs
 
 | Checkpoint | File | Role | Current meaning |
@@ -56,6 +65,7 @@ This wrapper emits pure JSON, checks the required governance docs are present, p
 | Redaction fixture matrix | `ASSETCARD_EXPORT_QUERY_REDACTION_FIXTURE_MATRIX.zh-TW.md` | Lists future positive/negative redaction fixture cases. | Fixture matrix only; no fixture driver. |
 | Redaction fixture packet design | `ASSETCARD_REDACTION_FIXTURE_PACKET_DESIGN.zh-TW.md` | Defines future fixture packet fields and diagnostics vocabulary. | Packet design only; examples remain unverified. |
 | Governance checkpoint command design | `ASSETCARD_GOVERNANCE_CHECKPOINT_COMMAND_DESIGN.zh-TW.md` | Documents the local governance wrapper prototype and expected JSON fields. | Governance tooling only; no export/query API. |
+| Governance checkpoint validator | `scripts/validate_assetcard_governance_checkpoint.py` | Validates wrapper JSON and in-memory negative safety mutations. | Governance self-check only; no fixture driver or export/query API. |
 
 ## Governance Chain
 
