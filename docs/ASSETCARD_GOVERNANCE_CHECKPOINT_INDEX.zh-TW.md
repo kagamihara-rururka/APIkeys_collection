@@ -111,6 +111,7 @@ The validator currently emits:
 | Redaction fixture packet design | `ASSETCARD_REDACTION_FIXTURE_PACKET_DESIGN.zh-TW.md` | Defines future fixture packet fields and diagnostics vocabulary. | Packet design only; examples remain unverified. |
 | Governance checkpoint command design | `ASSETCARD_GOVERNANCE_CHECKPOINT_COMMAND_DESIGN.zh-TW.md` | Documents the local governance wrapper prototype and expected JSON fields. | Governance tooling only; no export/query API. |
 | Governance checkpoint validator | `scripts/validate_assetcard_governance_checkpoint.py` | Validates wrapper JSON and in-memory negative safety mutations. | Governance self-check only; no fixture driver or export/query API. |
+| Governance checkpoint usage/failure guide | `ASSETCARD_GOVERNANCE_CHECKPOINT_USAGE_FAILURE_INDEX.zh-TW.md` | Explains how to run wrapper/validator, read failure states, and apply stop conditions. | Docs-only operational guide; no behavior change. |
 
 ## Governance Chain
 
