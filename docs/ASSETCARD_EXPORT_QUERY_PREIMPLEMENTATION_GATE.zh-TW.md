@@ -145,11 +145,11 @@ Allowed wording:
 
 Forbidden wording:
 
-- Core is production ready.
-- Core is downstream ready.
-- Core is integration ready.
-- Odoriba can consume Core cards now.
-- AssetCard export/query API exists.
+- Claims that Core has production readiness.
+- Claims that Core has downstream consumption readiness.
+- Claims that Core has integration readiness.
+- Claims that Odoriba can consume Core cards in the present state.
+- Claims that an AssetCard export/query API already exists.
 - Renderer/compressor integration is authorized.
 - Payload paths are safe to expose.
 
