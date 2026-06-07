@@ -19,6 +19,7 @@ let latestAdapterReview = null;
 let recentEvents = [];
 let missions = [];
 let projectMaturity = null;
+let assetcardGovernance = null;
 let crawlerAssetDownloadImportResult = null;
 const assetPlanOutcomes = new Map();
 const assetPlanPassports = new Map();
@@ -67,6 +68,9 @@ const reviewSummary = document.querySelector("#reviewSummary");
 const maturityRefreshButton = document.querySelector("#maturityRefreshButton");
 const maturitySummary = document.querySelector("#maturitySummary");
 const maturityGrid = document.querySelector("#maturityGrid");
+const governanceRefreshButton = document.querySelector("#governanceRefreshButton");
+const governanceSummary = document.querySelector("#governanceSummary");
+const governanceGrid = document.querySelector("#governanceGrid");
 const eventRefreshButton = document.querySelector("#eventRefreshButton");
 const eventList = document.querySelector("#eventList");
 
@@ -81,6 +85,7 @@ crawlerAssetDownloadButton.addEventListener("click", () => runCrawlerAssetDownlo
 downloaderRefreshButton.addEventListener("click", renderDownloaderWorkspace);
 reviewReturnButton.addEventListener("click", () => showWorkspace("assets"));
 maturityRefreshButton.addEventListener("click", () => loadProjectMaturity());
+governanceRefreshButton.addEventListener("click", () => loadAssetcardGovernance());
 eventRefreshButton.addEventListener("click", () => loadRecentEvents());
 
 loadAssets();
@@ -202,6 +207,8 @@ function showWorkspace(name) {
     renderReviewWorkspace();
   } else if (activeWorkspace === "maturity") {
     loadProjectMaturity({ quiet: true });
+  } else if (activeWorkspace === "governance") {
+    loadAssetcardGovernance({ quiet: true });
   } else if (activeWorkspace === "events") {
     loadRecentEvents({ quiet: true });
   }
@@ -265,6 +272,125 @@ function maturityCardHtml(row) {
       <p>${escapeHtml(row.deliverable_scope || "")}</p>
       ${limitations.length ? `<ul>${limitations.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>` : ""}
       ${nextActions.length ? `<footer>${escapeHtml(nextActions[0])}</footer>` : ""}
+    </article>
+  `;
+}
+
+async function loadAssetcardGovernance(options = {}) {
+  if (!governanceSummary || !governanceGrid) return;
+  try {
+    assetcardGovernance = await getJson("/api/governance/checkpoints");
+    renderGovernanceWorkspace();
+    if (!options.quiet) {
+      addMission("治理 checkpoint 已讀取", assetcardGovernance.schema || "governance checkpoint");
+      writeJson(assetcardGovernance);
+    }
+  } catch (error) {
+    governanceSummary.innerHTML = `<div class="empty-state wide"><strong>治理狀態讀取失敗</strong><p>${escapeHtml(String(error))}</p></div>`;
+    if (!options.quiet) writeJson({ error: String(error), endpoint: "governance_checkpoints" });
+  }
+}
+
+function renderGovernanceWorkspace() {
+  if (!governanceSummary || !governanceGrid) return;
+  const payload = assetcardGovernance || {};
+  const cards = Array.isArray(payload.summary_cards) ? payload.summary_cards : [];
+  const docs = Array.isArray(payload.docs) ? payload.docs : [];
+  const flags = Array.isArray(payload.false_safety_flags) ? payload.false_safety_flags : [];
+  const layers = Array.isArray(payload.runner_separation) ? payload.runner_separation : [];
+  const stops = Array.isArray(payload.stop_conditions) ? payload.stop_conditions : [];
+  const missingDocs = Array.isArray(payload.missing_docs) ? payload.missing_docs : [];
+
+  governanceSummary.innerHTML = `
+    <section class="governance-summary-card ${missingDocs.length ? "warning" : "success"}">
+      <span class="eyebrow">Core Governance</span>
+      <strong>${escapeHtml(displayTextOrFallback("Core readiness: partial", payload.core_gate_label))}</strong>
+      <p>${escapeHtml(payload.not_source_of_truth || "Web Preview 是 UIUX review surface，不是產品證據來源。")}</p>
+      <footer>${escapeHtml(payload.source_of_truth || "GitHub commits / tests / smoke / CLI JSON 才是產品證據。")}</footer>
+    </section>
+  `;
+
+  governanceGrid.innerHTML = `
+    <section class="governance-section">
+      <div class="section-head">
+        <span class="eyebrow">State Cards</span>
+        <strong>目前治理狀態</strong>
+      </div>
+      <div class="governance-card-grid">
+        ${cards.map((card) => governanceStateCardHtml(card)).join("")}
+      </div>
+    </section>
+    <section class="governance-section">
+      <div class="section-head">
+        <span class="eyebrow">Runner Separation</span>
+        <strong>Checkpoint / Validator / Meta-test 分工</strong>
+      </div>
+      <div class="governance-lane-grid">
+        ${layers.map((layer) => governanceLayerHtml(layer)).join("")}
+      </div>
+    </section>
+    <section class="governance-section">
+      <div class="section-head">
+        <span class="eyebrow">False-Safety Flags</span>
+        <strong>必須維持 false 的安全旗標</strong>
+      </div>
+      <ul class="governance-flag-list">
+        ${flags.map((flag) => `<li><span>${escapeHtml(flag.label || flag.flag || "安全旗標待確認")}</span><strong>${escapeHtml(String(flag.expected))}</strong></li>`).join("")}
+      </ul>
+    </section>
+    <section class="governance-section">
+      <div class="section-head">
+        <span class="eyebrow">Governance Docs</span>
+        <strong>文件鏈</strong>
+      </div>
+      <div class="governance-doc-list">
+        ${docs.map((doc) => governanceDocHtml(doc)).join("")}
+      </div>
+    </section>
+    <section class="governance-section danger">
+      <div class="section-head">
+        <span class="eyebrow">Stop Conditions</span>
+        <strong>看到這些情況就停止</strong>
+      </div>
+      <ul class="governance-stop-list">
+        ${stops.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
+      </ul>
+    </section>
+  `;
+}
+
+function governanceStateCardHtml(card) {
+  const tone = toneClass(card.tone || "neutral");
+  return `
+    <article class="governance-card ${tone}">
+      <span>${escapeHtml(card.label || "治理項目")}</span>
+      <strong>${escapeHtml(card.value || "待確認")}</strong>
+      <p>${escapeHtml(card.detail || "")}</p>
+    </article>
+  `;
+}
+
+function governanceLayerHtml(layer) {
+  return `
+    <article class="governance-lane-card">
+      <span>${escapeHtml(layer.layer || "layer")}</span>
+      <strong>${escapeHtml(layer.label || "治理層")}</strong>
+      <p>${escapeHtml(layer.responsibility || "")}</p>
+      <footer>${escapeHtml(layer.must_not_do || "")}</footer>
+    </article>
+  `;
+}
+
+function governanceDocHtml(doc) {
+  const present = doc.present === true;
+  return `
+    <article class="governance-doc-row ${present ? "present" : "missing"}">
+      <div>
+        <strong>${escapeHtml(doc.label || "治理文件")}</strong>
+        <span>${escapeHtml(doc.path || "path pending")}</span>
+      </div>
+      <p>${escapeHtml(doc.role || "")}</p>
+      <em>${present ? "present" : "missing"}</em>
     </article>
   `;
 }

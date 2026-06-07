@@ -13,6 +13,13 @@
 - Formal crawler asset download/import 的預設輸出在本機下載資料夾下的 `RuRuKa Asset Launcher Web Preview\<asset_id>`；resolved plan 也寫在同一個本機下載資料夾內。不要把 live import 預設壓在 K 槽雲端同步路徑，避免 SQLite lock / sync latency 影響展示與驗收。
 - 若用 PowerShell 讀 zh-TW 文件時出現亂碼，先用 `Get-Content -Encoding UTF8` 或 Python `encoding="utf-8"` 複核；不要把 console 顯示問題誤判成檔案損壞。
 
+## 2026-06-07 Governance / Checkpoint workspace
+
+- Web Preview 新增「治理 / Checkpoint」工作區，讀取 `/api/governance/checkpoints` 的 display-ready payload，讓 u_o 可以掃描目前 c_1 Core governance 狀態。
+- 這個工作區只呈現 repo-side governance evidence：Core gate 仍是 `partial`、AssetCard governance checkpoint 有 wrapper / validator / negative self-test / usage-failure index、false-safety flags 必須維持 false、stop conditions 必須可見。
+- `/api/governance/checkpoints` 不會在每次 request 內執行 checkpoint wrapper、validator、pytest、git 或 subprocess fan-out。它只檢查已知治理文件路徑並回傳人類可讀摘要。
+- Web Preview 仍是 UIUX review surface，不是正式 Web 產品，也不是 source of truth。產品證據仍以 GitHub commits、tests、smoke、CLI JSON、實際 UI 行為與 diff 為準。
+- 前端只視覺化後端回傳的 governance payload；JS 不重新判斷 Core readiness、不建立 export/query API、不推論 Odoriba 或其他 requester 是否能消費 Core cards。
 
 ## Plan Passport freshness guard
 - Web Preview 讀取的 `latest_plan_passport` 是後端判斷過的 display-safe payload，不是單純的上次結果快照。

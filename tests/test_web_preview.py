@@ -66,6 +66,7 @@ from frontends.web.preview_diagnostics import (
     web_real_download_demo,
 )
 from frontends.web.preview_events import compact_listing_outcome, web_preview_recent_events
+from frontends.web.preview_governance import web_assetcard_governance_checkpoints
 from frontends.web.preview_payloads import (
     web_crawler_asset_credentials_event_context,
     web_crawler_asset_listing_credential_blocked_response,
@@ -251,6 +252,35 @@ class WebPreviewApiTest(unittest.TestCase):
         self.assertEqual("🚧", renderer["status_icon"])
         self.assertEqual("review", renderer["display_tone"])
         self.assertEqual("施工中 / 合約", renderer["display_label"])
+
+    def test_web_assetcard_governance_checkpoints_is_static_uiux_payload(self) -> None:
+        payload = web_assetcard_governance_checkpoints()
+
+        self.assertEqual("web_assetcard_governance_checkpoints.v1", payload["schema"])
+        self.assertEqual("web_preview", payload["surface"])
+        self.assertEqual("uiux_review", payload["purpose"])
+        self.assertEqual("partial", payload["core_gate_status"])
+        self.assertEqual("passed", payload["checkpoint_status"])
+        self.assertFalse(payload["missing_docs"])
+        self.assertIn("Web Preview", payload["not_source_of_truth"])
+        self.assertIn("GitHub commits", payload["source_of_truth"])
+        self.assertGreaterEqual(len(payload["summary_cards"]), 4)
+        self.assertGreaterEqual(len(payload["docs"]), 8)
+        self.assertGreaterEqual(len(payload["stop_conditions"]), 6)
+
+        flags = {item["flag"]: item["expected"] for item in payload["false_safety_flags"]}
+        self.assertFalse(flags["export_query_api_exists"])
+        self.assertFalse(flags["json_fixture_driver_exists"])
+        self.assertFalse(flags["cross_repo_integration"])
+        self.assertFalse(flags["payload_exposure"])
+        self.assertFalse(flags["private_path_exposure"])
+        self.assertFalse(flags["odoriba_consumption_claim"])
+
+        layers = {item["layer"]: item for item in payload["runner_separation"]}
+        self.assertIn("checkpoint", layers)
+        self.assertIn("validator", layers)
+        self.assertIn("meta_test", layers)
+        self.assertIn("不得呼叫 tests", layers["checkpoint"]["must_not_do"])
 
     def test_web_real_download_demo_plan_uses_public_csv_import_contract(self) -> None:
         with TemporaryDirectory() as tmp:
@@ -455,6 +485,37 @@ class WebPreviewApiTest(unittest.TestCase):
         self.assertEqual(200, response.status)
         self.assertEqual("test", body["matrix_version"])
         self.assertEqual("🚧", body["rows"][0]["status_icon"])
+
+    def test_server_routes_assetcard_governance_without_runner_fanout(self) -> None:
+        with build_web_preview_server("127.0.0.1", 0, port_scan=0) as server:
+            host, port = server.server_address
+            thread = threading.Thread(target=server.serve_forever, daemon=True)
+            thread.start()
+            try:
+                with patch(
+                    "frontends.web.server.web_assetcard_governance_checkpoints",
+                    return_value={
+                        "schema": "web_assetcard_governance_checkpoints.v1",
+                        "core_gate_status": "partial",
+                        "checkpoint_status": "passed",
+                        "summary_cards": [],
+                        "docs": [],
+                        "stop_conditions": [],
+                    },
+                ) as governance:
+                    conn = http.client.HTTPConnection(host, port, timeout=5)
+                    conn.request("GET", "/api/governance/checkpoints", headers={"Connection": "close"})
+                    response = conn.getresponse()
+                    body = json.loads(response.read().decode("utf-8"))
+                    conn.close()
+            finally:
+                server.shutdown()
+                thread.join(timeout=5)
+
+        governance.assert_called_once_with()
+        self.assertEqual(200, response.status)
+        self.assertEqual("web_assetcard_governance_checkpoints.v1", body["schema"])
+        self.assertEqual("partial", body["core_gate_status"])
 
     def test_server_routes_bounds_form_schema_probe(self) -> None:
         with build_web_preview_server("127.0.0.1", 0, port_scan=0) as server:
@@ -2135,10 +2196,14 @@ class WebPreviewApiTest(unittest.TestCase):
         self.assertNotIn('return passport?.stale ? "refresh_or_rebuild_plan_passport"', combined)
         self.assertIn('data-workspace="downloader"', combined)
         self.assertIn('data-workspace="maturity"', combined)
+        self.assertIn('data-workspace="governance"', combined)
         self.assertIn("downloaderQueue", combined)
         self.assertIn("maturityGrid", combined)
+        self.assertIn("governanceGrid", combined)
         self.assertIn("renderMaturityWorkspace", combined)
+        self.assertIn("renderGovernanceWorkspace", combined)
         self.assertIn("/api/project-maturity", combined)
+        self.assertIn("/api/governance/checkpoints", combined)
         self.assertIn("🚧", combined)
         self.assertIn("deliveryClosureText", combined)
         self.assertIn("sourceTypeDisplayText", combined)
@@ -2240,6 +2305,8 @@ class WebPreviewApiTest(unittest.TestCase):
         self.assertIn("review-summary", styles)
         self.assertIn("maturity-grid", styles)
         self.assertIn("maturity-card", styles)
+        self.assertIn("governance-grid", styles)
+        self.assertIn("governance-card", styles)
         self.assertIn("event-row", styles)
         self.assertIn("@media (max-width: 980px)", styles)
         self.assertIn("中寬度仍要保留中文標籤", styles)

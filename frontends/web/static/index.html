@@ -22,6 +22,7 @@
           <button type="button" data-workspace="downloader">下載器</button>
           <button type="button" data-workspace="review">匯入審核</button>
           <button type="button" data-workspace="maturity">成熟度</button>
+          <button type="button" data-workspace="governance">治理</button>
           <button type="button" data-workspace="events">事件紀錄</button>
         </nav>
 
@@ -192,6 +193,19 @@
           <p class="workspace-note">這裡直接呈現後端成熟度矩陣；<code>🚧</code> 代表 contract-only、planned 或尚未可交付的能力，不應被當成正式功能。</p>
           <div id="maturitySummary" class="maturity-summary"></div>
           <div id="maturityGrid" class="maturity-grid"></div>
+        </section>
+
+        <section id="governanceWorkspace" class="workspace-surface workspace-panel hidden" data-workspace-panel="governance" aria-label="治理 checkpoint">
+          <div class="panel-head">
+            <div>
+              <span class="eyebrow">Governance Checkpoint</span>
+              <h2>治理 / Checkpoint</h2>
+            </div>
+            <button id="governanceRefreshButton" class="ghost-button small" type="button">讀取治理狀態</button>
+          </div>
+          <p class="workspace-note">Web Preview 只顯示 Core governance evidence 的目前狀態；它不是正式 Web 產品，也不是 source of truth。Core readiness 仍是 partial，未授權 export/query、跨 repo 整合或下游消費。</p>
+          <div id="governanceSummary" class="governance-summary"></div>
+          <div id="governanceGrid" class="governance-grid"></div>
         </section>
 
         <section id="eventWorkspace" class="workspace-surface workspace-panel hidden" data-workspace-panel="events" aria-label="事件紀錄">

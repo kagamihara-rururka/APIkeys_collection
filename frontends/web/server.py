@@ -36,6 +36,7 @@ from frontends.web.preview_diagnostics import (
     web_preview_status,
 )
 from frontends.web.preview_events import web_preview_recent_events
+from frontends.web.preview_governance import web_assetcard_governance_checkpoints
 
 
 STATIC_DIR = Path(__file__).resolve().parent / "static"
@@ -57,6 +58,9 @@ class WebPreviewHandler(BaseHTTPRequestHandler):
                 return
             if path == "/api/project-maturity":
                 self.write_json(web_project_maturity())
+                return
+            if path == "/api/governance/checkpoints":
+                self.write_json(web_assetcard_governance_checkpoints())
                 return
             if path == "/api/events/recent":
                 query = parse_qs(parsed.query)
